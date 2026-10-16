@@ -1,3 +1,7 @@
+> [!CAUTION]
+> **UNDER REVIEW: NOT APPROVED TO USE.**
+> phonechatXI is waiting on a CatsEyeXI staff review. Don't install or run it until it's approved. This page will say so when it is.
+
 # phonechatXI
 
 **Your phone as a second chat window for FFXI on CatsEyeXI.**
@@ -9,8 +13,6 @@ FFXI's chat is hard to read and type in with a controller, especially on a Steam
   <img src="docs/screenshots/tell-thread.png" width="220" alt="A tell thread">
   <img src="docs/screenshots/emotes.png" width="220" alt="Emote picker">
 </p>
-
-> **Status:** waiting on a CatsEye staff review. Reading chat is fine to use now. Please don't use the sending side until it's approved.
 
 ## What it does
 
@@ -93,16 +95,6 @@ phone ->  bridge ->  outbox file ->  addon  ->  chat  (one line per tap)
 - Chat lives in the bridge's memory and is gone when it stops. The chat file it reads from is cleared every time the bridge starts and every time the addon loads.
 - Only tells can be saved, and only if you turn on "Remember tells". That keeps the last 50 lines per person, and "Clear saved tells" deletes them. Linkshell and party chat are never saved.
 - Anyone on your Wi-Fi with your link can read and send, so keep your link to yourself.
-
-## Building the Decky plugin
-
-```
-cd decky
-pnpm install
-pnpm run build
-```
-
-Then zip `main.py`, `plugin.json`, `package.json`, `LICENSE`, `dist/` and a `bridge/` folder holding the bridge files, all inside a `phonechatXI/` folder.
 
 ## Credits
 
