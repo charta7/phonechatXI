@@ -1,0 +1,11 @@
+{
+  "name": "phonechatXI",
+  "author": "Kevin",
+  "flags": [],
+  "api_version": 1,
+  "publish": {
+    "tags": ["chat", "ffxi"],
+    "description": "Start/stop the phonechat bridge and show the phone address.",
+    "image": ""
+  }
+}

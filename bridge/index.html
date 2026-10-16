@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="phonechatXI">
+<meta name="theme-color" content="#0b1020">
+<title>phonechatXI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --bg:#0b1020; --pane:#0e1530; --raise:#12182f; --chip:#171f40; --line:#1d2850; --edge:#2c3a6e; --edge2:#3a4a80;
+  --text:#e8ecf6; --soft:#c9d2ec; --mute:#8e9ac0; --gold:#d9b45a; --ink:#1a1405;
+  --ls1:#7ee08f; --ls2:#4fd6c8; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
+  --emote:#b9a6ff; --say:#dfe5f5; --vent:#f0b24d; --sys:#8e9ac0; --bad:#ff9a9a; --badbg:#2a1418; --badedge:#5a2a2a; --ok:#7ee08f;
+  --fs:15.5px; --serif:'Cinzel',Georgia,serif; --sans:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+body.size-S{--fs:14px} body.size-L{--fs:17.5px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input{font:inherit}
+#app{position:fixed;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);padding-top:var(--safe-t)}
+.overlay{transform:translateX(100%);transition:transform .22s ease;z-index:5}
+#main{bottom:var(--tabh,0px)}
+.overlay.tabs{bottom:var(--tabh,0px)}
+.overlay.open{transform:none}
+.tab{display:none;flex:1;min-height:0;flex-direction:column}
+.tab.on{display:flex}
+.top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px}
+.big{font-family:var(--serif);font-weight:700;font-size:28px}
+.row{display:flex;align-items:center;gap:10px}
+.pill-on{display:flex;align-items:center;gap:6px;font-size:12px;border-radius:999px;padding:4px 10px;border:1px solid #1f4a33;color:var(--ok)}
+.pill-on i{width:7px;height:7px;border-radius:50%;background:currentColor;display:block}
+.pill-on.off{border-color:var(--badedge);color:var(--bad)}
+.iconbtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--edge);display:flex;align-items:center;justify-content:center}
+.bar{display:flex;align-items:center;padding:12px 10px 8px;border-bottom:1px solid var(--line);gap:4px}
+.back{display:flex;align-items:center;color:var(--gold);font-size:16px;min-width:76px}
+.bar .mid{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.bar .mid b{font-size:17px}
+.bar .mid small{font-size:12px;color:var(--mute)}
+.bar .end{min-width:76px;display:flex;justify-content:flex-end}
+svg.i{flex:none}
+
+/* view switcher and pills */
+.views{display:flex;align-items:center;gap:8px;padding:6px 12px 2px}
+.seg{flex:1;display:flex;border:1px solid var(--edge);border-radius:10px;overflow-x:auto;scrollbar-width:none}
+.seg::-webkit-scrollbar{display:none}
+.seg button{flex:1 0 auto;padding:7px 12px;font-size:13.5px;color:var(--mute);white-space:nowrap}
+.seg button.on{background:var(--gold);color:var(--ink);font-weight:700}
+.pencil{flex:none;width:36px;height:34px;border-radius:10px;border:1px solid var(--edge);display:flex;align-items:center;justify-content:center}
+.pills{display:flex;gap:8px;padding:8px 12px 8px;overflow-x:auto;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.chipb{flex:none;position:relative;display:flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--edge);border-radius:999px;font-size:13.5px;color:var(--mute)}
+.chipb svg{opacity:.45}
+.chipb.on{border-color:var(--gold);background:var(--chip);color:var(--text)}
+.chipb.on svg{opacity:1}
+.chipb .callflag{position:absolute;top:-7px;right:-4px;font-size:9px;font-weight:700;letter-spacing:.4px;color:var(--vent);background:#2b2210;border:1px solid #5a4620;border-radius:5px;padding:0 4px;line-height:14px}
+
+/* chat pane */
+.panewrap{flex:1;min-height:0;position:relative;margin:0 10px}
+.pane{position:absolute;inset:0;border:1px solid var(--edge2);border-radius:10px;background:var(--pane);box-shadow:inset 0 0 0 1px var(--bg),inset 0 0 24px #101a3d;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;overscroll-behavior:contain}
+.pane .inner{margin-top:auto;padding:10px 12px;display:flex;flex-direction:column;gap:11px}
+body.compact .pane .inner{gap:5px}
+.empty{color:var(--mute);font-size:14px;text-align:center;padding:30px 10px;line-height:1.5}
+.div{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute);letter-spacing:1px}
+.div:before,.div:after{content:"";flex:1;height:1px;background:var(--line)}
+.run{display:flex;gap:10px}
+.rail{flex:none;width:3px;border-radius:2px;background:var(--c)}
+.run.out .rail{opacity:.55}
+.run.call .rail{background:var(--vent)!important;opacity:1}
+.rbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.rhead{display:flex;align-items:center;gap:6px;font-size:14px;flex-wrap:wrap}
+.rhead b{color:var(--c)}
+.rhead .t{font-size:12px;color:var(--mute)}
+.ln{font-size:var(--fs);line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap}
+.ln.emote{font-style:italic;color:var(--soft)}
+.tellc .ln{color:#ffa8dc;color:color-mix(in srgb,var(--tell) 72%,#fff)}
+.tellc .ln .st{color:var(--mute)}
+.ln .st{font-size:12px;color:var(--mute);margin-left:6px;white-space:nowrap}
+.ln .st.bad{color:var(--bad)}
+.failbox{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--badbg);border:1px solid var(--badedge);border-radius:8px;padding:6px 10px;font-size:13px;color:var(--bad);margin-top:4px}
+.failbox button{color:var(--gold);font-weight:700}
+.note{font-size:13px;color:var(--mute);padding-left:13px;border-left:3px solid var(--line)}
+.callp{display:inline-flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--vent);background:#2b2210;border:1px solid #5a4620;border-radius:6px;padding:0 6px;height:18px;margin:0 3px 2px 0;vertical-align:1px;white-space:nowrap}
+.burst{display:flex;flex-wrap:wrap;align-items:center;margin-top:2px}
+.burst .lbl{font-size:12px;color:var(--mute);margin-right:6px}
+a.url{color:#7fb2ff;background:#18254d;border-radius:6px;padding:0 6px;text-decoration:none;white-space:nowrap}
+/* compact */
+.cl{display:flex;gap:8px;align-items:flex-start}
+.cl .rail{align-self:stretch}
+.cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px}
+.cl .ln{flex:1}
+.cl .ln b{color:var(--c)}
+.cl.out .rail{opacity:.55}
+.cl svg.i{vertical-align:-1px;margin-right:5px}
+/* thread */
+.run.mine{justify-content:flex-end}
+.run.mine .rbody{max-width:84%;align-items:flex-end;flex:none}
+.run.mine .rhead{justify-content:flex-end}
+.run.mine .ln{text-align:right}
+.jump{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:700;font-size:13px;border-radius:999px;padding:6px 14px;box-shadow:0 4px 14px rgba(0,0,0,.5);display:none}
+.jump.show{display:block}
+
+/* composer */
+.comp{display:flex;align-items:center;gap:8px;padding:10px 12px 10px;border-top:1px solid var(--line);background:var(--bg)}
+.tgt{flex:none;display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid var(--edge2);border-radius:999px;font-size:14px;background:#121a3a;max-width:130px;white-space:nowrap;overflow:hidden}
+.tgt.tell{border-color:#7a4a96;background:#2a1a3a}
+.tgt.cmd{border-color:var(--gold);background:#1a1730}
+.tgt .car{color:var(--mute);font-size:11px}
+.comp input{flex:1;min-width:0;font-size:16px;padding:10px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--pane);color:var(--text);outline:none;-webkit-appearance:none}
+.comp input:focus{border-color:var(--gold)}
+.comp input.mono{font-family:var(--mono);font-size:16px;border-radius:10px}
+.send{flex:none;width:40px;height:40px;border-radius:50%;background:#3a3f5c;display:flex;align-items:center;justify-content:center}
+.send.on{background:var(--gold)}
+.comp.dis{opacity:.5;pointer-events:none}
+.comp.chat{position:relative;padding-top:22px}
+.left{position:absolute;top:4px;right:64px;font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;letter-spacing:.3px}
+.left.near{color:var(--gold)}
+.left.over{color:var(--bad);font-weight:700}
+.send.blocked{background:#3a3f5c;opacity:.5}
+
+/* tab bar */
+.tabbar{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;border-top:1px solid var(--line);background:var(--bg);padding:8px 8px calc(10px + var(--safe-b))}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--mute);position:relative}
+.tabbar button.on{color:var(--gold)}
+.tabbar .bdg{position:absolute;top:-4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+body.typing .tabbar{display:none}
+.tabbar .bdg[hidden]{display:none}
+
+/* banners and lists */
+.banner{margin:8px 12px 4px;padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.45}
+.banner.bad{background:var(--badbg);border:1px solid var(--badedge);color:#ffd0d0}
+.banner.info{background:#14193a;border:1px solid var(--edge);color:var(--soft)}
+.banner b{display:block;margin-bottom:2px}
+.code{font-family:var(--mono);color:var(--gold)}
+.list{flex:1;min-height:0;overflow-y:auto;padding:0 18px 12px}
+.sect{padding:16px 0 6px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:1.2px;color:var(--gold)}
+.lrow{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.av{flex:none;width:46px;height:46px;border-radius:50%;background:#2a1a3a;border:2px solid var(--tell);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--tell)}
+.lmain{flex:1;min-width:0}
+.ltop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ltop b{font-size:17px}
+.ltop span{font-size:13px;color:var(--mute);flex:none}
+.lsub{font-size:14px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lsub.bad{color:var(--bad)}
+.tag{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--mute);border:1px solid var(--edge);border-radius:6px;padding:0 5px;margin-left:8px;vertical-align:2px}
+.cnt{flex:none;min-width:22px;height:22px;border-radius:11px;background:var(--gold);color:var(--ink);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px}
+.btnline{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--gold);border-radius:999px;color:var(--gold);font-weight:700;font-size:14px}
+.center{text-align:center;padding:12px}
+
+/* ventures */
+.vcard{border-radius:16px;background:#1a1730;border:1px solid #5a4620;padding:16px;display:flex;flex-direction:column;gap:12px}
+.vteaser{font-size:15px;color:var(--soft);line-height:1.4;font-style:italic}
+.vzone{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#241f3d}
+.vgrid{flex:none;width:52px;height:52px;border-radius:12px;background:var(--vent);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
+.vold{border-radius:14px;background:var(--raise);padding:12px 14px;display:flex;flex-direction:column;gap:4px;opacity:.88;margin-bottom:8px}
+.vold .h{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
+.vstatus{padding:10px 14px;border-radius:12px;background:#14193a;display:flex;gap:10px;align-items:center;font-size:14px;color:var(--soft);margin-top:10px}
+
+/* settings */
+.srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.srow .m{flex:1;min-width:0}
+.srow .m div{font-size:15.5px}
+.srow .m small{display:block;font-size:12.5px;color:var(--mute);margin-top:1px;line-height:1.35}
+.tog{flex:none;width:46px;height:28px;border-radius:14px;background:var(--edge);position:relative;transition:background .15s}
+.tog:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.tog.on{background:#2b8a46}
+.tog.on:after{left:21px}
+.segs{flex:none;display:flex;border:1px solid var(--edge);border-radius:9px;overflow:hidden}
+.segs button{padding:6px 10px;font-size:12.5px;color:var(--mute)}
+.segs button.on{background:var(--gold);color:var(--ink);font-weight:700}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;background:var(--c)}
+.fixed{font-size:13px;color:var(--mute)}
+.linkbtn{color:var(--gold);font-size:13.5px}
+.dangerbtn{color:var(--bad);font-size:13.5px}
+/* colors */
+.swatch{flex:none;width:44px;height:30px;border-radius:8px;border:1px solid var(--edge2);padding:0;background:none;overflow:hidden;-webkit-appearance:none;appearance:none}
+.swatch::-webkit-color-swatch-wrapper{padding:0}
+.swatch::-webkit-color-swatch{border:0;border-radius:7px}
+.swatch::-moz-color-swatch{border:0;border-radius:7px}
+/* emotes */
+.emgrid{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 6px}
+.emgrid button{padding:9px 13px;border:1px solid var(--edge);border-radius:999px;font-size:14.5px;background:var(--chip);color:var(--text)}
+.emgrid button.job{font-family:var(--mono);font-size:13.5px;color:var(--emote);border-color:#4a3f80}
+.emgrid button:active{border-color:var(--emote);background:#231d44}
+.emseg{margin:8px 18px 2px}
+#qrbox{background:#fff;border-radius:12px;padding:8px;width:220px;margin:10px auto}
+.foot{font-size:12px;color:var(--mute);text-align:center;padding:18px 0 30px}
+
+/* command */
+.cmdlog .cl2{display:flex;gap:8px;font-family:var(--mono);font-size:13px;line-height:1.4}
+.cmdlog .cl2 .t{flex:none;color:var(--mute)}
+.cmdlog .cl2.sent span:last-child{color:var(--soft)}
+.cmdlog .cl2.reply span:last-child{color:var(--ok)}
+.cmdlog .cl2.bad span:last-child{color:var(--bad)}
+.cmdlog .cl2.wait span:last-child{color:var(--mute)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 12px 2px;border-top:1px solid var(--line);scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;padding:7px 12px;border:1px solid #5a4620;border-radius:999px;font-size:13px;color:var(--gold);background:#1a1730;font-family:var(--mono);white-space:nowrap}
+.chips button.all{border:1px dashed var(--edge2);color:var(--mute);font-family:var(--sans);background:none}
+.crow{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.crow .m{flex:1;min-width:0;text-align:left}
+.crow .m div{font-family:var(--mono);font-size:15px;color:var(--gold)}
+.crow .m small{display:block;font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctag{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--vent);border:1px solid #5a4620;border-radius:6px;padding:0 5px;margin-left:8px;vertical-align:2px}
+.search{margin:8px 18px 0;padding:10px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--pane);color:var(--text);font-size:16px;outline:none;width:calc(100% - 36px)}
+.starb{flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+
+/* sheet */
+#scrim{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:60;display:none}
+#scrim.on{display:block}
+#sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;background:var(--raise);border-top:1px solid var(--edge2);border-radius:20px 20px 0 0;padding:10px 14px calc(18px + var(--safe-b));box-shadow:0 -12px 30px rgba(0,0,0,.5);transform:translateY(105%);transition:transform .2s ease;max-height:85%;overflow-y:auto}
+#sheet.on{transform:none}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--edge2);margin:0 auto 10px}
+.shead{display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px}
+.shead .sect{padding:0}
+.opt{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:12px;border:1px solid transparent;width:100%;text-align:left}
+.opt.sel{border-color:var(--gold);background:var(--chip)}
+.opt .oc{flex:none;width:40px;height:40px;border-radius:50%;background:#16204a;border:2px solid var(--c);display:flex;align-items:center;justify-content:center}
+.opt b{font-size:16px;display:block}
+.opt small{font-size:12px;color:var(--mute)}
+.sfield{display:block;font-size:11px;color:var(--mute);padding:0 2px}
+.sinput{width:100%;margin:4px 0 8px;padding:10px 14px;border:1px solid var(--edge);border-radius:10px;background:var(--pane);color:var(--text);font-size:16px;outline:none}
+.sbtns{display:flex;gap:10px;justify-content:flex-end;padding-top:10px}
+.sbtns button{padding:9px 16px;border-radius:999px;font-weight:700;font-size:14px}
+.sbtns .pri{background:var(--gold);color:var(--ink)}
+.sbtns .sec{border:1px solid var(--edge2);color:var(--soft)}
+.sbtns .del{color:var(--bad);margin-right:auto}
+.sfoot{padding:10px 6px 0;font-size:12.5px;color:var(--mute);line-height:1.45}
+#toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+</style>
+</head>
+<body class="size-M">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<radialGradient id="gG" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:#f0fff3;stop-color:color-mix(in srgb,var(--ls1) 20%,#fff)"/><stop offset=".5" style="stop-color:var(--ls1)"/><stop offset="1" style="stop-color:#2b8a46;stop-color:color-mix(in srgb,var(--ls1) 50%,#000)"/></radialGradient>
+<radialGradient id="gT" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:#eafffd;stop-color:color-mix(in srgb,var(--ls2) 20%,#fff)"/><stop offset=".5" style="stop-color:var(--ls2)"/><stop offset="1" style="stop-color:#1a7f78;stop-color:color-mix(in srgb,var(--ls2) 50%,#000)"/></radialGradient>
+</defs>
+<symbol id="i-ls1" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gG)"/><ellipse cx="7.3" cy="6.5" rx="2.6" ry="1.6" fill="#fff" opacity=".55"/></symbol>
+<symbol id="i-ls2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gT)"/><ellipse cx="7.3" cy="6.5" rx="2.6" ry="1.6" fill="#fff" opacity=".55"/></symbol>
+<symbol id="i-party" viewBox="0 0 20 20"><circle cx="10" cy="5.5" r="3" style="fill:var(--party)"/><path d="M4.5 18c0-3.4 2.4-5.2 5.5-5.2s5.5 1.8 5.5 5.2z" style="fill:var(--party)"/><circle cx="3.8" cy="9" r="2" style="fill:var(--party)" opacity=".7"/><circle cx="16.2" cy="9" r="2" style="fill:var(--party)" opacity=".7"/></symbol>
+<symbol id="i-tell" viewBox="0 0 20 20"><path d="M3 4h14a1 1 0 011 1v8a1 1 0 01-1 1H9l-4 3v-3H3a1 1 0 01-1-1V5a1 1 0 011-1z" style="fill:var(--tell)"/></symbol>
+<symbol id="i-say" viewBox="0 0 20 20"><path d="M10 3c4.4 0 8 2.7 8 6s-3.6 6-8 6c-.9 0-1.8-.1-2.6-.3L3.5 17l1-3.3C3 12.6 2 11 2 9c0-3.3 3.6-6 8-6z" style="fill:var(--say)"/></symbol>
+<symbol id="i-unity" viewBox="0 0 20 20"><path d="M10 1.5l2.2 6.3 6.3 2.2-6.3 2.2L10 18.5l-2.2-6.3L1.5 10l6.3-2.2z" style="fill:var(--unity)"/></symbol>
+<symbol id="i-vent" viewBox="0 0 20 20"><path d="M10 1.5l7 8.5-7 8.5L3 10z" fill="#f0b24d"/></symbol>
+<symbol id="i-shout" viewBox="0 0 20 20"><path d="M3 8v4h3l6 4V4L6 8z" style="fill:var(--shout)"/><path d="M14.5 7a4 4 0 010 6" fill="none" style="stroke:var(--shout)" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-yell" viewBox="0 0 20 20"><path d="M2.5 8v4h3l6 4V4l-6 4z" style="fill:var(--yell)"/><path d="M13.5 7a4 4 0 010 6M15.8 5a7 7 0 010 10" fill="none" style="stroke:var(--yell)" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-emote" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" style="stroke:var(--emote)" stroke-width="1.6"/><circle cx="7.3" cy="8" r="1.2" style="fill:var(--emote)"/><circle cx="12.7" cy="8" r="1.2" style="fill:var(--emote)"/><path d="M6.5 11.8a4 4 0 007 0" fill="none" style="stroke:var(--emote)" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-bell" viewBox="0 0 20 20"><path d="M10 2.5a5 5 0 00-5 5V11l-1.5 3h13L15 11V7.5a5 5 0 00-5-5zM8 16a2 2 0 004 0z" fill="#8e9ac0"/></symbol>
+<symbol id="i-cmd" viewBox="0 0 20 20"><rect x="1.5" y="3" width="17" height="14" rx="3" fill="#2a3466"/><path d="M5 7.5l3.5 2.5L5 12.5M10.5 13h4.5" fill="none" stroke="#d9b45a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" fill="#8e9ac0" transform="translate(0 -1)"/></symbol>
+<symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="#d9b45a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-send" viewBox="0 0 20 20"><path d="M3 10l14-7-5 14-3-6z" fill="#1a1405"/></symbol>
+<symbol id="i-pen" viewBox="0 0 20 20"><path d="M3 14.5V17h2.5L15 7.5 12.5 5zM16.7 5.8a1 1 0 000-1.4l-1.1-1.1a1 1 0 00-1.4 0l-1.2 1.2 2.5 2.5z" fill="#8e9ac0"/></symbol>
+</svg>
+
+<div id="app">
+  <!-- main tabs -->
+  <div class="screen" id="main">
+    <section class="tab on" id="tab-chat">
+      <div class="top"><div class="big">Chat</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div class="views"><div class="seg" id="viewseg"></div><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
+      <div class="pills" id="pills"></div>
+      <div id="ban-chat"></div>
+      <div class="panewrap"><div class="pane" id="pane-chat"><div class="inner"></div></div><button class="jump" data-jump="pane-chat"></button></div>
+      <div class="comp" data-comp="chat"></div>
+    </section>
+    <section class="tab" id="tab-tells">
+      <div class="top"><div class="big">Tells</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div id="ban-tells"></div>
+      <div class="list" id="tells-list"></div>
+      <div class="center"><button class="btnline" id="newtell">+ New tell</button></div>
+    </section>
+    <section class="tab" id="tab-vent">
+      <div class="top"><div class="big">Ventures</div><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div></div>
+      <div class="list" id="vent"></div>
+    </section>
+    <section class="tab" id="tab-notices">
+      <div class="top"><div class="big">Notices</div><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div></div>
+      <div class="list" id="notices"></div>
+    </section>
+  </div>
+
+  <!-- focus on one channel -->
+  <div class="screen overlay tabs" id="scr-focus">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px" id="focus-title"></div><small id="focus-sub"></small></div><div class="end"><span class="pill-on off" data-bridge style="border:0;padding:0"><i></i><span>OFF</span></span></div></div>
+    <div class="pills" id="focus-filters"></div>
+    <div class="panewrap"><div class="pane" id="pane-focus"><div class="inner"></div></div><button class="jump" data-jump="pane-focus"></button></div>
+    <div class="comp" data-comp="focus"></div>
+  </div>
+
+  <!-- tell thread -->
+  <div class="screen overlay" id="scr-thread">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Tells</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell thread</small></div><div class="end"></div></div>
+    <div class="panewrap" style="margin-top:10px"><div class="pane" id="pane-thread"><div class="inner"></div></div><button class="jump" data-jump="pane-thread"></button></div>
+    <div class="comp" data-comp="thread"></div>
+  </div>
+
+  <!-- game command -->
+  <div class="screen overlay tabs" id="scr-cmd">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-cmd"/></svg><b>Game command</b></div><small>Sent as if typed in game</small></div><div class="end"></div></div>
+    <div class="banner info" style="background:#241f3d;border-color:#5a4620">Only CatsEye server <b style="display:inline">!</b> commands work here (emotes have their own screen). One command per tap. No game actions, no macros.</div>
+    <div class="panewrap" style="margin-top:6px"><div class="pane cmdlog" id="pane-cmd"><div class="inner" style="gap:6px"></div></div></div>
+    <div class="chips" id="cmdchips"></div>
+    <div class="comp" data-comp="cmd" style="border-top:0"></div>
+  </div>
+
+  <!-- emotes -->
+  <div class="screen overlay tabs" id="scr-emote">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-emote"/></svg><b>Emotes</b></div><small>One tap sends it</small></div><div class="end"></div></div>
+    <div class="emseg" id="emseg"></div>
+    <div class="list" id="emotes"></div>
+  </div>
+
+  <!-- command list -->
+  <div class="screen overlay" id="scr-cmdlist">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Command</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Commands</b></div><div class="end"></div></div>
+    <input class="search" id="cmdsearch" placeholder="Search commands" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div class="list" id="cmdlist"></div>
+  </div>
+
+  <!-- settings -->
+  <div class="screen overlay" id="scr-settings">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Back</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Settings</b></div><div class="end"></div></div>
+    <div class="list" id="settings"></div>
+  </div>
+
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="chat" class="on"><svg class="i" width="22" height="22"><use href="#i-ls1"/></svg>Chat</button>
+    <button data-tab="tells"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg>Tells<span class="bdg" id="bdg-tells" hidden></span></button>
+    <button data-tab="vent"><svg class="i" width="22" height="22"><use href="#i-vent"/></svg>Ventures<span class="bdg" id="bdg-vent" hidden></span></button>
+    <button data-tab="notices"><svg class="i" width="22" height="22"><use href="#i-bell"/></svg>Notices<span class="bdg" id="bdg-notices" hidden></span></button>
+  </nav>
+
+  <div id="scrim"></div>
+  <div id="sheet"></div>
+  <div id="toast"></div>
+</div>
+
+<script>
+(function () {
+"use strict";
+
+// ------------------------------------------------------------------------------------------
+// Basics
+// ------------------------------------------------------------------------------------------
+var TOKEN = new URLSearchParams(location.search).get("t") || "";
+var CH = {
+  ls1:   {label: "LS1",    full: "Linkshell 1", icon: "ls1",   c: "var(--ls1)",   send: "/l"},
+  ls2:   {label: "LS2",    full: "Linkshell 2", icon: "ls2",   c: "var(--ls2)",   send: "/l2"},
+  party: {label: "Party",  full: "Party",       icon: "party", c: "var(--party)", send: "/p"},
+  tell:  {label: "Tells",  full: "Tell",        icon: "tell",  c: "var(--tell)",  send: "/t"},
+  say:   {label: "Say",    full: "Say",         icon: "say",   c: "var(--say)",   send: "/s", sub: "Nearby"},
+  shout: {label: "Shout",  full: "Shout",       icon: "shout", c: "var(--shout)", send: "/sh", sub: "Local area"},
+  unity: {label: "Unity",  full: "Unity",       icon: "unity", c: "var(--unity)"},
+  yell:  {label: "Yell",   full: "Yell",        icon: "yell",  c: "var(--yell)",  sub: "Trade spam. Read only."},
+  emote: {label: "Emotes", full: "Emotes",      icon: "emote", c: "var(--emote)"}
+};
+var CHAT_CH = ["ls1", "ls2", "party", "tell", "say", "shout", "unity", "yell", "emote"];
+var SENDABLE = ["ls1", "ls2", "party", "tell", "say", "shout"];
+var MAX_VIEWS = 5;
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c];
+  });
+}
+function $(id) { return document.getElementById(id); }
+function ico(name, size, style) {
+  return '<svg class="i" width="' + (size || 14) + '" height="' + (size || 14) + '"' + (style ? ' style="' + style + '"' : "") + '><use href="#i-' + name + '"/></svg>';
+}
+function hhmm(ts) {
+  var d = new Date(ts * 1000);
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+function dayLabel(ts) {
+  var d = new Date(ts * 1000), now = new Date();
+  if (d.toDateString() === now.toDateString()) return "Today " + hhmm(ts);
+  var y = new Date(now); y.setDate(now.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return "Yesterday " + hhmm(ts);
+  return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) + " " + hhmm(ts);
+}
+function nowSec() { return Math.floor(Date.now() / 1000); }
+var toastTimer = null;
+function toast(text) {
+  var t = $("toast");
+  t.textContent = text;
+  t.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.classList.remove("on"); }, 3200);
+}
+
+// ------------------------------------------------------------------------------------------
+// Settings (per device). Storage can be blocked, so everything is wrapped.
+// ------------------------------------------------------------------------------------------
+var DEFAULTS = {
+  density: "comfortable", size: "M", calls: "highlight", groupCalls: true,
+  master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true},
+  views: [
+    {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true}},
+    {id: "v1", name: "Linkshells", ch: {ls1: true, ls2: true}},
+    {id: "v2", name: "Party & tells", ch: {party: true, tell: true}}
+  ],
+  view: "all",
+  target: {ch: "ls1", peer: ""},
+  favs: ["!mog", "!points", "!dailies"],
+  colors: {}, emoteMode: "", recentEmotes: [],
+  read: {}, seenVent: 0, seenNotice: 0
+};
+var S = load();
+function load() {
+  var s = null;
+  try { s = JSON.parse(localStorage.getItem("pcxi") || "null"); } catch (e) { s = null; }
+  var out = JSON.parse(JSON.stringify(DEFAULTS));
+  if (s && typeof s === "object") {
+    for (var k in out) if (s[k] !== undefined) out[k] = s[k];
+    out.master = Object.assign({}, DEFAULTS.master, s.master || {});
+  }
+  if (!Array.isArray(out.views) || !out.views.length || out.views[0].id !== "all") out.views = DEFAULTS.views;
+  return out;
+}
+var saveTimer = null;
+function save() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function () {
+    try { localStorage.setItem("pcxi", JSON.stringify(S)); } catch (e) { /* storage blocked: settings last until reload */ }
+  }, 150);
+}
+var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#4fd6c8", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff"};
+function colorOf(c) { return (S.colors && S.colors[c]) || DEFAULT_COLORS[c]; }
+function applyColors() {
+  CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
+}
+function applyLook() {
+  applyColors();
+  document.body.classList.toggle("compact", S.density === "compact");
+  document.body.classList.remove("size-S", "size-M", "size-L");
+  document.body.classList.add("size-" + S.size);
+}
+
+// ------------------------------------------------------------------------------------------
+// Data from the bridge
+// ------------------------------------------------------------------------------------------
+var msgs = [];          // everything except acks, in id order
+var byId = {};
+var pend = {};          // pid -> local outgoing line waiting on the game
+var pendOrder = [];
+var cmdLog = [];
+var lastCmdAt = 0;
+var status = {char: "", save_tells: false, url: ""};
+var connected = false, everConnected = false, lastBoot = null, offlineSince = Date.now();
+var commands = {info: {}, action: {}};
+
+function api(path, body) {
+  return fetch(path, {
+    method: "POST",
+    headers: {"Content-Type": "application/json", "X-Token": TOKEN},
+    body: JSON.stringify(body || {})
+  }).then(function (r) {
+    return r.json().catch(function () { return {ok: false, error: "Bridge error " + r.status}; }).then(function (j) { j._status = r.status; return j; });
+  });
+}
+function getJSON(path) {
+  return fetch(path + (path.indexOf("?") < 0 ? "?" : "&") + "t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}})
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+}
+function refreshStatus() {
+  getJSON("/api/status").then(function (j) { status = j; render(); }).catch(function () {});
+}
+
+var lsName = {};
+function onMsg(m) {
+  if (m.ch === "_ack") { onAck(m); return; }
+  if (m.ch === "server") {
+    var ln = /^\[(\d)\]<\s*([^>]+?)\s*>/.exec(m.body || "");
+    if (ln) lsName["ls" + ln[1]] = ln[2];
+  }
+  if (byId[m.id]) return;
+  byId[m.id] = m;
+  msgs.push(m);
+  if (m.pid && pend[m.pid]) { delete pend[m.pid]; }
+  if (lastCmdAt && Date.now() - lastCmdAt < 8000 && (m.ch === "system" || m.ch === "echo" || m.ch === "server")) {
+    cmdLog.push({ts: m.ts, text: m.body, kind: "reply"});
+  }
+  if (msgs.length > 4000) {
+    var drop = msgs.splice(0, 500);
+    drop.forEach(function (d) { delete byId[d.id]; });
+  }
+  schedule();
+}
+function onAck(a) {
+  var p = pend[a.pid];
+  if (a.pid && a.pid.charAt(0) === "c") {
+    if (a.state === "failed") cmdLog.push({ts: a.ts, text: a.reason || "Could not send.", kind: "bad"});
+    schedule();
+    return;
+  }
+  if (!p) return;
+  if (a.state === "sent") { p.state = "sent"; setTimeout(function () { if (pend[a.pid]) { delete pend[a.pid]; schedule(); } }, 4000); }
+  else { p.state = a.state; p.reason = a.reason || ""; }
+  schedule();
+}
+
+var es = null;
+function connect() {
+  if (es) { try { es.close(); } catch (e) {} }
+  es = new EventSource("/events?t=" + encodeURIComponent(TOKEN));
+  es.addEventListener("hello", function (ev) {
+    var j = {};
+    try { j = JSON.parse(ev.data); } catch (e) {}
+    if (lastBoot !== null && j.boot !== lastBoot) { msgs = []; byId = {}; }
+    lastBoot = j.boot;
+    setConnected(true);
+    refreshStatus();
+  });
+  es.onmessage = function (ev) {
+    try { onMsg(JSON.parse(ev.data)); } catch (e) {}
+  };
+  es.onopen = function () { setConnected(true); };
+  es.onerror = function () {
+    setConnected(false);
+    if (es.readyState === 2) setTimeout(connect, 3000);
+  };
+}
+function setConnected(on) {
+  if (on === connected) return;
+  connected = on;
+  if (on) everConnected = true; else offlineSince = Date.now();
+  render();
+  if (!on) setTimeout(render, 3500);
+}
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible" && (!es || es.readyState !== 1)) connect();
+});
+
+// ------------------------------------------------------------------------------------------
+// Message text: escape, calls, links
+// ------------------------------------------------------------------------------------------
+var URL_RE = /\b((?:https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,;:!?)\]])/gi;
+var CALL_RE = /&lt;\s*call\s*(\d{1,2})\s*&gt;/gi;
+function fmt(body) {
+  var h = esc(body);
+  if (S.calls !== "off") {
+    h = h.replace(CALL_RE, function (all, n) { n = +n; return n >= 1 && n <= 25 ? '<span class="callp">CALL ' + n + "</span>" : all; });
+  }
+  h = h.replace(URL_RE, function (u) {
+    var raw = u.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+    var href = /^https?:/i.test(raw) ? raw : "https://" + raw;
+    var dom = href.replace(/^https?:\/\//i, "").split(/[\/?#]/)[0];
+    return '<a class="url" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(dom) + " &#8599;</a>";
+  });
+  return h;
+}
+function hasLink(m) { URL_RE.lastIndex = 0; return URL_RE.test(m.body || ""); }
+
+// ------------------------------------------------------------------------------------------
+// Which messages a screen shows
+// ------------------------------------------------------------------------------------------
+function curView() {
+  for (var i = 0; i < S.views.length; i++) if (S.views[i].id === S.view) return S.views[i];
+  S.view = "all";
+  return S.views[0];
+}
+function shows(ch, view) { return !!(S.master[ch] && view.ch[ch]); }
+function pendList(filter) {
+  var out = [];
+  pendOrder = pendOrder.filter(function (pid) { return pend[pid]; });
+  pendOrder.forEach(function (pid) { var p = pend[pid]; if (filter(p)) out.push(p); });
+  return out;
+}
+function chatItems() {
+  var v = curView(), isAll = v.id === "all";
+  var items = msgs.filter(function (m) {
+    if (CHAT_CH.indexOf(m.ch) >= 0) return shows(m.ch, v);
+    if (m.ch === "zone") return isAll;
+    if (m.ch === "system") return isAll || v.ch.tell || v.ch.party;
+    return false;
+  });
+  return items.concat(pendList(function (p) { return shows(p.ch, v); }));
+}
+var focus = {ch: "ls1", filter: "all"};
+function focusItems() {
+  var items = msgs.filter(function (m) {
+    if (m.ch !== focus.ch) return false;
+    if (focus.filter === "calls") return !!m.calls;
+    if (focus.filter === "links") return hasLink(m);
+    return true;
+  });
+  if (focus.filter === "all") items = items.concat(pendList(function (p) { return p.ch === focus.ch; }));
+  return items;
+}
+var thread = {peer: ""};
+function threadItems() {
+  var key = thread.peer.toLowerCase();
+  return msgs.filter(function (m) { return m.ch === "tell" && (m.name || "").toLowerCase() === key; })
+    .concat(pendList(function (p) { return p.ch === "tell" && p.peer.toLowerCase() === key; }));
+}
+
+// ------------------------------------------------------------------------------------------
+// Rendering the stream
+// ------------------------------------------------------------------------------------------
+function myName() { return status.char || "You"; }
+function senderOf(m) {
+  if (m.pending || (m.ch === "tell" && m.dir === "out")) return myName();
+  return m.name || (m.dir === "out" ? myName() : "");
+}
+
+function stateHtml(m) {
+  if (!m.pending) return "";
+  if (m.state === "sending") return '<span class="st">sending&hellip;</span>';
+  if (m.state === "sent") return '<span class="st">sent</span>';
+  return "";
+}
+function failHtml(m) {
+  if (!m.pending || (m.state !== "failed" && m.state !== "unconfirmed")) return "";
+  var why = m.state === "failed" ? (m.reason || "Not delivered") : "The game didn't confirm this one";
+  return '<div class="failbox"><span>' + esc(why) + '</span><button data-retry="' + esc(m.pid) + '">Retry</button></div>';
+}
+function bodyLine(m, ctx) {
+  var b = fmt(m.body);
+  if (m.ch === "tell" && ctx !== "thread") {
+    b = m.dir === "in" ? "&gt;&gt; " + b : "&gt;&gt;" + esc(m.pending ? m.peer : m.name) + " : " + b;
+  }
+  return '<div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + b + stateHtml(m) + "</div>" + failHtml(m);
+}
+function isCallOnly(m) { return S.calls !== "off" && S.groupCalls && m.callonly && !m.pending; }
+
+function blocks(items, ctx) {
+  items = items.slice().sort(function (a, b) { return (a.ts - b.ts) || ((a.id || 1e12) - (b.id || 1e12)); });
+  var out = [], last = null, prevTs = 0;
+  for (var i = 0; i < items.length; i++) {
+    var m = items[i];
+    if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", text: dayLabel(m.ts)});
+    prevTs = m.ts;
+    if (m.ch === "zone") { out.push({type: "div", text: m.body}); last = null; continue; }
+    if (m.ch === "system") { out.push({type: "note", m: m}); last = null; continue; }
+    if (isCallOnly(m)) {
+      var grp = [m], j = i + 1;
+      while (j < items.length && isCallOnly(items[j]) && items[j].ch === m.ch && items[j].name === m.name && items[j].ts - grp[grp.length - 1].ts <= 10) { grp.push(items[j]); j++; }
+      if (grp.length >= 3) { out.push({type: "burst", m: m, grp: grp}); i = j - 1; last = null; continue; }
+    }
+    var who = senderOf(m), dir = m.pending ? "out" : m.dir;
+    if (ctx !== "compact" && last && last.ch === m.ch && last.who === who && last.dir === dir && m.ts - last.lastTs <= 120 && !m.calls && !last.call) {
+      last.ms.push(m); last.lastTs = m.ts; continue;
+    }
+    last = {type: "run", ch: m.ch, who: who, dir: dir, ms: [m], lastTs: m.ts, call: !!(m.calls && S.calls !== "off")};
+    out.push(last);
+  }
+  return out;
+}
+function runHead(b, ctx) {
+  var m = b.ms[0], c = CH[b.ch] || {icon: "bell", c: "var(--sys)"};
+  var extra = "";
+  if (b.dir === "out") extra += " &middot; you";
+  if (m.zone) extra += " &middot; " + esc(m.zone);
+  if (m.saved && ctx === "thread") extra += " &middot; saved";
+  var nameTap = ' data-who="' + esc(b.ch === "tell" ? (m.pending ? m.peer : m.name) : "") + '" data-ch="' + b.ch + '"';
+  if (ctx === "thread" && b.dir === "out") {
+    return '<div class="rhead"><span class="t">' + extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
+  }
+  return '<div class="rhead"><button class="row" style="gap:6px"' + nameTap + ">" + ico(c.icon) + "<b>" + esc(b.who || CH[b.ch].full) + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
+}
+function compactPrefix(m) {
+  var who = esc(senderOf(m));
+  switch (m.ch) {
+    case "tell": return m.dir === "in" && !m.pending ? who + "&gt;&gt;" : "&gt;&gt;" + esc(m.pending ? m.peer : m.name) + " :";
+    case "party": return "(" + who + ")";
+    case "unity": return "{" + who + "}";
+    case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
+    case "emote": return "";
+    default: return who + ":";
+  }
+}
+function renderBlocks(list, ctx) {
+  var html = [];
+  list.forEach(function (b) {
+    if (b.type === "div") { html.push('<div class="div">' + esc(b.text) + "</div>"); return; }
+    if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
+    var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
+    if (b.type === "burst") {
+      var pills = b.grp.map(function (g) { return '<span class="callp">' + g.calls.join(" ") + "</span>"; }).join("");
+      var head = ctx === "compact" ? "" : runHead({ms: [b.m], ch: b.m.ch, who: b.m.name, dir: b.m.dir}, ctx);
+      if (ctx === "compact") {
+        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="t">' + hhmm(b.m.ts) + '</span><div class="ln">' + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
+      } else {
+        html.push('<div class="run call" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + head + '<div class="burst"><span class="lbl">roll call</span>' + pills + "</div></div></div>");
+      }
+      return;
+    }
+    if (ctx === "compact") {
+      b.ms.forEach(function (m) {
+        var pre = compactPrefix(m);
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? "<b>" + pre + "</b> " : "") + fmt(m.body) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+      });
+      return;
+    }
+    var mine = ctx === "thread" && b.dir === "out";
+    var lines = b.ms.map(function (m) { return bodyLine(m, ctx); }).join("");
+    if (mine) {
+      html.push('<div class="run mine' + (b.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rbody">' + runHead(b, ctx) + lines + '</div><div class="rail" style="background:#7a4a96"></div></div>');
+    } else {
+      html.push('<div class="run' + (b.dir === "out" ? " out" : "") + (b.call ? " call" : "") + (b.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + runHead(b, ctx) + lines + "</div></div>");
+    }
+  });
+  return html.join("");
+}
+var seenCount = {};
+function renderPane(id, items, ctx, emptyText) {
+  var pane = $(id), inner = pane.firstElementChild;
+  var atBottom = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 60;
+  var shown = items.slice(-350);
+  var mode = ctx === "thread" ? "thread" : (S.density === "compact" ? "compact" : ctx);
+  inner.innerHTML = shown.length ? renderBlocks(blocks(shown, mode), mode) : '<div class="empty">' + emptyText + "</div>";
+  var jump = document.querySelector('[data-jump="' + id + '"]');
+  if (atBottom || seenCount[id] === undefined) {
+    pane.scrollTop = pane.scrollHeight;
+    seenCount[id] = items.length;
+    if (jump) jump.classList.remove("show");
+  } else if (jump) {
+    var n = items.length - seenCount[id];
+    if (n > 0) { jump.textContent = "Jump to latest (" + n + ")"; jump.classList.add("show"); }
+  }
+}
+document.querySelectorAll(".pane").forEach(function (p) {
+  p.addEventListener("scroll", function () {
+    if (p.scrollHeight - p.scrollTop - p.clientHeight < 60) {
+      var j = document.querySelector('[data-jump="' + p.id + '"]');
+      if (j) j.classList.remove("show");
+      seenCount[p.id] = undefined;
+      schedule();
+    }
+  }, {passive: true});
+});
+document.addEventListener("click", function (e) {
+  var j = e.target.closest("[data-jump]");
+  if (j) { var p = $(j.dataset.jump); p.scrollTop = p.scrollHeight; j.classList.remove("show"); }
+});
+
+// ------------------------------------------------------------------------------------------
+// Chat tab pieces
+// ------------------------------------------------------------------------------------------
+function renderViews() {
+  $("viewseg").innerHTML = S.views.map(function (v) {
+    return '<button data-view="' + v.id + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
+  }).join("");
+  var v = curView();
+  var recentCall = {};
+  if (S.calls === "badge") {
+    var since = nowSec() - 600;
+    msgs.forEach(function (m) { if (m.calls && m.ts >= since) recentCall[m.ch] = true; });
+  }
+  $("pills").innerHTML = CHAT_CH.filter(function (c) { return S.master[c]; }).map(function (c) {
+    var on = !!v.ch[c];
+    return '<button class="chipb' + (on ? " on" : "") + '" data-pill="' + c + '">' + ico(CH[c].icon) + CH[c].label + (recentCall[c] ? '<span class="callflag">CALL</span>' : "") + "</button>";
+  }).join("");
+}
+$("viewseg").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-view]");
+  if (!b) return;
+  S.view = b.dataset.view; save(); seenCount["pane-chat"] = undefined; render();
+});
+$("pills").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-pill]");
+  if (!b) return;
+  var v = curView(), c = b.dataset.pill;
+  v.ch[c] = !v.ch[c]; save(); render();
+});
+$("editview").addEventListener("click", function () { editView(curView().id); });
+
+function editView(id) {
+  var v = null;
+  S.views.forEach(function (x) { if (x.id === id) v = x; });
+  var isNew = !v;
+  var draft = isNew ? {id: "v" + Date.now(), name: "Custom " + S.views.length, ch: {ls1: true}} : JSON.parse(JSON.stringify(v));
+  function body() {
+    return '<div class="grab"></div><div class="shead"><div class="sect">' + (isNew ? "NEW VIEW" : "EDIT VIEW") + '</div><button class="linkbtn" data-sb="done" style="font-weight:700;font-size:15px">Done</button></div>' +
+      (draft.id === "all" ? '<div class="sfoot" style="padding-top:0">The All view can\'t be renamed.</div>' :
+        '<label class="sfield" for="vname">Name</label><input class="sinput" id="vname" maxlength="18" value="' + esc(draft.name) + '" placeholder="View name">') +
+      CHAT_CH.map(function (c) {
+        return '<div class="srow" style="padding:8px 6px">' + ico(CH[c].icon, 22) + '<div class="m"><div>' + CH[c].full + "</div>" + (CH[c].sub ? "<small>" + CH[c].sub + "</small>" : "") + (!S.master[c] ? "<small>Hidden everywhere (Settings)</small>" : "") + '</div><button class="tog' + (draft.ch[c] ? " on" : "") + '" data-vt="' + c + '" aria-label="' + CH[c].full + '"></button></div>';
+      }).join("") +
+      '<div class="sbtns">' + (draft.id !== "all" && !isNew ? '<button class="del" data-sb="del">Delete view</button>' : "") +
+      (!isNew && S.views.length < MAX_VIEWS ? '<button class="sec" data-sb="new">New view</button>' : "") + "</div>" +
+      '<div class="sfoot">Hiding a channel only hides it in this view. Messages still come in, so turn it back on and they\'re there. Combat and battle messages are never captured.</div>';
+  }
+  openSheet(body(), function (e) {
+    var t = e.target.closest("[data-vt]");
+    if (t) { draft.ch[t.dataset.vt] = !draft.ch[t.dataset.vt]; t.classList.toggle("on"); return; }
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    var nm = $("vname");
+    if (nm) draft.name = (nm.value || "").trim() || draft.name;
+    if (b.dataset.sb === "done") {
+      if (isNew) S.views.push(draft);
+      else S.views = S.views.map(function (x) { return x.id === draft.id ? draft : x; });
+      S.view = draft.id;
+    } else if (b.dataset.sb === "del") {
+      S.views = S.views.filter(function (x) { return x.id !== draft.id; });
+      S.view = "all";
+    } else if (b.dataset.sb === "new") {
+      closeSheet(); setTimeout(function () { editView(null); }, 230); return;
+    }
+    save(); closeSheet(); render();
+  });
+}
+
+// ------------------------------------------------------------------------------------------
+// Composer (one per screen) and the send-to picker
+// ------------------------------------------------------------------------------------------
+function compTarget(ctx) {
+  if (ctx === "thread") return {ch: "tell", peer: thread.peer};
+  if (ctx === "focus") return SENDABLE.indexOf(focus.ch) >= 0 && focus.ch !== "tell" ? {ch: focus.ch, peer: ""} : S.target;
+  if (ctx === "cmd") return {ch: "cmd"};
+  return S.target;
+}
+function chipHtml(t, ctx) {
+  if (t.ch === "cmd") return '<div class="tgt cmd">' + ico("cmd", 16) + "CMD</div>";
+  var c = CH[t.ch];
+  var label = t.ch === "tell" ? (t.peer || "Tell") : c.label;
+  var tap = ctx === "thread" ? "" : ' data-pick="' + ctx + '"';
+  return '<button class="tgt' + (t.ch === "tell" ? " tell" : "") + '"' + tap + ">" + ico(c.icon, 16) + esc(label) + (tap ? '<span class="car">&#9662;</span>' : "") + "</button>";
+}
+function placeholder(t) {
+  if (t.ch === "cmd") return "!command";
+  if (t.ch === "tell") return t.peer ? "Tell " + t.peer : "Pick a name first";
+  return "Message " + CH[t.ch].label;
+}
+function buildComposers() {
+  document.querySelectorAll("[data-comp]").forEach(function (el) {
+    var ctx = el.dataset.comp;
+    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" spellcheck="true"' + (ctx === "cmd" ? ' class="mono" autocapitalize="off" autocorrect="off" spellcheck="false"' : "") + ' maxlength="400"><span class="left" hidden></span><button class="send" aria-label="Send">' + ico("send", 18) + "</button>" + (ctx === "cmd" ? '<button class="starb" data-favnow aria-label="Save as favorite">' + starSvg(false) + "</button>" : "");
+    var inp = el.querySelector("input"), btn = el.querySelector(".send");
+    inp.addEventListener("input", function () { btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); if (ctx === "cmd") updateFavNow(); });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(ctx, inp); } });
+    btn.addEventListener("click", function () { submit(ctx, inp); inp.focus(); });
+    inp.addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); setTimeout(pinPanes, 320); });
+    inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || document.activeElement.tagName !== "INPUT") document.body.classList.remove("typing"); fitViewport(); }, 80); });
+  });
+  updateComposers();
+}
+// FFXI chat lines are capped at 130 Shift-JIS bytes, prefix included. Shown as a countdown near the end.
+var LINE_BYTES = 130;
+function sjisLen(s) {
+  var n = 0;
+  for (var i = 0; i < s.length; i++) { var c = s.charCodeAt(i); n += (c < 0x80 || (c >= 0xff61 && c <= 0xff9f)) ? 1 : 2; }
+  return n;
+}
+function lineRoom(t) {
+  if (!CH[t.ch] || !CH[t.ch].send) return LINE_BYTES;
+  var pre = CH[t.ch].send + " " + (t.ch === "tell" ? (t.peer || "") + " " : "");
+  return LINE_BYTES - sjisLen(pre);
+}
+function updateLeft(el) {
+  var ctx = el.dataset.comp, inp = el.querySelector("input"), left = el.querySelector(".left"), btn = el.querySelector(".send");
+  if (!left || ctx === "cmd") return;
+  var room = lineRoom(compTarget(ctx)), used = sjisLen((inp.value || "").trim()), rem = room - used;
+  el.classList.add("chat");
+  left.hidden = false;
+  left.textContent = used + " / " + room;
+  left.classList.toggle("near", rem >= 0 && rem <= 15);
+  left.classList.toggle("over", rem < 0);
+  btn.classList.toggle("blocked", rem < 0);
+}
+function updateComposers() {
+  document.querySelectorAll("[data-comp]").forEach(function (el) {
+    var ctx = el.dataset.comp, t = compTarget(ctx);
+    el.querySelector(".chipslot").innerHTML = chipHtml(t, ctx);
+    var inp = el.querySelector("input");
+    inp.placeholder = placeholder(t);
+    updateLeft(el);
+    el.classList.toggle("dis", !connected && everConnected);
+  });
+}
+document.addEventListener("click", function (e) {
+  var p = e.target.closest("[data-pick]");
+  if (p) openPicker(p.dataset.pick);
+});
+function openPicker(ctx) {
+  var cur = compTarget(ctx);
+  function opt(ch, sub) {
+    var c = CH[ch], sel = cur.ch === ch;
+    return '<button class="opt' + (sel ? " sel" : "") + '" data-o="' + ch + '"><div class="oc" style="--c:' + c.c + '">' + ico(c.icon, 22) + '</div><div style="flex:1"><b>' + c.full + "</b><small>" + sub + "</small></div>" + (sel ? '<span style="color:var(--gold)">&#10003;</span>' : "") + "</button>";
+  }
+  var html = '<div class="grab"></div><div class="shead"><div class="sect">SEND TO</div></div>' +
+    opt("ls1", "/l" + (lsName.ls1 ? " &middot; " + esc(lsName.ls1) : "")) + opt("ls2", "/l2" + (lsName.ls2 ? " &middot; " + esc(lsName.ls2) : "")) + opt("party", "/p") +
+    opt("tell", "/t" + (cur.ch === "tell" && cur.peer ? " &middot; " + esc(cur.peer) : " &middot; pick a name")) +
+    opt("say", "/s &middot; nearby") +
+    opt("shout", "/sh &middot; local area") +
+    '<div style="height:1px;background:var(--line);margin:6px 0"></div>' +
+    '<button class="opt" data-o="emote"><div class="oc" style="--c:var(--emote)">' + ico("emote", 22) + '</div><div style="flex:1"><b>Emote</b><small>/wave, /bow, /cheer and the rest</small></div></button>' +
+    '<button class="opt" data-o="cmd"><div class="oc" style="--c:var(--gold)">' + ico("cmd", 22) + '</div><div style="flex:1"><b>Game command</b><small>CatsEye ! server commands</small></div></button>';
+  openSheet(html, function (e) {
+    var b = e.target.closest("[data-o]");
+    if (!b) return;
+    var ch = b.dataset.o;
+    if (ch === "cmd") { closeSheet(); go("cmd"); return; }
+    if (ch === "emote") { closeSheet(); go("emote"); return; }
+    if (ch === "tell") { closeSheet(); setTimeout(function () { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); }, 230); return; }
+    S.target = {ch: ch, peer: ""};
+    if (ctx === "focus") { focus.ch = ch; }
+    save(); closeSheet(); render();
+  });
+}
+function recentPeers() {
+  var seen = {}, out = [];
+  for (var i = msgs.length - 1; i >= 0 && out.length < 8; i--) {
+    var m = msgs[i];
+    if (m.ch === "tell" && m.name && !seen[m.name.toLowerCase()]) { seen[m.name.toLowerCase()] = 1; out.push(m.name); }
+  }
+  return out;
+}
+function pickPeer(done) {
+  var peers = recentPeers();
+  var html = '<div class="grab"></div><div class="shead"><div class="sect">TELL WHO?</div></div>' +
+    '<input class="sinput" id="peerin" placeholder="Character name" autocapitalize="words" autocorrect="off" spellcheck="false" maxlength="15">' +
+    peers.map(function (p) { return '<button class="opt" data-peer="' + esc(p) + '"><div class="av" style="width:40px;height:40px;font-size:16px">' + esc(p.charAt(0)) + "</div><b>" + esc(p) + "</b></button>"; }).join("") +
+    '<div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Use name</button></div>';
+  openSheet(html, function (e) {
+    var b = e.target.closest("[data-peer]");
+    var name = b ? b.dataset.peer : null;
+    var s = e.target.closest("[data-sb]");
+    if (s && s.dataset.sb === "x") { closeSheet(); return; }
+    if (s && s.dataset.sb === "ok") name = ($("peerin").value || "").trim();
+    if (name === null) return;
+    if (!/^[A-Za-z]{3,15}$/.test(name)) { toast("Names are 3 to 15 letters."); return; }
+    name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    closeSheet(); done(name);
+  });
+  setTimeout(function () { var i = $("peerin"); if (i) i.focus(); }, 250);
+}
+
+var sending = false;
+function submit(ctx, inp) {
+  var text = (inp.value || "").trim();
+  if (!text || sending) return;
+  if (ctx === "cmd") { sendCommand(text, false, inp); return; }
+  var t = compTarget(ctx);
+  if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
+  if (/^[\/!]/.test(text)) { toast("Commands go through Game command (tap the channel chip)."); return; }
+  if (sjisLen(text) > lineRoom(t)) { toast("Too long for one chat line. Trim it a little."); return; }
+  sending = true;
+  api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {
+    sending = false;
+    if (!j.ok) { toast(j.error || "Could not send."); return; }
+    inp.value = ""; inp.dispatchEvent(new Event("input"));
+    (j.parts || []).forEach(function (p) {
+      pend[p.pid] = {pid: p.pid, pending: true, ch: t.ch, peer: t.peer || "", body: p.text, ts: nowSec(), state: "sending", dir: "out", name: myName(), retry: {target: t.ch, peer: t.peer || "", text: p.text}};
+      pendOrder.push(p.pid);
+    });
+    seenCount["pane-" + ctx] = undefined;
+    schedule();
+  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+}
+document.addEventListener("click", function (e) {
+  var r = e.target.closest("[data-retry]");
+  if (!r) return;
+  var p = pend[r.dataset.retry];
+  if (!p) return;
+  delete pend[p.pid];
+  api("/api/send", p.retry).then(function (j) {
+    if (!j.ok) { toast(j.error || "Could not send."); return; }
+    (j.parts || []).forEach(function (q) {
+      pend[q.pid] = {pid: q.pid, pending: true, ch: p.ch, peer: p.peer, body: q.text, ts: nowSec(), state: "sending", dir: "out", name: myName(), retry: p.retry};
+      pendOrder.push(q.pid);
+    });
+    schedule();
+  });
+});
+
+// ------------------------------------------------------------------------------------------
+// Commands
+// ------------------------------------------------------------------------------------------
+function sendCommand(text, confirmed, inp) {
+  sending = true;
+  api("/api/command", {text: text, confirm: !!confirmed}).then(function (j) {
+    sending = false;
+    if (j._status === 409 && j.needs_confirm) { confirmCommand(text, inp); return; }
+    if (!j.ok) { cmdLog.push({ts: nowSec(), text: "→ " + text, kind: "sent"}); cmdLog.push({ts: nowSec(), text: j.error || "Blocked.", kind: "bad"}); schedule(); return; }
+    cmdLog.push({ts: nowSec(), text: "→ " + text, kind: "sent"});
+    cmdLog.push({ts: nowSec(), text: "Sent. Waiting on the game…", kind: "wait"});
+    lastCmdAt = Date.now();
+    if (inp) { inp.value = ""; inp.dispatchEvent(new Event("input")); }
+    schedule();
+  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+}
+function confirmCommand(text, inp) {
+  var name = text.split(/\s+/)[0].slice(1).toLowerCase();
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(text) + '</div><div class="sfoot">' + esc(commands.action[name] || "This command changes something in the game.") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    closeSheet();
+    if (b.dataset.sb === "ok") sendCommand(text, true, inp);
+  });
+}
+function starSvg(on) {
+  return '<svg class="i" width="22" height="22" viewBox="0 0 20 20"><path d="M10 2l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L10 14.4 5 17.2l1.2-5.6L2 7.8l5.6-.6z" fill="' + (on ? "#d9b45a" : "none") + '" stroke="' + (on ? "#d9b45a" : "#3a4a80") + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+}
+function isFav(t) { return S.favs.indexOf(t) >= 0; }
+function toggleFav(t) {
+  t = (t || "").trim();
+  if (!t) return;
+  if (isFav(t)) S.favs = S.favs.filter(function (x) { return x !== t; }); else S.favs.push(t);
+  save(); renderCmd(); renderCmdList();
+}
+function cmdInput() { return document.querySelector('[data-comp="cmd"] input'); }
+function updateFavNow() {
+  var b = document.querySelector("[data-favnow]"), i = cmdInput();
+  if (b && i) b.innerHTML = starSvg(isFav(i.value.trim()));
+}
+document.addEventListener("click", function (e) {
+  if (e.target.closest("[data-favnow]")) { var i = cmdInput(); if (i.value.trim()) toggleFav(i.value.trim()); updateFavNow(); }
+});
+function renderCmd() {
+  $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("") + '<button class="all" data-go="cmdlist">All commands</button>';
+  var rows = cmdLog.slice(-80).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
+  var pane = $("pane-cmd");
+  pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Tap a favorite or type a command like <span class="code">!points</span>.<br>Replies from the server show here.</div>';
+  pane.scrollTop = pane.scrollHeight;
+  updateFavNow();
+}
+$("cmdchips").addEventListener("click", function (e) {
+  var c = e.target.closest("[data-chip]");
+  if (!c) return;
+  sendCommand(c.dataset.chip, false, null);
+});
+function renderCmdList() {
+  var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
+  function row(name, desc, isAction) {
+    var t = "!" + name;
+    if (q && name.indexOf(q) < 0 && desc.toLowerCase().indexOf(q) < 0) return "";
+    return '<div class="crow"><button class="m" data-fill="' + esc(t) + '"><div>' + esc(t) + (isAction ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(desc) + '</small></button><button class="starb" data-star="' + esc(t) + '">' + starSvg(isFav(t)) + "</button></div>";
+  }
+  var favRows = S.favs.map(function (f) {
+    var n = f.replace(/^!/, "").split(/\s+/)[0].toLowerCase();
+    var d = commands.info[n] || commands.action[n] || "";
+    if (q && f.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
+    return '<div class="crow"><button class="m" data-fill="' + esc(f) + '"><div>' + esc(f) + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(d) + '</small></button><button class="starb" data-star="' + esc(f) + '">' + starSvg(true) + "</button></div>";
+  }).join("");
+  var info = Object.keys(commands.info).sort().map(function (n) { return row(n, commands.info[n], false); }).join("");
+  var act = Object.keys(commands.action).sort().map(function (n) { return row(n, commands.action[n], true); }).join("");
+  $("cmdlist").innerHTML = (favRows ? '<div class="sect">FAVORITES</div>' + favRows : "") +
+    '<div class="sect">INFO</div>' + (info || '<div class="empty">No match</div>') +
+    '<div class="sect">ACTIONS</div>' + (act || '<div class="empty">No match</div>') +
+    '<div class="sfoot">From the CatsEyeXI command list on BG-Wiki. Actions ask before sending. Star a command to pin it as a chip.</div>';
+}
+$("cmdsearch").addEventListener("input", renderCmdList);
+$("cmdlist").addEventListener("click", function (e) {
+  var s = e.target.closest("[data-star]");
+  if (s) { toggleFav(s.dataset.star); return; }
+  var f = e.target.closest("[data-fill]");
+  if (f) { if (histOK) history.back(); else back(); var i = cmdInput(); i.value = f.dataset.fill + (/(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/.test(f.dataset.fill) ? " " : ""); i.dispatchEvent(new Event("input")); setTimeout(function () { i.focus(); }, 260); }
+});
+
+// ------------------------------------------------------------------------------------------
+// Emotes: one tap sends it. Plays on your current in-game target if you have one.
+// ------------------------------------------------------------------------------------------
+var EMOTE_MODES = [["", "Text + motion"], ["motion", "Motion only"], ["text", "Text only"]];
+function renderEmotes() {
+  $("emseg").innerHTML = '<div class="seg">' + EMOTE_MODES.map(function (m) { return '<button data-emode="' + m[0] + '"' + (S.emoteMode === m[0] ? ' class="on"' : "") + ">" + m[1] + "</button>"; }).join("") + "</div>";
+  var list = commands.emotes || [];
+  var main = list.filter(function (e) { return e !== "sitchair"; });
+  function chip(cmd, label, cls) { return '<button data-emote="' + esc(cmd) + '"' + (cls ? ' class="' + cls + '"' : "") + ">" + esc(label) + "</button>"; }
+  var recent = (S.recentEmotes || []).filter(function (r) { return r; });
+  var h = "";
+  if (recent.length) h += '<div class="sect">RECENT</div><div class="emgrid">' + recent.map(function (r) { return chip(r, r.replace(/^\//, ""), r.indexOf("/jobemote") === 0 ? "job" : ""); }).join("") + "</div>";
+  h += '<div class="sect">EMOTES</div><div class="emgrid">' + main.map(function (e) { return chip("/" + e, e); }).join("") + "</div>";
+  if (list.indexOf("sitchair") >= 0) h += '<div class="sect">SIT IN A CHAIR</div><div class="emgrid">' + chip("/sitchair", "sitchair") + [1, 2, 3, 4].map(function (n) { return chip("/sitchair " + n, "chair " + n); }).join("") + "</div>";
+  if ((commands.jobs || []).length) h += '<div class="sect">JOB EMOTES</div><div class="emgrid">' + commands.jobs.map(function (j) { return chip("/jobemote " + j.toLowerCase(), j, "job"); }).join("") + '</div><div class="sfoot" style="padding:0 0 8px">Job emotes unlock with each job\'s emote quest.</div>';
+  h += '<div class="sfoot">Emotes play on your current in-game target if you have one. Stock FFXI emotes; tell me if CatsEye is missing or adds any.</div>';
+  $("emotes").innerHTML = list.length ? h : '<div class="empty">Loading emotes&hellip;</div>';
+}
+$("emseg").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-emode]");
+  if (!b) return;
+  S.emoteMode = b.dataset.emode; save(); renderEmotes();
+});
+$("emotes").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-emote]");
+  if (!b || sending) return;
+  var base = b.dataset.emote, line = base;
+  var plain = base.indexOf("/sitchair ") !== 0 && base.indexOf("/jobemote") !== 0;
+  if (plain && S.emoteMode) line = base.split(" ")[0] + " " + S.emoteMode;
+  sending = true;
+  api("/api/command", {text: line}).then(function (j) {
+    sending = false;
+    if (!j.ok) { toast(j.error || "Could not send that emote."); return; }
+    toast("Sent " + line);
+    var r = (S.recentEmotes || []).filter(function (x) { return x !== base; });
+    r.unshift(base); S.recentEmotes = r.slice(0, 8); save(); renderEmotes();
+  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+});
+
+// ------------------------------------------------------------------------------------------
+// Tells tab
+// ------------------------------------------------------------------------------------------
+function tellPeers() {
+  var map = {};
+  function touch(name, m, isPend) {
+    if (!name) return;
+    var k = name.toLowerCase();
+    var p = map[k] || (map[k] = {name: name, last: null, unread: 0, saved: false, failed: false});
+    if (!p.last || m.ts >= p.last.ts) { p.last = m; p.failed = isPend && (m.state === "failed"); }
+    if (m.saved) p.saved = true;
+    if (!isPend && m.dir === "in" && m.ts > (S.read[k] || 0)) p.unread++;
+  }
+  msgs.forEach(function (m) { if (m.ch === "tell") touch(m.name, m, false); });
+  pendOrder.forEach(function (pid) { var p = pend[pid]; if (p && p.ch === "tell") touch(p.peer, p, true); });
+  return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return b.last.ts - a.last.ts; });
+}
+function renderTells() {
+  var peers = tellPeers();
+  $("ban-tells").innerHTML = status.save_tells ?
+    '<div class="banner info">Saving is on for tells. The last 50 lines per person are kept on the bridge. <button class="linkbtn" data-go="settings">Change in Settings</button></div>' :
+    '<div class="banner info">Tells are kept until the bridge stops. <button class="linkbtn" data-go="settings">Turn on saving</button></div>';
+  $("tells-list").innerHTML = peers.length ? peers.map(function (p) {
+    var m = p.last, prev = m.state === "failed" ? (m.reason || "Not delivered") : ((m.dir === "out" ? "&gt;&gt; " : "") + esc(m.body));
+    return '<button class="lrow" data-thread="' + esc(p.name) + '"><div class="av">' + esc(p.name.charAt(0).toUpperCase()) + '</div><div class="lmain"><div class="ltop"><b>' + esc(p.name) + (p.saved ? '<span class="tag">SAVED</span>' : "") + "</b><span>" + hhmm(m.ts) + '</span></div><div class="lsub' + (p.failed ? " bad" : "") + '">' + prev + "</div></div>" + (p.unread ? '<span class="cnt">' + p.unread + "</span>" : "") + "</button>";
+  }).join("") : '<div class="empty">No tells yet.</div>';
+  var total = peers.reduce(function (n, p) { return n + p.unread; }, 0);
+  var bd = $("bdg-tells");
+  bd.hidden = !total; bd.textContent = total;
+}
+$("tells-list").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-thread]");
+  if (b) openThread(b.dataset.thread);
+});
+$("newtell").addEventListener("click", function () { pickPeer(openThread); });
+function openThread(peer) {
+  thread.peer = peer;
+  S.read[peer.toLowerCase()] = nowSec(); save();
+  $("thread-name").textContent = peer;
+  seenCount["pane-thread"] = undefined;
+  go("thread");
+}
+
+// ------------------------------------------------------------------------------------------
+// Ventures and notices
+// ------------------------------------------------------------------------------------------
+function renderVent() {
+  var v = msgs.filter(function (m) { return m.ch === "venture"; });
+  var alerts = v.filter(function (m) { return m.zones; }).reverse();
+  var other = v.filter(function (m) { return !m.zones; });
+  var statusLine = other.length ? other[other.length - 1] : null;
+  var html = "";
+  if (statusLine) html += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(statusLine.body) + "</span></div>";
+  if (alerts.length) {
+    var a = alerts[0];
+    html += '<div class="sect">LATEST ALERT</div><div class="vcard"><div class="row" style="justify-content:space-between"><div class="row" style="gap:8px">' + ico("vent", 20) + '<b style="font-size:16px">Venture alert</b></div><span style="font-size:13px;color:var(--mute)">' + hhmm(a.ts) + "</span></div>" +
+      (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") +
+      a.zones.map(function (z) { return '<div class="vzone"><div class="vgrid">' + esc(z.grid) + '</div><div style="min-width:0"><div style="font-size:16px;font-weight:700">' + esc(z.zone) + '</div><div style="font-size:13px;color:var(--mute)">Map square ' + esc(z.grid) + "</div></div></div>"; }).join("") + "</div>";
+    if (alerts.length > 1) {
+      html += '<div class="sect">EARLIER</div>' + alerts.slice(1, 12).map(function (m) {
+        return '<div class="vold"><div class="h"><span>Venture alert</span><span>' + hhmm(m.ts) + '</span></div><div style="font-size:15px">' + m.zones.map(function (z) { return esc(z.zone) + " (" + esc(z.grid) + ")"; }).join(" / ") + "</div></div>";
+      }).join("");
+    }
+  }
+  var recent = other.slice(-8).reverse();
+  if (recent.length > 1) html += '<div class="sect">OTHER VENTURE LINES</div>' + recent.map(function (m) { return '<div class="vold"><div class="h"><span>' + esc(m.name || "Venture") + "</span><span>" + hhmm(m.ts) + '</span></div><div style="font-size:14.5px">' + esc(m.body) + "</div></div>"; }).join("");
+  $("vent").innerHTML = html || '<div class="empty">No venture alerts yet. Populox alerts show up here as cards.</div>';
+  var newest = v.length ? v[v.length - 1].ts : 0;
+  var bd = $("bdg-vent");
+  bd.hidden = !(newest > S.seenVent && curTab !== "vent"); bd.textContent = "!";
+}
+function renderNotices() {
+  var n = msgs.filter(function (m) { return m.ch === "server" || m.ch === "system"; }).reverse().slice(0, 100);
+  $("notices").innerHTML = n.length ? n.map(function (m) {
+    return '<div class="vold"><div class="h"><span>' + (m.ch === "server" ? "Server" : "System") + "</span><span>" + dayLabel(m.ts) + '</span></div><div style="font-size:15px;white-space:pre-wrap">' + fmt(m.body) + "</div></div>";
+  }).join("") : '<div class="empty">Server broadcasts, maintenance warnings and the LS message of the day show here.</div>';
+  var newest = n.length ? n[0].ts : 0;
+  var bd = $("bdg-notices");
+  bd.hidden = !(newest > S.seenNotice && curTab !== "notices"); bd.textContent = "!";
+}
+
+// ------------------------------------------------------------------------------------------
+// Settings
+// ------------------------------------------------------------------------------------------
+function tog(on, key) { return '<button class="tog' + (on ? " on" : "") + '" data-set="' + key + '"></button>'; }
+function segs(key, opts, cur) { return '<div class="segs">' + opts.map(function (o) { return '<button data-seg="' + key + '" data-val="' + o[0] + '"' + (o[0] === cur ? ' class="on"' : "") + ">" + o[1] + "</button>"; }).join("") + "</div>"; }
+function srow(title, sub, right) { return '<div class="srow"><div class="m"><div>' + title + "</div>" + (sub ? "<small>" + sub + "</small>" : "") + "</div>" + right + "</div>"; }
+var showQr = false;
+function renderSettings() {
+  var link = location.origin + "/?t=" + encodeURIComponent(TOKEN);
+  var h = '<div class="sect">CONNECTION</div>' +
+    srow("Bridge", connected ? "Connected" + (status.version ? " &middot; v" + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
+    (showQr ? '<div id="qrbox"></div><div class="sfoot" style="text-align:center;word-break:break-all">' + esc(link) + "</div>" : "") +
+    srow("Start with the game", "Set in the Decky panel on the Deck, or <span class=\"code\">/pchat config</span> in game.", '<span class="fixed">On the bridge</span>') +
+    '<div class="sect">CHANNELS</div>' +
+    CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Mostly trade spam. Read only, no sending." : (c === "shout" ? "Local area chat" : (c === "say" ? "Nearby" : "")), tog(S.master[c], "m." + c)); }).join("") +
+    '<div class="sect">CALLS</div>' +
+    srow("When a call comes in", "Roll calls can be noisy", segs("calls", [["off", "Off"], ["highlight", "Highlight"], ["badge", "Badge"]], S.calls)) +
+    srow("Group call bursts", "Fold 1, 2, 3... into one line", tog(S.groupCalls, "groupCalls")) +
+    '<div class="sect">COMMANDS</div>' +
+    srow("Allowed commands", "CatsEye server ! commands and stock emotes only", '<span class="fixed">Fixed</span>') +
+    srow("Automation", "None. Every send is one tap.", '<span class="fixed">Never</span>') +
+    '<div class="sect">PRIVACY</div>' +
+    srow("Remember tells", "Off by default. Last 50 lines per person, kept on the bridge. Other channels are never saved.", tog(status.save_tells, "save_tells")) +
+    srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
+    '<div class="sect">COLORS</div>' +
+    CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
+    srow("Reset colors", "Back to the defaults", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
+    '<div class="sect">DISPLAY</div>' +
+    srow("Density", "Comfortable shows names above lines", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
+    srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
+    '<div class="foot">phonechatXI &middot; bridge ' + esc(status.version || "?") + "</div>";
+  $("settings").innerHTML = h;
+  if (showQr && window.qrcode) {
+    try { var q = qrcode(0, "M"); q.addData(link); q.make(); $("qrbox").innerHTML = q.createSvgTag({cellSize: 5, margin: 2, scalable: true}); } catch (e) {}
+  }
+}
+function loadQr(cb) {
+  if (window.qrcode) { cb(); return; }
+  var s = document.createElement("script"); s.src = "/qr.js"; s.onload = cb; document.head.appendChild(s);
+}
+$("settings").addEventListener("input", function (e) {
+  var c = e.target.closest("[data-color]");
+  if (!c) return;
+  S.colors = S.colors || {};
+  S.colors[c.dataset.color] = c.value;
+  applyColors(); save(); schedule();
+});
+$("settings").addEventListener("click", function (e) {
+  var t = e.target.closest("[data-set]");
+  if (t) {
+    var k = t.dataset.set;
+    if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
+    else if (k === "groupCalls") { S.groupCalls = !S.groupCalls; }
+    else if (k === "save_tells") {
+      api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); });
+      return;
+    }
+    save(); render(); return;
+  }
+  var s = e.target.closest("[data-seg]");
+  if (s) { S[s.dataset.seg] = s.dataset.val; save(); applyLook(); seenCount = {}; render(); return; }
+  var a = e.target.closest("[data-act]");
+  if (!a) return;
+  if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
+  if (a.dataset.act === "qr") { showQr = !showQr; loadQr(render); render(); }
+  if (a.dataset.act === "clear") {
+    openSheet('<div class="grab"></div><div class="shead"><div class="sect">CLEAR SAVED TELLS?</div></div><div class="sfoot">This deletes the saved tell files on the bridge. Tells from this session stay until the bridge stops.</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok" style="background:var(--bad)">Clear</button></div>', function (e2) {
+      var b = e2.target.closest("[data-sb]");
+      if (!b) return;
+      closeSheet();
+      if (b.dataset.sb === "ok") api("/api/tells/clear", {}).then(function (j) { toast(j.ok ? "Saved tells cleared." : (j.error || "Could not clear.")); });
+    });
+  }
+});
+
+// ------------------------------------------------------------------------------------------
+// Navigation, sheets, banners
+// ------------------------------------------------------------------------------------------
+var curTab = "chat", stack = [], histOK = true;
+document.getElementById("tabbar").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-tab]");
+  if (!b) return;
+  while (stack.length) { $("scr-" + stack.pop()).classList.remove("open"); }
+  curTab = b.dataset.tab;
+  document.querySelectorAll("#tabbar button").forEach(function (x) { x.classList.toggle("on", x === b); });
+  document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.id === "tab-" + curTab); });
+  if (curTab === "vent") S.seenVent = nowSec();
+  if (curTab === "notices") S.seenNotice = nowSec();
+  save(); render();
+});
+function go(name) {
+  var el = $("scr-" + name);
+  if (!el) return;
+  if (name === "cmdlist") { $("cmdsearch").value = ""; renderCmdList(); }
+  if (name === "settings") refreshStatus();
+  if (name === "emote") renderEmotes();
+  stack.push(name);
+  el.style.zIndex = (el.classList.contains("tabs") ? 5 : 20) + stack.length;
+  el.classList.add("open");
+  try { history.pushState({s: stack.length}, ""); } catch (e) { histOK = false; }
+  render();
+}
+function back() {
+  var name = stack.pop();
+  if (!name) return;
+  $("scr-" + name).classList.remove("open");
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  render();
+}
+window.addEventListener("popstate", function () { if ($("sheet").classList.contains("on")) { closeSheet(); return; } if (stack.length) back(); });
+document.addEventListener("click", function (e) {
+  var g = e.target.closest("[data-go]");
+  if (g) { go(g.dataset.go); return; }
+  if (e.target.closest("[data-back]")) { if (stack.length) { if (histOK) history.back(); else back(); } }
+  var w = e.target.closest("[data-who]");
+  if (w && w.closest(".pane")) {
+    var ch = w.dataset.ch;
+    if (ch === "tell" && w.dataset.who) { openThread(w.dataset.who); return; }
+    if (CH[ch]) { focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; go("focus"); }
+  }
+});
+$("focus-filters").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-f]");
+  if (!b) return;
+  focus.filter = b.dataset.f; seenCount["pane-focus"] = undefined; render();
+});
+var sheetHandler = null;
+function openSheet(html, onClick) {
+  $("sheet").innerHTML = html;
+  sheetHandler = onClick;
+  $("scrim").classList.add("on");
+  $("sheet").classList.add("on");
+}
+function closeSheet() {
+  $("scrim").classList.remove("on");
+  $("sheet").classList.remove("on");
+  sheetHandler = null;
+}
+$("sheet").addEventListener("click", function (e) { if (sheetHandler) sheetHandler(e); });
+$("scrim").addEventListener("click", closeSheet);
+
+function banner() {
+  if (!connected && everConnected && Date.now() - offlineSince > 3000) {
+    return '<div class="banner bad"><b>Bridge is off or out of reach</b>Messages are paused. Start it from the Decky panel, or type <span class="code">/pchat start</span> in game on Windows. This page reconnects by itself.</div>';
+  }
+  if (!connected && !everConnected && Date.now() - offlineSince > 4000) {
+    return '<div class="banner bad"><b>Can\'t reach the bridge</b>Check that it is running and that your phone is on the same Wi-Fi.</div>';
+  }
+  if (connected && !status.char) {
+    return '<div class="banner info"><b>Waiting for the game</b>The bridge is on but no character has logged in yet.</div>';
+  }
+  return "";
+}
+
+// ------------------------------------------------------------------------------------------
+// Render loop
+// ------------------------------------------------------------------------------------------
+var queued = false;
+function schedule() { if (!queued) { queued = true; requestAnimationFrame(function () { queued = false; render(); }); } }
+function render() {
+  document.querySelectorAll("[data-bridge]").forEach(function (p) {
+    p.classList.toggle("off", !connected);
+    p.querySelector("span").textContent = connected ? "Bridge ON" : "Bridge OFF";
+  });
+  var b = banner();
+  $("ban-chat").innerHTML = b;
+  renderViews();
+  if (curTab === "chat") renderPane("pane-chat", chatItems(), "chat", "No messages in this view yet.<br>Chat from the game shows up here.");
+  renderTells();
+  if (curTab === "tells" && b) $("ban-tells").innerHTML = b + $("ban-tells").innerHTML;
+  renderVent();
+  renderNotices();
+  var top = stack[stack.length - 1];
+  if (top === "focus") {
+    var c = CH[focus.ch];
+    $("focus-title").innerHTML = ico(c.icon, 22) + "<b>" + c.full + "</b>";
+    $("focus-sub").textContent = focus.filter === "all" ? (lsName[focus.ch] || "Just this channel") : (focus.filter === "calls" ? "Only calls" : "Only links");
+    $("focus-filters").innerHTML = [["all", "All"], ["calls", "Calls"], ["links", "Links"]].map(function (f) { return '<button class="chipb' + (focus.filter === f[0] ? " on" : "") + '" data-f="' + f[0] + '">' + f[1] + "</button>"; }).join("");
+    renderPane("pane-focus", focusItems(), "focus", "Nothing here yet.");
+  }
+  if (top === "thread") {
+    S.read[thread.peer.toLowerCase()] = nowSec();
+    renderPane("pane-thread", threadItems(), "thread", "No tells with " + esc(thread.peer) + " yet. Say hi.");
+  }
+  if (stack.indexOf("cmd") >= 0) renderCmd();
+  if (top === "settings") renderSettings();
+  updateComposers();
+}
+
+// ------------------------------------------------------------------------------------------
+// Keyboard: keep the composer just above the iPhone keyboard, newest line in view.
+// ------------------------------------------------------------------------------------------
+var app = $("app");
+function setTabH() {
+  var h = document.body.classList.contains("typing") ? 0 : $("tabbar").offsetHeight;
+  app.style.setProperty("--tabh", h + "px");
+}
+new MutationObserver(setTabH).observe(document.body, {attributes: true, attributeFilter: ["class"]});
+window.addEventListener("resize", setTabH);
+function fitViewport() {
+  var vv = window.visualViewport;
+  if (!vv) return;
+  app.style.height = vv.height + "px";
+  app.style.transform = "translateY(" + vv.offsetTop + "px)";
+  if (window.scrollY) window.scrollTo(0, 0);
+}
+function pinPanes() {
+  ["pane-chat", "pane-focus", "pane-thread", "pane-cmd"].forEach(function (id) { var p = $(id); p.scrollTop = p.scrollHeight; });
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", function () { fitViewport(); pinPanes(); });
+  window.visualViewport.addEventListener("scroll", fitViewport);
+}
+
+// ------------------------------------------------------------------------------------------
+// Start
+// ------------------------------------------------------------------------------------------
+applyLook();
+buildComposers();
+render();
+setTabH();
+if (!TOKEN) {
+  $("ban-chat").innerHTML = '<div class="banner bad"><b>Missing link token</b>Open the full link from the Decky panel or the bridge window (it ends in ?t=...).</div>';
+} else {
+  connect();
+  getJSON("/api/commands").then(function (j) { commands = j; renderCmdList(); }).catch(function () {});
+  setInterval(refreshStatus, 30000);
+  setInterval(function () { if (!connected) render(); }, 2000);
+}
+})();
+</script>
+</body>
+</html>
