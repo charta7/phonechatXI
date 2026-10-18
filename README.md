@@ -34,7 +34,8 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Linked items (`{{Suppanomimi}}`) open a BG-Wiki search.
 - Mentions: words you pick, like your name, are highlighted in chat and collected in Alerts.
 - The LS message of the day is pinned above chat.
-- A Commands tab with the stock emotes (plus dances, chair poses and job emotes) and CatsEye `!` commands like `!points` and `!dailies`. Commands that change something ask first.
+- An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
+- A Server tab for CatsEye `!` commands like `!points` and `!dailies`. The ones that change something ask first.
 - An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, server notices, and bazaar visits if you turn them on. Tap × to clear a card. If CatsEye rewords a venture line, it still shows as plain text.
 - An emoticon button, and emoji swap to text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show emoji.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
@@ -122,7 +123,7 @@ Windows isn't tested or supported yet. These steps have never been run.
 2. Delete `/home/deck/phonechat/` (Deck) or `<Ashita>\config\addons\phonechat\` (Windows).
 3. Remove the shortcut from your Home Screen.
 
-## Commands
+## In-game commands
 
 | Command | |
 |---|---|

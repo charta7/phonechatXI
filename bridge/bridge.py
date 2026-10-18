@@ -315,7 +315,7 @@ class Sender(threading.Thread):
             raise SendError("Nothing to send after cleaning the text.")
         # Checked after cleaning, so a hidden character can't sneak a command past this.
         if text.startswith("/") or text.startswith("!"):
-            raise SendError("Commands go through Game command, not chat.")
+            raise SendError("Use the Emotes or Server tab for those, not chat.")
         if re.search(r";\s*[/!]", text):
             raise SendError("Blocked: a ; followed by a command.")
         prefix = TARGETS[target]

@@ -44,7 +44,6 @@ input{font:inherit}
 .tab.on{display:flex}
 .cpanel{flex:1;min-height:0;display:flex;flex-direction:column}
 .cpanel[hidden]{display:none}
-#cmdseg{flex:0 1 auto;margin:0 auto}
 /* your own lines: a faint wash so they're easy to spot */
 .run.out,.cl.out{background:color-mix(in srgb,var(--c) 8%,transparent);border-radius:8px}
 .run.out{margin:0 -6px;padding:2px 6px}
@@ -395,6 +394,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
 <symbol id="i-finder" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.2" fill="none" style="stroke:var(--finder)" stroke-width="2"/><path d="M12.4 12.4l4.6 4.6" style="stroke:var(--finder)" stroke-width="2.2" stroke-linecap="round"/></symbol>
 <symbol id="i-bazaar" viewBox="0 0 20 20"><path d="M6.5 7V5.5a3.5 3.5 0 017 0V7" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/><path d="M4 7h12l-1 10H5z" fill="var(--gold)" opacity=".9"/></symbol>
 <symbol id="i-bell" viewBox="0 0 20 20"><path d="M10 2.5a5 5 0 00-5 5V11l-1.5 3h13L15 11V7.5a5 5 0 00-5-5zM8 16a2 2 0 004 0z" fill="#8e9ac0"/></symbol>
+<symbol id="i-bang" viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="4" fill="#2a3466"/><path d="M10 5.6v5.6" stroke="#d9b45a" stroke-width="2.2" stroke-linecap="round"/><circle cx="10" cy="14.4" r="1.3" fill="#d9b45a"/></symbol>
 <symbol id="i-cmd" viewBox="0 0 20 20"><rect x="1.5" y="3" width="17" height="14" rx="3" fill="#2a3466"/><path d="M5 7.5l3.5 2.5L5 12.5M10.5 13h4.5" fill="none" stroke="#d9b45a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" fill="#8e9ac0" transform="translate(0 -1)"/></symbol>
 <symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="#d9b45a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -421,8 +421,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
       <div class="center"><button class="btnline" id="newtell">+ New tell</button></div>
     </section>
     <section class="tab" id="tab-cmds">
-      <div class="top"><div class="big">Commands</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="views"><div class="seg" id="cmdseg"><button data-cseg="emote" class="on">Emotes</button><button data-cseg="server">Server commands</button></div></div>
+      <div class="top"><div class="big" id="cmdtitle">Emotes</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
       <div class="cpanel" id="cp-emote">
         <div class="emseg" id="emseg"></div>
         <div class="list" id="emotes"></div>
@@ -458,7 +457,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
 
   <!-- command list -->
   <div class="screen overlay" id="scr-cmdlist">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Commands</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Commands</b></div><div class="end"></div></div>
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Server</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">CatsEye ! commands</b></div><div class="end"></div></div>
     <input class="search" id="cmdsearch" placeholder="Search commands" autocomplete="off" autocapitalize="off" spellcheck="false">
     <div class="list" id="cmdlist"></div>
   </div>
@@ -472,7 +471,8 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
   <nav class="tabbar" id="tabbar">
     <button data-tab="chat" class="on"><svg class="i" width="22" height="22"><use href="#i-ls1"/></svg>Chat</button>
     <button data-tab="tells"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg>Tells<span class="bdg" id="bdg-tells" hidden></span></button>
-    <button data-tab="cmds"><svg class="i" width="22" height="22"><use href="#i-cmd"/></svg>Commands</button>
+    <button data-tab="cmds" data-cs="emote"><svg class="i" width="22" height="22"><use href="#i-emote"/></svg>Emotes</button>
+    <button data-tab="cmds" data-cs="server"><svg class="i" width="22" height="22"><use href="#i-bang"/></svg>Server</button>
     <button data-tab="alerts"><svg class="i" width="22" height="22"><use href="#i-bell"/></svg>Alerts<span class="bdg" id="bdg-alerts" hidden></span></button>
   </nav>
 
@@ -1255,7 +1255,7 @@ function submit(ctx, inp) {
   if (ctx === "cmd") { sendCommand(text, false, inp); return; }
   var t = compTarget(ctx);
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
-  if (/^[\/!]/.test(text)) { toast("Commands go in the Commands tab."); return; }
+  if (/^[\/!]/.test(text)) { toast("Emotes and ! commands have their own tabs."); return; }
   if (sjisLen(text) > lineRoom(t)) { toast("Too long for one line. Trim it a bit."); return; }
   sending = true;
   api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {
@@ -1759,11 +1759,14 @@ $("settings").addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 var curTab = "chat", stack = [], histOK = true;
 function showTab(name, cseg) {
-  var again = name === curTab && !stack.length;
+  var again = name === curTab && !stack.length && (name !== "cmds" || !cseg || cseg === S.cseg);
   while (stack.length) { $("scr-" + stack.pop()).classList.remove("open"); }
   curTab = name;
   if (cseg) S.cseg = cseg;
-  document.querySelectorAll("#tabbar button").forEach(function (x) { x.classList.toggle("on", x.dataset.tab === name); });
+  // Emotes and Server are two buttons on one screen, so match the panel too.
+  document.querySelectorAll("#tabbar button").forEach(function (x) {
+    x.classList.toggle("on", x.dataset.tab === name && (!x.dataset.cs || x.dataset.cs === (S.cseg === "server" ? "server" : "emote")));
+  });
   document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.id === "tab-" + curTab); });
   if (curTab === "alerts") S.seenAlerts = nowSec();
   if (curTab === "cmds") showCseg();
@@ -1777,20 +1780,15 @@ function showTab(name, cseg) {
 }
 document.getElementById("tabbar").addEventListener("click", function (e) {
   var b = e.target.closest("[data-tab]");
-  if (b) showTab(b.dataset.tab);
+  if (b) showTab(b.dataset.tab, b.dataset.cs);
 });
 function showCseg() {
   var em = S.cseg !== "server";
   $("cp-emote").hidden = !em;
   $("cp-server").hidden = em;
-  document.querySelectorAll("#cmdseg button").forEach(function (b) { b.classList.toggle("on", b.dataset.cseg === (em ? "emote" : "server")); });
+  $("cmdtitle").textContent = em ? "Emotes" : "Server";
   if (em) renderEmotes(); else renderCmd();
 }
-$("cmdseg").addEventListener("click", function (e) {
-  var b = e.target.closest("[data-cseg]");
-  if (!b) return;
-  S.cseg = b.dataset.cseg; save(); showCseg();
-});
 function go(name) {
   var el = $("scr-" + name);
   if (!el) return;

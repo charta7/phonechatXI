@@ -56,7 +56,7 @@ Chat
 - The chat box stays above the iPhone keyboard.
 
 Alerts
-- Tabs are Chat, Tells, Commands (emotes and server commands) and Alerts (ventures, mentions, bazaar, notices).
+- Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (ventures, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
 - The VNM alert shows as VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - Pools under 100% are listed on one In progress card. A pool at 100% shows on the VNM card instead, and drops off with it after 10 minutes.
 - Active seals show as one line.
