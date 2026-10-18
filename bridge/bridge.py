@@ -237,30 +237,6 @@ def clean_text(text):
     return " ".join("".join(out).split())
 
 
-def split_parts(text, limit):
-    """Split on word boundaries so each part is at most `limit` bytes in Shift-JIS."""
-    PART_BYTES = limit
-    words = text.split(" ")
-    parts, cur = [], ""
-    for w in words:
-        cand = w if not cur else cur + " " + w
-        if len(cand.encode("cp932")) <= PART_BYTES:
-            cur = cand
-            continue
-        if cur:
-            parts.append(cur)
-        while len(w.encode("cp932")) > PART_BYTES:            # one very long word
-            cut = PART_BYTES
-            while len(w[:cut].encode("cp932")) > PART_BYTES:
-                cut -= 1
-            parts.append(w[:cut])
-            w = w[cut:]
-        cur = w
-    if cur:
-        parts.append(cur)
-    return parts
-
-
 class Commands:
     def __init__(self, path):
         with open(path, "r", encoding="utf-8") as f:

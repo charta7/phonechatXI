@@ -209,8 +209,6 @@ body.typing .tabbar{display:none}
 .vteaser{font-size:15px;color:var(--soft);line-height:1.4;font-style:italic}
 .vzone{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#241f3d}
 .vgrid{flex:none;width:52px;height:52px;border-radius:12px;background:var(--vent);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
-.vold{border-radius:14px;background:var(--raise);padding:12px 14px;display:flex;flex-direction:column;gap:4px;opacity:.88;margin-bottom:8px}
-.vold .h{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
 .vrow{display:flex;gap:10px;align-items:baseline;font-size:14.5px;padding:3px 0}
 .vrow .vm{flex:1;min-width:0}
 .vrow .vpct{margin-right:8px}
@@ -339,7 +337,6 @@ body.skin-classic .win,
 body.skin-classic .pane,
 body.skin-classic #sheet,
 body.skin-classic .vcard,
-body.skin-classic .vold,
 body.skin-classic .acard,
 body.skin-classic .banner.info{
   background:linear-gradient(180deg,rgba(64,88,178,.94) 0%,rgba(30,44,118,.95) 38%,rgba(17,26,78,.97) 100%);
@@ -356,7 +353,7 @@ body.skin-classic .bar .mid small{color:var(--soft)}
   filter:drop-shadow(1px 1px 0 #000) drop-shadow(0 0 2px rgba(0,0,0,.8));pointer-events:none;opacity:0;transition:opacity .25s}
 #cursor.show{opacity:1;transition:none}
 body.skin-classic .ln,body.skin-classic .rhead,body.skin-classic .cl,body.skin-classic .big,body.skin-classic .bar,
-body.skin-classic .lrow,body.skin-classic .srow,body.skin-classic .opt,body.skin-classic .vcard,body.skin-classic .vold,body.skin-classic .acard{text-shadow:1px 1px 0 rgba(0,0,0,.9)}
+body.skin-classic .lrow,body.skin-classic .srow,body.skin-classic .opt,body.skin-classic .vcard,body.skin-classic .acard{text-shadow:1px 1px 0 rgba(0,0,0,.9)}
 body.skin-classic .big{font-weight:700;letter-spacing:.3px}
 body.skin-classic .sect{letter-spacing:1.5px;color:var(--gold)}
 body.skin-classic .rail{width:2px}
@@ -1363,20 +1360,12 @@ function toggleFav(t) {
   save(); renderCmd(); renderCmdList();
 }
 function cmdInput() { return document.querySelector('[data-comp="cmd"] input'); }
-function updateFavNow() {
-  var b = document.querySelector("[data-favnow]"), i = cmdInput();
-  if (b && i) b.innerHTML = starSvg(isFav(i.value.trim()));
-}
-document.addEventListener("click", function (e) {
-  if (e.target.closest("[data-favnow]")) { var i = cmdInput(); if (i.value.trim()) toggleFav(i.value.trim()); updateFavNow(); }
-});
 function renderCmd() {
   $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("") + '<button class="all" data-go="cmdlist">All commands</button>';
   var rows = cmdLog.slice(-80).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
   var pane = $("pane-cmd");
   pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Tap a favorite or type one, like <span class="code">!points</span>. Replies show here.</div>';
   pane.scrollTop = pane.scrollHeight;
-  updateFavNow();
 }
 $("cmdchips").addEventListener("click", function (e) {
   var c = e.target.closest("[data-chip]");
