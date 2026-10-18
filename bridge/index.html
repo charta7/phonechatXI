@@ -49,7 +49,6 @@ input{font:inherit}
 .run.out,.cl.out{background:color-mix(in srgb,var(--c) 8%,transparent);border-radius:8px}
 .run.out{margin:0 -6px;padding:2px 6px}
 /* mentions */
-.mention .ln{text-decoration:none;box-shadow:inset 3px 0 0 var(--gold);padding-left:6px}
 .mention{background:color-mix(in srgb,var(--gold) 9%,transparent);border-radius:8px}
 mark.mw{background:none;color:var(--gold);font-weight:700}
 /* auto-translate phrases (not links) */
@@ -103,8 +102,6 @@ body.compact .pane .inner{gap:5px}
 .div:before,.div:after{content:"";flex:1;height:1px;background:var(--line)}
 .run{display:flex;gap:10px}
 .rail{flex:none;width:3px;border-radius:2px;background:var(--c)}
-.run.out .rail{opacity:.55}
-.run.call .rail{background:var(--vent)!important;opacity:1}
 .rbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .rhead{display:flex;align-items:center;gap:6px;font-size:14px;flex-wrap:wrap}
 .rhead b{color:var(--c)}
@@ -142,7 +139,6 @@ a.url{color:#7fb2ff;background:#18254d;border-radius:6px;padding:0 6px;text-deco
 .t,.vt{white-space:nowrap}
 .cl .ln{flex:1}
 .cl .ln b{color:var(--c)}
-.cl.out .rail{opacity:.55}
 .cl svg.i{vertical-align:-1px;margin-right:5px}
 /* thread */
 .run.mine{justify-content:flex-end}
@@ -938,7 +934,7 @@ function compactPrefix(m) {
     case "party": return "(" + who + ")";
     case "unity": return "{" + who + "}";
     case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
-    case "emote": return "";
+    case "emote": case "finder": return "";
     default: return who + ":";
   }
 }

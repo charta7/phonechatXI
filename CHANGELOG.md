@@ -40,6 +40,8 @@ Two checks are stricter:
 Chat
 - Scrolling up from the newest line no longer shakes or snaps back, and the view no longer jumps when new lines arrive or you send.
 - Your own lines have a faint tint.
+- The colored bar on the left of each line always matches its channel. Calls, mentions and your own lines no longer change it.
+- Party Finder lines in compact view no longer start with a stray `:`.
 - An emoticon button next to the chat box opens a row of text emoticons (`^^`, `:D`, `;)`, `=)`, `<_<`, `T_T` and more). Tapping one adds it to the box. It doesn't send.
 - Emoji turn into text emoticons as you type (👀 becomes `<_<`, 😀 becomes `:D`). Emoji were already stripped before sending, so this only changes what's left to send.
 - Mentions save as you type. Before, leaving the box with Back on iPhone lost them.
