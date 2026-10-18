@@ -113,9 +113,13 @@ Windows isn't tested or supported yet. These steps have never been run.
 
 ### Updating
 
-- Add the new zip in the launcher.
-- If the bridge is running, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`. Your link stays the same.
-- The phone page updates itself and keeps your settings. For a new Home Screen icon, remove the shortcut and add it again.
+1. Close the game.
+2. In the CatsEye launcher, use Add New Addon and pick the new zip.
+3. Start the game. The addon updates the bridge the next time it starts it, either with Start with the game or when you click **Start**.
+
+Your phone page updates itself. Nothing you've set up is lost: your phone link, your phone settings, saved tells and the addon's own settings all live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`), which updates never touch. Only the program files are replaced. To get a new Home Screen icon, remove the shortcut and add it again.
+
+If the bridge was running from Desktop Mode during the update, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`.
 
 ### Uninstall
 
@@ -184,6 +188,5 @@ To test without the game, see [`tools/`](tools): a fake chat session, and a repl
 - Built by Charta with Claude.
 - `bridge/qrcode.js` is [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT).
 - The in-game QR code uses [luaqrcode](https://github.com/speedata/luaqrcode) by speedata (BSD-3), in `addon/phonechat/qrencode.lua`.
-- The retired Decky plugin (`decky/`) started from the Decky plugin template (BSD-3).
 - Fonts: Cinzel, Atkinson Hyperlegible, JetBrains Mono and Cormorant SC (logo), all under the SIL Open Font License. License files are in `bridge/fonts/`.
 - The server command list comes from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki.

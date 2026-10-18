@@ -35,7 +35,7 @@ Two checks are stricter:
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
 - Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
 - GitHub issue templates for bug reports and requests.
-- The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code stays in `decky/` but isn't released.
+- The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code is removed from the repo; it's still in the 1.0.0 history.
 
 ### Phone page
 
