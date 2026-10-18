@@ -206,7 +206,6 @@ body.typing .tabbar{display:none}
 .vgrid{flex:none;width:52px;height:52px;border-radius:12px;background:var(--vent);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
 .vrow{display:flex;gap:10px;align-items:baseline;font-size:14.5px;padding:3px 0}
 .vrow .vm{flex:1;min-width:0}
-.vrow .vpct{margin-right:8px}
 .vt{flex:none;font-size:12.5px;color:var(--mute);font-weight:400}
 .acard{border-radius:14px;background:var(--raise);padding:11px 14px 12px;display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
 .ah{display:flex;align-items:center;gap:8px;min-height:20px}
@@ -214,12 +213,10 @@ body.typing .tabbar{display:none}
 .ah .al b{font-weight:700;letter-spacing:.2px}
 .ax{flex:none;color:var(--mute);font-size:20px;line-height:1;padding:0 2px 0 8px;margin:-4px -4px -4px 0}
 .abody{font-size:15px}
-.vpct{flex:none;min-width:44px;font-weight:700;color:var(--vent)}
 .vgrid.sm{width:auto;height:auto;padding:1px 6px;font-size:12px}
 .empty.sm{padding:6px 2px 10px;font-size:13.5px;text-align:left}
 #alerts .sect{margin-top:6px}
 .vcard{margin-bottom:10px}
-.vstatus{padding:10px 14px;border-radius:12px;background:#14193a;display:flex;gap:10px;align-items:center;font-size:14px;color:var(--soft);margin-top:10px}
 
 /* settings */
 .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -248,8 +245,6 @@ body.typing .tabbar{display:none}
 .banner .linkbtn{margin-left:6px}
 .cd{flex:none;margin-left:8px;padding:2px 9px;border:1px solid color-mix(in srgb,var(--vent) 60%,transparent);border-radius:999px;color:var(--vent);font:700 12px var(--mono);white-space:nowrap}
 .vm .cd{font-size:11px;padding:1px 7px;margin-left:6px;vertical-align:1px}
-.vstatus span{flex:1}
-.vstatus .ax{margin:0}
 /* colors */
 .swatch{flex:none;width:44px;height:30px;border-radius:8px;border:1px solid var(--edge2);padding:0;background:none;overflow:hidden;-webkit-appearance:none;appearance:none}
 .swatch::-webkit-color-swatch-wrapper{padding:0}
@@ -1608,20 +1603,12 @@ function tickCd() {
   if (done) schedule();
 }
 function renderAlerts() {
-  var v = msgs.filter(function (m) { return m.ch === "venture"; });
+  // Ventures: only Populox's VNM alert ("Hmm... something's stirring" plus the zones).
+  var v = msgs.filter(function (m) { return m.ch === "venture" && m.name === "Populox"; });
   var hid = {};
   (S.hidden || []).forEach(function (k) { hid[k] = 1; });
   var DONE = nowSec() - 600;      // a venture is over about 10 minutes after its alert, so old ones fade
-  var pop = v.filter(function (m) { return m.zones && m.name !== "Seals"; }).reverse();
-  var seals = v.filter(function (m) { return m.name === "Seals"; }).pop();
-  var zoneLine = v.filter(function (m) { return m.name === "Zone"; }).pop();
-  var latest = {};
-  v.forEach(function (m) { if (m.name === "ventures" && m.area) latest[(m.pool || "") + "|" + m.area] = m; });
-  function rk(m) { return "va|" + (m.pool || "") + "|" + m.area + "|" + m.ts; }
-  var liveVnm = pop.length && pop[0].ts >= DONE && !hid["v|" + noticeKey(pop[0])];
-  var addon = Object.keys(latest).map(function (k) { return latest[k]; })
-    .filter(function (m) { return !(m.pct >= 100 && (m.ts < DONE || liveVnm)) && !hid[rk(m)]; })
-    .sort(function (a, b) { return b.ts - a.ts; }).slice(0, 8);
+  var pop = v.filter(function (m) { return m.zones; }).reverse();
   // Every alert card has the same head: icon and a bold label on the left, the time on the right.
   function card(icon, color, label, ts, body, x) {
     return '<div class="acard" style="--c:' + color + '"><div class="ah"><span class="al">' + ico(icon, 15) + "<b>" + label + "</b></span>" +
@@ -1642,26 +1629,16 @@ function renderAlerts() {
         (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") + vzones(a.zones) + "</div>";
     }
   }
-  if (addon.length) {
-    h += card("vent", "var(--vent)", "In progress", addon[0].ts, addon.map(function (m) {
-      return row('<span class="vpct">' + Math.round(m.pct) + "%</span>" + (m.pool ? "Pool " + esc(m.pool) + " &middot; " : "") + esc(m.area), 0, m.grid ? '<span class="vgrid sm">' + esc(m.grid) + "</span>" : "");
-    }).join(""), addon.map(rk).join(";;"));
-  }
-  if (seals && !hid["s|" + seals.ts]) {
-    h += '<div class="vstatus">' + ico("vent", 18) + "<span><b>Seals</b> &middot; " + (seals.zones ? zl(seals.zones, " &middot; ") : esc(seals.body)) + '</span><button class="ax" data-dismiss="s|' + seals.ts + '" aria-label="Dismiss">&times;</button></div>';
-  }
-  // Safety net: a venture line the page doesn't understand (say CatsEye rewords Populox or the
-  // ventures addon) still shows as plain text instead of vanishing. Kept for 30 minutes.
+  // Safety net: a Populox line the page can't read (say CatsEye rewords it) still shows as plain
+  // text instead of vanishing. Kept for 30 minutes.
   var odd = v.filter(function (m) {
-    if (m.name === "Seals" || m.name === "Zone" || m.zones) return false;
-    if (m.name === "ventures" && m.area) return false;
-    if (m.name === "Populox" && pop.some(function (p) { return p.teaser === m.body && Math.abs(p.ts - m.ts) < 10; })) return false;
+    if (m.zones) return false;
+    if (pop.some(function (p) { return p.teaser === m.body && Math.abs(p.ts - m.ts) < 10; })) return false;
     return m.ts >= nowSec() - 1800 && !hid["vo|" + m.ts + "|" + (m.body || "").slice(0, 24)];
   }).slice(-3).reverse();
   odd.forEach(function (m) {
-    h += card("vent", "var(--vent)", esc(m.name === "ventures" ? "Ventures addon" : (m.name || "Venture")), m.ts, '<div class="abody">' + fmt(m.body) + "</div>", "vo|" + m.ts + "|" + (m.body || "").slice(0, 24));
+    h += card("vent", "var(--vent)", "Populox", m.ts, '<div class="abody">' + fmt(m.body) + "</div>", "vo|" + m.ts + "|" + (m.body || "").slice(0, 24));
   });
-  if (zoneLine && zoneLine.ts >= DONE && !hid["z|" + zoneLine.ts]) h += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(zoneLine.body) + '</span><button class="ax" data-dismiss="z|' + zoneLine.ts + '" aria-label="Dismiss">&times;</button></div>';
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();

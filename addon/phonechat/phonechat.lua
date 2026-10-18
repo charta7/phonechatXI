@@ -105,7 +105,7 @@ local MODES = {
     [205] = { 'server', 'in'  },
 }
 
--- Plain system-message modes that can carry venture status, Party Finder ads and bazaar
+-- Plain system-message modes that can carry Party Finder ads and bazaar
 -- visits. Combat modes are never on this list.
 local NOTICE_MODES = { [9] = true, [121] = true, [127] = true, [131] = true, [142] = true }
 
@@ -675,7 +675,7 @@ local function parse(channel, dir, text)
     return name, (body:gsub('^%s+', ''))
 end
 
--- Party Finder ads, bazaar visits and venture status lines from the system modes.
+-- Party Finder ads and bazaar visits from the system modes.
 -- Returns true when the line was handled.
 local function system_line(text)
     local ad = text:match('^%[PartyFinder%]%s*(.+)$')
@@ -686,15 +686,6 @@ local function system_line(text)
     local low = text:lower()
     if low:find('your bazaar', 1, true) then
         emit('bazaar', 'in', '', text)
-        return true
-    end
-    local seals = text:match('Active Venture Seals:%s*(.+)$')
-    if seals then
-        emit('venture', 'in', 'Seals', seals)
-        return true
-    end
-    if low:find('venture is currently taking place', 1, true) then
-        emit('venture', 'in', 'Zone', text)
         return true
     end
     return false
@@ -758,16 +749,11 @@ local function handle_line(raw_mode, message)
     emit(channel, dir, name, body)
 end
 
--- Lines printed by other addons. Only the ventures addon's alert line is passed on:
--- "[ventures] Pool A Fort Karugo-Narugo [S] is now 75% complete at (G-5)!"
+-- Lines printed by other addons are never passed on. With /pchat debug on they're logged
+-- (flagged) so they can be checked, and that's all.
 local function handle_injected(raw_mode, message)
     local mode = bit.band(raw_mode, 0xFF)
     debug_log(raw_mode, mode, message, true)
-    local text = clean(message)
-    local body = text:match('^%[ventures%]%s*(.+ is now [%d%.]+%% complete.*)$')
-    if body then
-        emit('venture', 'in', 'ventures', (body:gsub('!$', '')))
-    end
 end
 
 ----------------------------------------------------------------------------------------------------

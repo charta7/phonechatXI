@@ -6,7 +6,7 @@ Close the game first, then start the bridge by itself (the phonechatXI Bridge la
 
 ## fakefeed.py
 
-Plays a short made-up session into the bridge: linkshell chat, tells, emotes, a Party Finder ad, a Populox VNM alert with the ventures addon's lines, seals, Apururu and a bazaar visit. The lines are already in the format the addon writes, so this tests the bridge and the phone page.
+Plays a short made-up session into the bridge: linkshell chat, tells, emotes, a Party Finder ad, a Populox VNM alert, Apururu and a bazaar visit. The lines are already in the format the addon writes, so this tests the bridge and the phone page.
 
 ```
 python3 fakefeed.py            one session

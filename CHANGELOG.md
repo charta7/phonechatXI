@@ -18,9 +18,7 @@ Two checks are stricter:
 
 - "X examines you" lines, shown with emotes.
 - Other players' emotes on every chat mode they use. Emotes were already read in 1.0.0.
-- The ventures addon's progress line (`[ventures] Pool A ... is now 75% complete at (G-5)`), and only that line. phonechatXI doesn't read the ventures addon's packets or replace it.
 - Party Finder ads, as their own chat channel (on by default). Not shown in Alerts.
-- The "Active Venture Seals" and "a venture is currently taking place" server lines.
 - Bazaar visits ("X begins to browse your bazaar"). Off by default.
 - The linkshell message of the day, pinned above chat instead of listed in Notices.
 
@@ -30,7 +28,7 @@ Two checks are stricter:
 - The addon starts and stops the bridge: `/pchat start`, `/pchat stop`, or Start with the game. Tested on Steam Deck in Game Mode. Windows is untested.
 - An in-game window (`/pchat`) with bridge on/off, the QR code, New phone link and settings. It opens by itself the first time. `/pchat help` prints the commands in chat.
 - `/phonechat` works as a command.
-- `/pchat debug` also logs lines printed by other addons, flagged as such. The debug log starts over past 2 MB.
+- `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB.
 - The bridge logs to `~/phonechat/bridge.log` on the Deck.
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
 - Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
@@ -58,15 +56,13 @@ Chat
 - The chat box stays above the iPhone keyboard.
 
 Alerts
-- Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (ventures, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
+- Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (VNM, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
 - The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
 - Game modes: a command that only works in some of ACE, CW or WEW shows those modes' icons, and a filter (All, ACE, CW, WEW) under the search box shows only what works for your mode. The filter is remembered. It only tidies the list: favorites always show, and any command can still be typed and sent. The mode list lives in `commands.json` ("as of October 2026") and only labels and filters; it doesn't change what can be sent.
 - Emotes use a text `^_^` icon everywhere (tab, chat lines, picker) instead of a smiley.
-- The VNM alert shows as VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
-- Pools under 100% are listed on one In progress card. A pool at 100% shows on the VNM card instead, and drops off with it after 10 minutes.
-- Active seals show as one line.
-- If a venture line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
-- Venture cards, seals and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.
+- Ventures shows only Populox's VNM alert: VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
+- If Populox's line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
+- The VNM card and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.
 
 Look and settings
 - Text buttons (Save them, Got it, Show QR, Export, Import, Reset, Clear all) have an outline so they read as buttons.

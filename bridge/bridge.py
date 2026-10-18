@@ -72,7 +72,6 @@ ARGS_RE = re.compile(r"^[A-Za-z0-9 _\-]{0,40}$")
 CALL_RE = re.compile(r"<\s*call\s*(\d{1,2})\s*>", re.I)
 ZONE_RE = re.compile(r"^\s*(.+?)\s*\(([A-Z]-\d+)\)\s*$")
 YELL_RE = re.compile(r"^(.+?)\[(.*)\]$")
-ALERT_RE = re.compile(r"^(?:Pool ([AB]) )?(.+?) is now ([\d.]+)% complete(?: at \(([A-Z]-\d+)\))?")
 
 CURLY = {"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...",
          "–": "-", "—": "-", " ": " "}
@@ -488,21 +487,6 @@ class Tailer(threading.Thread):
             self.tells.record(msg)
 
     def handle_venture(self, char, msg):
-        if msg["name"] == "Seals":                   # "A (F-7) / B (G-6), C (D-9) / D (H-9)"
-            pairs = [parse_zones(p) for p in msg["body"].split(", ")]
-            if all(pairs):
-                msg["zones"] = [z for pair in pairs for z in pair]
-            store.add(msg)
-            return
-        if msg["name"] == "ventures":                # alert line from the ventures addon
-            m = ALERT_RE.match(msg["body"])
-            if m:
-                msg["pool"], msg["area"] = m.group(1) or "", m.group(2)
-                msg["pct"] = float(m.group(3))
-                if m.group(4):
-                    msg["grid"] = m.group(4)
-            store.add(msg)
-            return
         zones = parse_zones(msg["body"])
         with self.plock:
             held = self.pending.pop(char, None)

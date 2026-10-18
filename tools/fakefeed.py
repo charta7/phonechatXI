@@ -33,12 +33,8 @@ SESSION = [
     (4,  "finder",  "in", "", "Seul is looking for members: Venture (Lv57) - Melee Venture need lv18-20 Join to PF"),
     (4,  "ls1",     "in", "Tolliver", "{I can understand a little.} guide https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands"),
     (5,  "server",  "in", "", "This command may only be used in cities."),
-    (5,  "venture", "in", "ventures", "Pool B Rolanberry Fields [S] is now 75% complete at (D-9)"),
     (6,  "ls1",     "in", "Quenby", "selling {{Suppanomimi}} for {Looking for party}"),
-    (5,  "venture", "in", "Seals", "Qufim Island (F-7) / Yuhtunga Jungle (G-6), Rolanberry Fields [S] (D-9) / East Ronfaure [S] (H-9)"),
-    (6,  "venture", "in", "ventures", "Pool A Meriphataud Mountains is now 95% complete at (H-11)"),
     (8,  "ls1",     "in", "Marlow", "<call 1>"),
-    (6,  "venture", "in", "ventures", "Pool A Meriphataud Mountains is now 100% complete at (H-11)"),
     (1,  "venture", "in", "Populox", "Hmm... Whatever's stirring in these venture zones is about to reveal itself..."),
     (1,  "venture", "in", "Populox", "Meriphataud Mountains (H-11) / Valkurm Dunes (E-8)"),
     (6,  "ls1",     "in", "Tolliver", "nice, VNM time"),
@@ -54,9 +50,9 @@ CHATTER = [
     ("shout", "Seller", "WTS rare stuff cheap"), ("ls1", "Marlow", "gg"),
 ]
 ZONES = [
-    ("Meriphataud Mountains (H-11) / Valkurm Dunes (E-8)", "Meriphataud Mountains", "H-11"),
-    ("Fort Karugo-Narugo [S] (G-5) / Grauberg [S] (J-9)", "Fort Karugo-Narugo [S]", "G-5"),
-    ("Qufim Island (F-7) / Yuhtunga Jungle (G-6)", "Qufim Island", "F-7"),
+    "Meriphataud Mountains (H-11) / Valkurm Dunes (E-8)",
+    "Fort Karugo-Narugo [S] (G-5) / Grauberg [S] (J-9)",
+    "Qufim Island (F-7) / Yuhtunga Jungle (G-6)",
 ]
 
 
@@ -97,11 +93,10 @@ def main():
                 emit(path, ch, "in", name, body)
             z = ZONES[n % len(ZONES)]
             time.sleep(10 / speed)
-            emit(path, "venture", "in", "ventures", "Pool A %s is now 100%% complete at (%s)" % (z[1], z[2]))
             time.sleep(1 / speed)
             emit(path, "venture", "in", "Populox", "Hmm... Whatever's stirring in these venture zones is about to reveal itself...")
             time.sleep(1 / speed)
-            emit(path, "venture", "in", "Populox", z[0])
+            emit(path, "venture", "in", "Populox", z)
             time.sleep(150 / speed)
     except KeyboardInterrupt:
         print("\nStopped.")

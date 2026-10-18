@@ -37,7 +37,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends.
-- An Alerts tab: Populox's VNM alert with a 10 minute countdown, the ventures addon's progress, active seals, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
+- An Alerts tab: Populox's VNM alert with a 10 minute countdown, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
 - An emoticon button. Emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
 
@@ -51,7 +51,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
   <img src="docs/screenshots/chat-compact.png" width="180" alt="Compact layout">
   <img src="docs/screenshots/send-to.png" width="180" alt="Choosing where to send">
   <img src="docs/screenshots/emote-action.png" width="180" alt="Emotes view showing only emote lines">
-  <img src="docs/screenshots/ventures.png" width="180" alt="VNM alert with countdown, ventures progress and seals">
+  <img src="docs/screenshots/ventures.png" width="180" alt="VNM alert with countdown">
 </p>
 
 ## What it won't do
@@ -61,7 +61,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Use `/yell`.
 - Split messages. One tap sends one line of 130 characters at most, and no more than one line per second.
 - Read the combat log.
-- Replace the ventures addon. It shows that addon's progress line and nothing else.
+- Read other addons. Lines they print are ignored, the ventures addon's included.
 - Go online. There's no cloud or outside server. The only outside page is BG-Wiki, when you tap an item.
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
@@ -75,7 +75,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 ### New in 1.1.0 (not reviewed yet)
 
-- Reads "X examines you", the ventures addon's progress line, Party Finder ads, the Active Venture Seals line, bazaar visits (off by default) and the LS message of the day.
+- Reads "X examines you", Party Finder ads, bazaar visits (off by default) and the LS message of the day.
 - Starts and stops the bridge when you ask, and shows the QR code in an in-game window.
 - Sends the same list as 1.0.0. A `;` followed by a command is now blocked.
 
