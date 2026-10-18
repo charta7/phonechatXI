@@ -550,7 +550,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -700,17 +700,25 @@ function refreshStatus() {
 }
 
 var lsName = {}, lsMotd = {};
-// Mentions: watched words from Settings, whole words, any case.
-var watchRe = null, watchReG = null;
+// Mentions: your name or nicknames from Settings. Whole words, any case. Kept to 3 name-like
+// words (letters only, 2 to 15) so it stays a "someone said my name" feature, not a tracker.
+var WATCH_MAX = 3;
+var watchRe = null, watchReG = null, watchWords = [];
+function watchList(text) {
+  return (text || "").split(",").map(function (w) { return w.trim(); })
+    .filter(function (w) { return /^[A-Za-z]{2,15}$/.test(w); }).slice(0, WATCH_MAX);
+}
 function setWatch() {
-  var words = (S.watch || "").split(",").map(function (w) { return w.trim(); }).filter(function (w) { return w.length >= 2; });
+  var words = watchWords = watchList(S.watch);
+  var note = $("watchnote");
+  if (note) note.textContent = words.length ? "Watching: " + words.join(", ") : "Not watching anything yet.";
   var src = words.map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }).join("|");
   watchRe = words.length ? new RegExp("(^|[^A-Za-z0-9])(" + src + ")(?![A-Za-z0-9])", "i") : null;
   watchReG = words.length ? new RegExp("(^|[^A-Za-z0-9])(" + src + ")(?![A-Za-z0-9])", "gi") : null;
   msgs.forEach(function (m) { m._men = isMention(m); });
 }
 function isMention(m) {
-  return !!watchRe && m.dir !== "out" && !m.pending && CHAT_CH.indexOf(m.ch) >= 0 && m.ch !== "finder" && watchRe.test(m.body || "");
+  return !!watchRe && m.dir !== "out" && !m.pending && CHAT_CH.indexOf(m.ch) >= 0 && m.ch !== "finder" && m.ch !== "yell" && watchRe.test(m.body || "");
 }
 function markWatch(h) {
   return h.split(/(<[^>]+>)/).map(function (part, i) {
@@ -1155,7 +1163,13 @@ function buildComposers() {
     inp.addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); setTimeout(pinPanes, 320); });
     inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || document.activeElement.tagName !== "INPUT") document.body.classList.remove("typing"); fitViewport(); }, 80); });
   });
+  applyCaps();
   updateComposers();
+}
+// Most FFXI chat is typed lowercase, so the phone's keyboard doesn't capitalize unless you turn it on.
+// (An iPhone setting can still override this, and autocorrect may still turn "i" into "I".)
+function applyCaps() {
+  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) input').forEach(function (i) { i.setAttribute("autocapitalize", S.caps ? "sentences" : "off"); });
 }
 // FFXI chat lines are capped at 130 Shift-JIS bytes, prefix included. Shown as a countdown near the end.
 var LINE_BYTES = 130;
@@ -1594,7 +1608,7 @@ function renderAlerts() {
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
-  $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add words to watch in Settings.</div>' :
+  $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add your name in Settings.</div>' :
     (men.length ? men.map(function (m) {
       return card(CH[m.ch].icon, "var(--" + m.ch + ", var(--soft))", esc(m.name || CH[m.ch].full), m.ts, '<div class="abody">' + bodyHtml(m) + "</div>");
     }).join("") : '<div class="empty sm">Nothing yet.</div>'));
@@ -1663,9 +1677,12 @@ function renderSettings() {
     '<div class="sect">CALLS</div>' +
     srow("When a call comes in", "", segs("calls", [["off", "Off"], ["highlight", "Highlight"], ["badge", "Badge"]], S.calls)) +
     '<div class="sect">ALERTS</div>' +
-    '<div class="srow col"><div class="m"><div>Words to watch</div><small>Marked in chat and listed in Alerts. Separate with commas.</small></div>' +
-    '<input class="field" id="watchin" placeholder="Charta, Char" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(S.watch || "") + '"></div>' +
+    '<div class="srow col"><div class="m"><div>Your name</div><small>Your name or nicknames, up to 3, letters only. Marked in chat and listed in Alerts. Separate with commas.</small></div>' +
+    '<input class="field" id="watchin" placeholder="Charta, Char" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(S.watch || "") + '">' +
+    '<small id="watchnote" style="color:var(--mute)">' + (watchWords.length ? "Watching: " + esc(watchWords.join(", ")) : "Not watching anything yet.") + "</small></div>" +
     srow("Bazaar visits", "Listed in Alerts when someone browses your bazaar.", tog(S.bazaar, "bazaar")) +
+    '<div class="sect">TYPING</div>' +
+    srow("Capitalize first letter", "Off by default, since most people type lowercase in game.", tog(S.caps, "caps")) +
     '<div class="sect">PRIVACY</div>' +
     srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
@@ -1722,6 +1739,7 @@ $("settings").addEventListener("click", function (e) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
+    else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "save_tells") {
       api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); });
       return;

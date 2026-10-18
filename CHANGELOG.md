@@ -47,6 +47,8 @@ Chat
 - An emoticon button next to the chat box opens a row of text emoticons (`^^`, `:D`, `;)`, `=)`, `<_<`, `T_T` and more). Tapping one adds it to the box. It doesn't send.
 - Emoji turn into text emoticons as you type (👀 becomes `<_<`, 😀 becomes `:D`). Emoji were already stripped before sending, so this only changes what's left to send.
 - Mentions save as you type. Before, leaving the box with Back on iPhone lost them.
+- Mentions are for your name: up to 3 words, letters only, 2 to 15 characters each. Yell (trade spam) isn't checked.
+- The keyboard no longer capitalizes the first letter of a message, to match how people type in game. Turn it back on in Settings, Typing.
 - Only real items (`{{Item}}`) are linked. Auto-translate phrases are styled but not linked.
 - Party Finder ads are styled like the game's: the poster's name stands out and the ad is in italics.
 - 12-hour (default) or 24-hour clock.
