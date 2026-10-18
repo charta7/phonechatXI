@@ -105,7 +105,9 @@ That's it. When you start the bridge, the addon copies it to `/home/deck/phonech
 
 **Desktop Mode:** after the first run there's a **phonechatXI Bridge** launcher in `/home/deck/phonechat/`. Double-click it to start the bridge and open the QR page.
 
-### Windows (not tested yet)
+### Windows (not tested, not supported yet)
+
+phonechatXI is built and tested for Steam Deck. Windows is untested and isn't part of this build yet. The steps below were written but never run, so treat them as a rough guide.
 
 1. Install Python 3 from [python.org](https://www.python.org/downloads/). Tick **Add python.exe to PATH**.
 2. Add the addon zip with the CatsEye launcher's **Add New Addon**, and turn it on.
