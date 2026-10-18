@@ -45,7 +45,7 @@ Chat
 - An emoticon button next to the chat box opens a row of text emoticons (`^^`, `:D`, `;)`, `=)`, `<_<`, `T_T` and more). Tapping one adds it to the box. It doesn't send.
 - Emoji turn into text emoticons as you type (👀 becomes `<_<`, 😀 becomes `:D`). Emoji were already stripped before sending, so this only changes what's left to send.
 - Mentions save as you type. Before, leaving the box with Back on iPhone lost them.
-- Mentions are for your name: up to 3 words, letters only, 2 to 15 characters each. Yell (trade spam) isn't checked.
+- Mentions are for your name: up to 3 words, letters only, 2 to 15 characters each. Yell (trade spam) and emotes aren't checked, so "X waves to you" doesn't count as a mention. Your name is still highlighted in those lines.
 - The keyboard no longer capitalizes the first letter or autocorrects, so game words like Jeuno or Windurst aren't changed. Both can be turned back on in Settings, Typing. The command box never autocorrects (before, it could).
 - Only real items (`{{Item}}`) are linked. Auto-translate phrases are styled but not linked.
 - Party Finder ads are styled like the game's: the poster's name stands out and the ad is in italics.
@@ -59,7 +59,7 @@ Alerts
 - Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (VNM, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
 - The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
 - Game modes: a command that only works in some of ACE, CW or WEW shows those modes' icons, and a filter (All, ACE, CW, WEW) under the search box shows only what works for your mode. The filter is remembered. It only tidies the list: favorites always show, and any command can still be typed and sent. The mode list lives in `commands.json` ("as of October 2026") and only labels and filters; it doesn't change what can be sent.
-- Emotes use a text `^_^` icon everywhere (tab, chat lines, picker) instead of a smiley.
+- Emotes use a waving figure icon everywhere (tab, chat lines, picker) instead of a smiley, so it doesn't look like the `:)` emoticon button.
 - Ventures shows only Populox's VNM alert: VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - If Populox's line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
 - The VNM card and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.

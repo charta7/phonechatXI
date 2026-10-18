@@ -3,7 +3,7 @@
 > [!NOTE]
 > v1.0.0 was reviewed by CatsEyeXI staff and sanctioned (T1, October 2026). Their condition: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
 >
-> **v1.1.0 hasn't been reviewed yet.** Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
+> **v1.1.0 hasn't been reviewed yet, and it's on hold until early November.** It goes to staff for review then. Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -32,7 +32,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - A Tells tab with a thread per person.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
 - Linked items (`{{Suppanomimi}}`) open a BG-Wiki search.
-- Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts.
+- Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
