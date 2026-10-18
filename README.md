@@ -36,7 +36,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
-- A Server tab with every CatsEye `!` command in a searchable list. Star the ones you use. Tapping one asks before it sends.
+- A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends.
 - An Alerts tab: Populox's VNM alert with a 10 minute countdown, the ventures addon's progress, active seals, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
 - An emoticon button. Emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
@@ -191,4 +191,4 @@ To test without the game, see [`tools/`](tools): a fake chat session, and a repl
 - `bridge/qrcode.js` is [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT).
 - The in-game QR code uses [luaqrcode](https://github.com/speedata/luaqrcode) by speedata (BSD-3), in `addon/phonechat/qrencode.lua`.
 - Fonts: Cinzel, Atkinson Hyperlegible, JetBrains Mono and Cormorant SC (logo), all under the SIL Open Font License. License files are in `bridge/fonts/`.
-- The server command list comes from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki.
+- The server command list and the game mode icons come from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki (as of October 2026).

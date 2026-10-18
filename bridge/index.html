@@ -291,7 +291,10 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 .c1 .m b{flex:none;font-family:var(--mono);font-size:15px;font-weight:400;color:var(--gold)}
 .c1 .m span.d{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--mute)}
 .c1 .ctag{flex:none;margin-left:0;vertical-align:0}
-.ctag.cw{color:#8fd0ff;border-color:#2a4a6a}
+.modeic{width:16px;height:16px;flex:none;image-rendering:auto}
+.c1 .mds{flex:none;display:flex;gap:2px}
+#modeseg button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+.emo-i{display:inline-block;font-family:var(--mono);font-weight:700;letter-spacing:-.5px;line-height:1;color:var(--emote);white-space:nowrap;vertical-align:1px}
 .tabtxt{height:22px;display:flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:-.5px}
 .cmdlog .cl2{display:flex;gap:8px;font-family:var(--mono);font-size:13px;line-height:1.4}
 .cmdlog .cl2 .t{flex:none;color:var(--mute)}
@@ -440,6 +443,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
       </div>
       <div class="cpanel" id="cp-server" hidden>
         <input class="search" id="cmdsearch" placeholder="Search ! commands" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="emseg" id="modeseg" hidden></div>
         <div class="list srvlist" id="cmdlist"></div>
         <div class="cmdlog" id="pane-cmd"><div class="inner"></div></div>
         <div class="chips" id="cmdchips"></div>
@@ -519,6 +523,8 @@ function esc(s) {
 }
 function $(id) { return document.getElementById(id); }
 function ico(name, size, style) {
+  // Emotes use the game's own text emoticon instead of a drawn smiley.
+  if (name === "emote") return '<span class="i emo-i" style="font-size:' + Math.max(9, Math.round((size || 14) * 0.62)) + 'px' + (style ? ";" + style : "") + '">^_^</span>';
   return '<svg class="i" width="' + (size || 14) + '" height="' + (size || 14) + '"' + (style ? ' style="' + style + '"' : "") + '><use href="#i-' + name + '"/></svg>';
 }
 function hhmm(ts) {
@@ -557,7 +563,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -1407,23 +1413,42 @@ $("cmdchips").addEventListener("click", function (e) {
 // Commands that need something after them (an item, an amount) go in the box so you can finish typing.
 var NEEDS_ARGS = /^!(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/;
 function cmdName(t) { return (t || "").replace(/^!/, "").split(/\s+/)[0].toLowerCase(); }
-function isCW(n) { return (commands.cw || []).indexOf(n) >= 0; }
+// CatsEye game modes. A command missing from commands.modes works in all of them.
+var GAME_MODES = [["ace", "ACE"], ["cw", "CW"], ["wew", "WEW"]];
+function modeIcon(m, size) { return '<img class="modeic" src="/icons/mode-' + m + '.png" alt="' + m.toUpperCase() + '" width="' + (size || 16) + '" height="' + (size || 16) + '">'; }
+function cmdModes(n) { return (commands.modes || {})[n] || null; }
+function hasModes() { return !!commands.modes && Object.keys(commands.modes).length > 0; }
+function inMode(n) { var ms = cmdModes(n); return S.cmdMode === "all" || !hasModes() || !ms || ms.indexOf(S.cmdMode) >= 0; }
+function renderModeSeg() {
+  var el = $("modeseg");
+  el.hidden = !hasModes();
+  if (el.hidden) return;
+  el.innerHTML = '<div class="seg">' + [["all", "All"]].concat(GAME_MODES).map(function (m) {
+    return '<button data-cmode="' + m[0] + '"' + ((S.cmdMode || "all") === m[0] ? ' class="on"' : "") + ">" + (m[0] === "all" ? "" : modeIcon(m[0], 16)) + m[1] + "</button>";
+  }).join("") + "</div>";
+}
+$("modeseg").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-cmode]");
+  if (!b) return;
+  S.cmdMode = b.dataset.cmode; save(); renderModeSeg(); renderCmdList();
+});
 function cmdDesc(n) { return commands.info[n] || commands.action[n] || ""; }
 function renderCmdList() {
   var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
   function row(t) {
-    var n = cmdName(t), d = cmdDesc(n);
+    var n = cmdName(t), d = cmdDesc(n), ms = cmdModes(n);
+    if (!inMode(n)) return "";
     if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
     return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
       '<button class="m" data-cmdpick="' + esc(t) + '"><b>' + esc(t) + '</b><span class="d">' + esc(d) + "</span>" +
-      (isCW(n) ? '<span class="ctag cw">CW</span>' : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
+      (ms ? '<span class="mds">' + ms.map(function (m) { return modeIcon(m, 16); }).join("") + "</span>" : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
   }
   var favs = S.favs.map(row).join("");
   var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
   var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n); }).join("");
   $("cmdlist").innerHTML = (favs ? '<div class="sect">FAVORITES</div>' + favs : "") +
     (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
-    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From the CatsEyeXI command list on BG-Wiki. Tap one to send it. Star it to keep it at the bottom.</div>');
+    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes." : "") + "</div>");
 }
 // Tapping a command always asks first. One tap on Send = one command.
 function askSend(t) {
@@ -1838,7 +1863,7 @@ function showCseg() {
   $("cp-emote").hidden = !em;
   $("cp-server").hidden = em;
   $("cmdtitle").textContent = em ? "Emotes" : "Server";
-  if (em) renderEmotes(); else { renderCmd(); renderCmdList(); }
+  if (em) renderEmotes(); else { renderCmd(); renderModeSeg(); renderCmdList(); }
 }
 function go(name) {
   var el = $("scr-" + name);

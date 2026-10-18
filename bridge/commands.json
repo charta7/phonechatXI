@@ -31,8 +31,9 @@
     "ventures": "Daily Venture objectives (optional category)",
     "wspoints": "Weapon skill points (main, sub or ranged)"
   },
-  "_cw": "Commands only Crystal Warrior characters can use. Shown with a CW tag on the phone; it doesn't change what can be sent.",
-  "cw": [],
+  "_modes": "Game modes (ace, cw, wew) for commands that don't work in every mode. Leave a command out if it works in all three. Shown as icons and used by the mode filter on the phone. It doesn't change what can be sent.",
+  "_modes_asof": "October 2026",
+  "modes": {},
   "action": {
     "box": "Check, withdraw or store items in the Ephemeral Box",
     "chef": "Buy a food item with gil",

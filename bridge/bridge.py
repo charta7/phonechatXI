@@ -244,10 +244,17 @@ class Commands:
         self.action = dict(data.get("action", {}))
         self.emotes = set(data.get("emotes", []))
         self.jobs = set(j.upper() for j in data.get("jobs", []))
-        self.cw = sorted(n for n in data.get("cw", []) if n in self.info or n in self.action)   # label only
+        self.modes_asof = str(data.get("_modes_asof", ""))
+        # Which game modes a command works in, for commands that aren't in every mode. Label and filter only.
+        MODES = ("ace", "cw", "wew")
+        self.modes = {}
+        for n, ms in data.get("modes", {}).items():
+            keep = [m for m in MODES if isinstance(ms, list) and m in ms]
+            if (n in self.info or n in self.action) and 0 < len(keep) < len(MODES):   # all three = no label
+                self.modes[n] = keep
 
     def public(self):
-        return {"info": self.info, "action": self.action, "cw": self.cw,
+        return {"info": self.info, "action": self.action, "modes": self.modes, "modes_asof": self.modes_asof,
                 "emotes": sorted(self.emotes), "jobs": sorted(self.jobs)}
 
     def emote(self, text):
@@ -715,7 +722,8 @@ def host_ok(host):
 
 
 # Icons are public (iOS fetches the home-screen icon without the token). Nothing private in them.
-ICONS = ("apple-touch-icon.png", "icon-512.png", "favicon-32.png", "pearl-48.png", "pearl-96.png", "wordmark.png")
+ICONS = ("apple-touch-icon.png", "icon-512.png", "favicon-32.png", "pearl-48.png", "pearl-96.png", "wordmark.png",
+         "mode-ace.png", "mode-cw.png", "mode-wew.png")   # CatsEye game mode icons, from the BG-Wiki commands page
 # Fonts ship with the bridge so the phone page never calls out to Google Fonts. Also public.
 FONTS = ("cinzel-latin-600-normal.woff2", "cinzel-latin-700-normal.woff2",
          "atkinson-hyperlegible-latin-400-normal.woff2", "atkinson-hyperlegible-latin-700-normal.woff2",
