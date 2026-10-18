@@ -133,8 +133,8 @@ The bridge goes in `<Ashita>\config\addons\phonechat\bridge\`.
 
 | Command | What it does |
 |---|---|
-| `/pchat` | Bridge status, your phone link, and the list of options |
-| `/pchat config` | The phonechatXI window: start/stop, QR code, new phone link, settings |
+| `/pchat` or `/pchat config` | The phonechatXI window: start/stop, QR code, new phone link, settings |
+| `/pchat help` | Bridge status, your phone link, and the list of options in chat |
 | `/pchat start` / `stop` | Start or stop the bridge |
 | `/pchat url` | Print the phone link |
 | `/pchat newlink` | Make a new phone link. The old one stops working. |

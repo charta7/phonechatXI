@@ -64,7 +64,6 @@ SEND_QUEUE_MAX = 8              # lines waiting; more than this is refused
 CONFIRM_SECONDS = 8.0          # no echo from the game after this = "unconfirmed"
 FAIL_LINK_SECONDS = 5.0        # a mode 123 line this soon after a send = that send failed
 LINE_BYTES = 130                # FFXI's chat line limit; counted on the whole typed line, prefix included
-MAX_PARTS = 4
 TELLS_KEEP = 50                 # saved lines per person
 
 TARGETS = {"ls1": "/l", "ls2": "/l2", "party": "/p", "tell": "/t", "say": "/s", "shout": "/sh"}
@@ -311,12 +310,14 @@ class Sender(threading.Thread):
     def chat(self, target, peer, text):
         if target not in TARGETS:
             raise SendError("That channel can't be sent to.")
-        raw = (text or "").strip()
-        if raw.startswith("/") or raw.startswith("!"):
-            raise SendError("Commands go through Game command, not chat.")
-        text = clean_text(raw)
+        text = clean_text(text)
         if not text:
             raise SendError("Nothing to send after cleaning the text.")
+        # Checked after cleaning, so a hidden character can't sneak a command past this.
+        if text.startswith("/") or text.startswith("!"):
+            raise SendError("Commands go through Game command, not chat.")
+        if re.search(r";\s*[/!]", text):
+            raise SendError("Blocked: a ; followed by a command.")
         prefix = TARGETS[target]
         if target == "tell":
             if not NAME_RE.match(peer or ""):
@@ -327,15 +328,10 @@ class Sender(threading.Thread):
         if size > room:
             # One tap = one line. Never split a message into several sends.
             raise SendError("Too long for one chat line: %d over the %d limit." % (size - room, room))
-        parts = [text]
-        sid = secrets.token_hex(4)
-        items = []
-        for i, p in enumerate(parts):
-            pid = "%s-%d" % (sid, i)
-            items.append({"pid": pid, "kind": "chat", "ch": target, "peer": peer if target == "tell" else "",
-                          "text": p, "line": prefix + " " + p})
-        self.enqueue(items)
-        return [{"pid": it["pid"], "text": it["text"]} for it in items]
+        item = {"pid": secrets.token_hex(4) + "-0", "kind": "chat", "ch": target, "peer": peer if target == "tell" else "",
+                "text": text, "line": prefix + " " + text}
+        self.enqueue([item])
+        return [{"pid": item["pid"], "text": text}]      # a list for the page; always exactly one line
 
     def command(self, line):
         pid = "c" + secrets.token_hex(4)

@@ -6,7 +6,7 @@ Version numbers: **1.0.x** is fixes and looks only, and staff get an FYI. **1.x.
 
 1.0.1 was never released on its own, so it's folded in here (listed below). This version reads a few new kinds of lines and the addon can start the bridge itself, so it needs staff review before it's used in game.
 
-**What it sends: unchanged.** Same fixed list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap, one line, 130 characters max, one line per second. No automation.
+**What it sends: unchanged.** Same fixed list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap, one line, 130 characters max, one line per second. No automation. Slightly tighter than 1.0.0: a chat line with a `;` followed by a command (like `hi ; /wave`) is now blocked, and the bridge checks for a leading `/` or `!` after cleaning the text, not before.
 
 **New things it reads**
 - "X examines you" lines, shown with emotes.
@@ -20,7 +20,7 @@ Version numbers: **1.0.x** is fixes and looks only, and staff get an FYI. **1.x.
 **Install and setup**
 - One zip for everyone. Add it with the CatsEye launcher's Add New Addon. The bridge is inside it, and the addon copies it to the right place the first time it loads. Your phone link is kept on updates.
 - The addon can start and stop the bridge: `/pchat start`, `/pchat stop`, or "Start with the game". Works on Steam Deck in Game Mode (through Proton) and on Windows.
-- In-game window (`/pchat config`): bridge on/off, the QR code to scan, "New phone link", and settings. It opens by itself the first time.
+- In-game window (`/pchat` or `/pchat config`; `/pchat help` prints the options in chat): bridge on/off, the QR code to scan, "New phone link", and settings. It opens by itself the first time.
 - The Decky plugin is retired. The in-game window does everything it did. If you have it, uninstall it in Decky (that also stops its bridge). Its code stays in the repo under `decky/` as a fallback, but it isn't released.
 - Desktop Mode: a "phonechatXI Bridge" launcher appears in your phonechat folder. Double-click it to run the bridge and open the QR page.
 - `/phonechat` works as a command too.

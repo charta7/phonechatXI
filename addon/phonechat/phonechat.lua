@@ -583,7 +583,9 @@ local function allowed(cmd)
     if body then
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
         local first = body:sub(1, 1)
-        return first ~= '/' and first ~= '!'
+        if first == '/' or first == '!' then return false end
+        -- No ; followed by a command, in case anything treats ; as "run the next command".
+        return body:find(';%s*[/!]') == nil
     end
     if cmd:match('^/say ![%a]+$') or cmd:match('^/say ![%a]+ [%w _%-]+$') then return true end
     return emote_ok(cmd)
@@ -834,7 +836,7 @@ end
 local function print_help()
     local on, url = bridge_status()
     note(('Bridge: %s%s'):format(on and 'ON' or 'OFF', (on and url) and ('  |  ' .. url) or ''))
-    note('/pchat config   window with start/stop, the QR code and settings')
+    note('/pchat          window with start/stop, the QR code and settings (same as /pchat config)')
     note('/pchat start    start the bridge     /pchat stop   stop it')
     note('/pchat url      print the phone link')
     note('/pchat newlink  make a new phone link')
@@ -993,9 +995,11 @@ ashita.events.register('command', 'phonechat_command', function (e)
         stop_bridge(false)
     elseif sub == 'newlink' then
         new_link()
-    elseif sub == 'config' or sub == 'settings' or sub == 'qr' then
-        if has_imgui then
-            S.show_config[1] = (sub == 'qr') or not S.show_config[1]
+    elseif sub == '' or sub == 'config' or sub == 'settings' or sub == 'qr' then
+        if not has_imgui and sub == '' then
+            print_help()
+        elseif has_imgui then
+            S.show_config[1] = (sub == 'qr' or sub == '') or not S.show_config[1]
         else
             note('The window needs ImGui, which did not load. Use /pchat url for the link.')
         end
