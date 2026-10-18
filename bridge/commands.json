@@ -31,6 +31,8 @@
     "ventures": "Daily Venture objectives (optional category)",
     "wspoints": "Weapon skill points (main, sub or ranged)"
   },
+  "_cw": "Commands only Crystal Warrior characters can use. Shown with a CW tag on the phone; it doesn't change what can be sent.",
+  "cw": [],
   "action": {
     "box": "Check, withdraw or store items in the Ephemeral Box",
     "chef": "Buy a food item with gil",

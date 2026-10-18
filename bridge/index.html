@@ -281,6 +281,18 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 .foot{font-size:12px;color:var(--mute);text-align:center;padding:18px 0 30px}
 
 /* command */
+.srvlist{padding:0 12px 4px}
+.cmdlog{flex:none;max-height:92px;overflow-y:auto;margin:0 12px;padding:6px 2px;border-top:1px solid var(--line)}
+.cmdlog .inner{display:flex;flex-direction:column;gap:4px}
+.cmdlog .empty{padding:2px 0;font-size:12.5px;text-align:left}
+.c1{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line)}
+.c1 .starb{width:34px;height:40px}
+.c1 .m{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;padding:10px 0;text-align:left;white-space:nowrap;overflow:hidden}
+.c1 .m b{flex:none;font-family:var(--mono);font-size:15px;font-weight:400;color:var(--gold)}
+.c1 .m span.d{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--mute)}
+.c1 .ctag{flex:none;margin-left:0;vertical-align:0}
+.ctag.cw{color:#8fd0ff;border-color:#2a4a6a}
+.tabtxt{height:22px;display:flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:15px;letter-spacing:-.5px}
 .cmdlog .cl2{display:flex;gap:8px;font-family:var(--mono);font-size:13px;line-height:1.4}
 .cmdlog .cl2 .t{flex:none;color:var(--mute)}
 .cmdlog .cl2.sent span:last-child{color:var(--soft)}
@@ -427,8 +439,9 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
         <div class="list" id="emotes"></div>
       </div>
       <div class="cpanel" id="cp-server" hidden>
-        <div class="banner info">CatsEye <b style="display:inline">!</b> commands only. One per tap.</div>
-        <div class="panewrap" style="margin-top:6px"><div class="pane cmdlog" id="pane-cmd"><div class="inner" style="gap:6px"></div></div></div>
+        <input class="search" id="cmdsearch" placeholder="Search ! commands" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="list srvlist" id="cmdlist"></div>
+        <div class="cmdlog" id="pane-cmd"><div class="inner"></div></div>
         <div class="chips" id="cmdchips"></div>
         <div class="comp" data-comp="cmd" style="border-top:0"></div>
       </div>
@@ -456,12 +469,6 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
   </div>
 
   <!-- command list -->
-  <div class="screen overlay" id="scr-cmdlist">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Server</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">CatsEye ! commands</b></div><div class="end"></div></div>
-    <input class="search" id="cmdsearch" placeholder="Search commands" autocomplete="off" autocapitalize="off" spellcheck="false">
-    <div class="list" id="cmdlist"></div>
-  </div>
-
   <!-- settings -->
   <div class="screen overlay" id="scr-settings">
     <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Back</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Settings</b></div><div class="end"></div></div>
@@ -471,7 +478,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
   <nav class="tabbar" id="tabbar">
     <button data-tab="chat" class="on"><svg class="i" width="22" height="22"><use href="#i-ls1"/></svg>Chat</button>
     <button data-tab="tells"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg>Tells<span class="bdg" id="bdg-tells" hidden></span></button>
-    <button data-tab="cmds" data-cs="emote"><svg class="i" width="22" height="22"><use href="#i-emote"/></svg>Emotes</button>
+    <button data-tab="cmds" data-cs="emote"><span class="tabtxt" aria-hidden="true">^_^</span>Emotes</button>
     <button data-tab="cmds" data-cs="server"><svg class="i" width="22" height="22"><use href="#i-bang"/></svg>Server</button>
     <button data-tab="alerts"><svg class="i" width="22" height="22"><use href="#i-bell"/></svg>Alerts<span class="bdg" id="bdg-alerts" hidden></span></button>
   </nav>
@@ -1385,10 +1392,11 @@ function toggleFav(t) {
 }
 function cmdInput() { return document.querySelector('[data-comp="cmd"] input'); }
 function renderCmd() {
-  $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("") + '<button class="all" data-go="cmdlist">All commands</button>';
-  var rows = cmdLog.slice(-80).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
+  $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("");
+  $("cmdchips").hidden = !S.favs.length;
+  var rows = cmdLog.slice(-40).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
   var pane = $("pane-cmd");
-  pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Tap a favorite or type one, like <span class="code">!points</span>. Replies show here.</div>';
+  pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Replies show here.</div>';
   pane.scrollTop = pane.scrollHeight;
 }
 $("cmdchips").addEventListener("click", function (e) {
@@ -1396,32 +1404,50 @@ $("cmdchips").addEventListener("click", function (e) {
   if (!c) return;
   sendCommand(c.dataset.chip, false, null);
 });
+// Commands that need something after them (an item, an amount) go in the box so you can finish typing.
+var NEEDS_ARGS = /^!(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/;
+function cmdName(t) { return (t || "").replace(/^!/, "").split(/\s+/)[0].toLowerCase(); }
+function isCW(n) { return (commands.cw || []).indexOf(n) >= 0; }
+function cmdDesc(n) { return commands.info[n] || commands.action[n] || ""; }
 function renderCmdList() {
   var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
-  function row(name, desc, isAction) {
-    var t = "!" + name;
-    if (q && name.indexOf(q) < 0 && desc.toLowerCase().indexOf(q) < 0) return "";
-    return '<div class="crow"><button class="m" data-fill="' + esc(t) + '"><div>' + esc(t) + (isAction ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(desc) + '</small></button><button class="starb" data-star="' + esc(t) + '">' + starSvg(isFav(t)) + "</button></div>";
+  function row(t) {
+    var n = cmdName(t), d = cmdDesc(n);
+    if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
+    return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
+      '<button class="m" data-cmdpick="' + esc(t) + '"><b>' + esc(t) + '</b><span class="d">' + esc(d) + "</span>" +
+      (isCW(n) ? '<span class="ctag cw">CW</span>' : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
   }
-  var favRows = S.favs.map(function (f) {
-    var n = f.replace(/^!/, "").split(/\s+/)[0].toLowerCase();
-    var d = commands.info[n] || commands.action[n] || "";
-    if (q && f.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
-    return '<div class="crow"><button class="m" data-fill="' + esc(f) + '"><div>' + esc(f) + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(d) + '</small></button><button class="starb" data-star="' + esc(f) + '">' + starSvg(true) + "</button></div>";
-  }).join("");
-  var info = Object.keys(commands.info).sort().map(function (n) { return row(n, commands.info[n], false); }).join("");
-  var act = Object.keys(commands.action).sort().map(function (n) { return row(n, commands.action[n], true); }).join("");
-  $("cmdlist").innerHTML = (favRows ? '<div class="sect">FAVORITES</div>' + favRows : "") +
-    '<div class="sect">INFO</div>' + (info || '<div class="empty">No match</div>') +
-    '<div class="sect">ACTIONS</div>' + (act || '<div class="empty">No match</div>') +
-    '<div class="sfoot">From the CatsEyeXI command list on BG-Wiki. Actions ask before sending. Star a command to pin it as a chip.</div>';
+  var favs = S.favs.map(row).join("");
+  var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
+  var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n); }).join("");
+  $("cmdlist").innerHTML = (favs ? '<div class="sect">FAVORITES</div>' + favs : "") +
+    (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
+    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From the CatsEyeXI command list on BG-Wiki. Tap one to send it. Star it to keep it at the bottom.</div>');
+}
+// Tapping a command always asks first. One tap on Send = one command.
+function askSend(t) {
+  var n = cmdName(t), act = !!commands.action[n];
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(t) + '</div><div class="sfoot">' + esc(cmdDesc(n) || "CatsEye server command.") + (act ? " This one changes something in the game." : "") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    closeSheet();
+    if (b.dataset.sb === "ok") sendCommand(t, act, null);
+  });
 }
 $("cmdsearch").addEventListener("input", renderCmdList);
 $("cmdlist").addEventListener("click", function (e) {
   var s = e.target.closest("[data-star]");
   if (s) { toggleFav(s.dataset.star); return; }
-  var f = e.target.closest("[data-fill]");
-  if (f) { if (histOK) history.back(); else back(); var i = cmdInput(); i.value = f.dataset.fill + (/(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/.test(f.dataset.fill) ? " " : ""); i.dispatchEvent(new Event("input")); setTimeout(function () { i.focus(); }, 260); }
+  var f = e.target.closest("[data-cmdpick]");
+  if (!f) return;
+  e.stopPropagation();
+  var t = f.dataset.cmdpick;
+  if (NEEDS_ARGS.test(t)) {
+    var i = cmdInput(); i.value = t + " "; i.dispatchEvent(new Event("input")); i.focus();
+    return;
+  }
+  askSend(t);
 });
 
 // ------------------------------------------------------------------------------------------
@@ -1812,12 +1838,11 @@ function showCseg() {
   $("cp-emote").hidden = !em;
   $("cp-server").hidden = em;
   $("cmdtitle").textContent = em ? "Emotes" : "Server";
-  if (em) renderEmotes(); else renderCmd();
+  if (em) renderEmotes(); else { renderCmd(); renderCmdList(); }
 }
 function go(name) {
   var el = $("scr-" + name);
   if (!el) return;
-  if (name === "cmdlist") { $("cmdsearch").value = ""; renderCmdList(); }
   if (name === "settings") refreshStatus();
   stack.push(name);
   el.style.zIndex = (el.classList.contains("tabs") ? 5 : 20) + stack.length;

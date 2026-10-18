@@ -3,7 +3,7 @@
 > [!NOTE]
 > v1.0.0 was reviewed by CatsEyeXI staff and sanctioned (T1, October 2026). Their condition: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
 >
-> **v1.1.0 hasn't been reviewed yet.** Don't use it in game until it's released as a full release, not a pre-release. See the [changelog](CHANGELOG.md).
+> **v1.1.0 hasn't been reviewed yet.** Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -14,7 +14,7 @@ Typing with a controller is slow, and the chat log is hard to read on a Steam De
 There are three parts:
 
 - `phonechat`, an Ashita v4 addon. It writes chat to a file and types the lines you send.
-- The bridge, a small Python program on the same machine as the game. It serves the phone page. It ships in the addon zip, and the addon starts it.
+- The bridge, a small Python program on the same machine as the game. It serves the phone page, comes in the addon zip, and the addon starts it.
 - The phone page. Add it to your Home Screen and it opens like an app.
 
 Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck with an iPhone.
@@ -27,7 +27,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 
 ## Features
 
-- LS1, LS2, party, tells, say, shout, unity, yell, emotes and Party Finder in one feed, colored like the game. Apururu's Domain Invasion announcements come in on Unity.
+- LS1, LS2, party, tells, say, shout, unity, yell, emotes and Party Finder in one feed, colored like the game.
 - Views, like the game's chat windows. All, Linkshells and Party & tells are built in, and you can add your own.
 - A Tells tab with a thread per person.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
@@ -36,9 +36,9 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
-- A Server tab for CatsEye `!` commands like `!points` and `!dailies`. The ones that change something ask first.
-- An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, server notices, and bazaar visits if you turn them on. Tap × to clear a card. If CatsEye rewords a venture line, it still shows as plain text.
-- An emoticon button, and emoji swap to text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show emoji.
+- A Server tab with every CatsEye `!` command in a searchable list. Star the ones you use. Tapping one asks before it sends.
+- An Alerts tab: Populox's VNM alert with a 10 minute countdown, the ventures addon's progress, active seals, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
+- An emoticon button. Emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
 
 <p>
@@ -62,14 +62,15 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Split messages. One tap sends one line of 130 characters at most, and no more than one line per second.
 - Read the combat log.
 - Replace the ventures addon. It shows that addon's progress line and nothing else.
-- Talk to the internet. There's no cloud or outside server, and fonts and icons come from the bridge. The only outside page is BG-Wiki, when you tap an item.
+- Go online. There's no cloud or outside server. The only outside page is BG-Wiki, when you tap an item.
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
 <p>
-  <img src="docs/screenshots/settings.png" width="220" alt="Settings">
-  <img src="docs/screenshots/command-confirm.png" width="220" alt="Confirm step before an action command">
-  <img src="docs/screenshots/debug-info.png" width="220" alt="Debug info for a bug report">
+  <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
+  <img src="docs/screenshots/command-confirm.png" width="180" alt="Confirm step before a command is sent">
+  <img src="docs/screenshots/settings.png" width="180" alt="Settings">
+  <img src="docs/screenshots/debug-info.png" width="180" alt="Debug info for a bug report">
 </p>
 
 ### New in 1.1.0 (not reviewed yet)
@@ -91,7 +92,7 @@ The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>
 
 ## Install
 
-Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). A full release is either one staff reviewed or a small fix on top of it, listed in the changelog. A pre-release hasn't been reviewed, so don't use it in game.
+Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). Don't use a pre-release in game. It hasn't been reviewed yet.
 
 ### Steam Deck
 
@@ -99,7 +100,7 @@ Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). A full releas
 2. Start the game. The phonechatXI window opens the first time. Click **Start**, and tick **Start with the game** to skip this next time.
 3. Scan the QR code with your phone's camera and open the link. In Safari, tap Share, then Add to Home Screen.
 
-The first time the addon starts the bridge, it copies it to `/home/deck/phonechat/`. A phonechatXI Bridge launcher there starts it from Desktop Mode.
+The bridge is copied to `/home/deck/phonechat/` the first time it starts. To run it from Desktop Mode, use the phonechatXI Bridge launcher in that folder.
 
 If you used the old Decky plugin, uninstall it in Decky. Keep `~/phonechat`, because your link is saved there.
 
@@ -116,9 +117,9 @@ Windows isn't tested or supported yet. These steps have never been run.
 
 1. Close the game.
 2. In the CatsEye launcher, use Add New Addon and pick the new zip.
-3. Start the game. The addon updates the bridge the next time it starts it, either with Start with the game or when you click **Start**.
+3. Start the game and the bridge as usual. The bridge updates itself.
 
-Your phone page updates itself. Nothing you've set up is lost: your phone link, your phone settings, saved tells and the addon's own settings all live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`), which updates never touch. Only the program files are replaced. To get a new Home Screen icon, remove the shortcut and add it again.
+The phone page updates itself, and nothing you've set up is lost. Your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`), which updates don't touch. For a new Home Screen icon, remove the shortcut and add it again.
 
 If the bridge was running from Desktop Mode during the update, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`.
 
@@ -168,7 +169,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 - Chat is held in the bridge's memory and is gone when it stops. The feed file is cleared when the bridge starts and when the addon loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
-- Phone settings (views, colors, watch words) are saved on the bridge in `phone-settings.json`. No chat goes in that file.
+- Phone settings (views, colors, your name for mentions) are saved on the bridge in `phone-settings.json`. No chat goes in that file.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.
 
 ## About the code

@@ -244,9 +244,10 @@ class Commands:
         self.action = dict(data.get("action", {}))
         self.emotes = set(data.get("emotes", []))
         self.jobs = set(j.upper() for j in data.get("jobs", []))
+        self.cw = sorted(n for n in data.get("cw", []) if n in self.info or n in self.action)   # label only
 
     def public(self):
-        return {"info": self.info, "action": self.action,
+        return {"info": self.info, "action": self.action, "cw": self.cw,
                 "emotes": sorted(self.emotes), "jobs": sorted(self.jobs)}
 
     def emote(self, text):

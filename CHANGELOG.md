@@ -59,6 +59,9 @@ Chat
 
 Alerts
 - Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (ventures, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
+- The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
+- Crystal Warrior-only commands can carry a CW tag (from a `cw` list in `commands.json`). It's a label only.
+- The Emotes tab icon is a text `^_^` instead of a smiley.
 - The VNM alert shows as VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - Pools under 100% are listed on one In progress card. A pool at 100% shows on the VNM card instead, and drops off with it after 10 minutes.
 - Active seals show as one line.
@@ -74,7 +77,7 @@ Look and settings
 - Plainer wording in banners, tips, empty screens, Settings and About.
 - Copy debug info in Settings: versions, connection, settings and recent errors for a bug report. It leaves out the phone link, watch words and all chat.
 - Classic skin: the tap cursor is gold so it shows on light rows.
-- Removed the star next to the command box. Star commands from the All commands list.
+- Removed the star next to the command box and the separate All commands screen. Star commands right in the Server tab's list.
 
 ### From 1.0.1
 
