@@ -27,7 +27,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 
 ## Features
 
-- LS1, LS2, party, tells, say, shout, unity, yell, emotes and Party Finder in one feed, colored like the game.
+- LS1, LS2, party, tells, say, shout, unity, yell, emotes and Party Finder in one feed, colored like the game. Apururu's Domain Invasion announcements come in on Unity.
 - Views, like the game's chat windows. All, Linkshells and Party & tells are built in, and you can add your own.
 - A Tells tab with a thread per person.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
@@ -35,7 +35,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Mentions: words you pick, like your name, are highlighted in chat and collected in Alerts.
 - The LS message of the day is pinned above chat.
 - A Commands tab with the stock emotes (plus dances, chair poses and job emotes) and CatsEye `!` commands like `!points` and `!dailies`. Commands that change something ask first.
-- An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, Domain Invasion announcements from Apururu, server notices, and bazaar visits if you turn them on. Tap × to clear a card. If CatsEye rewords one of these lines, it still shows as plain text.
+- An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, server notices, and bazaar visits if you turn them on. Tap × to clear a card. If CatsEye rewords a venture line, it still shows as plain text.
 - An emoticon button, and emoji swap to text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show emoji.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
 
@@ -171,7 +171,7 @@ I built this with Claude. I designed it and tested every feature myself, and I'v
 
 ## Bugs and requests
 
-phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. That's the whole scope.
+phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0, and that list isn't growing. There are no plans for more commands, addon controls or macros unless CatsEyeXI staff ask for them.
 
 - Bugs: open a [bug report](../../issues/new/choose) and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
 - Requests are read, but most of my time goes to fixing bugs, so I can't promise a timeline. Anything that changes what it reads from the game or sends to it needs CatsEyeXI staff review first.

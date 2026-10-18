@@ -60,8 +60,7 @@ Alerts
 - The VNM alert shows as VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - Pools under 100% are listed on one In progress card. A pool at 100% shows on the VNM card instead, and drops off with it after 10 minutes.
 - Active seals show as one line.
-- Domain Invasion: Apururu's lines (Unity, already read in 1.0.0) also show on a card in Alerts for 30 minutes. They stay in Unity chat too.
-- If a venture or Apururu line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
+- If a venture line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
 - Venture cards, seals and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.
 
 Look and settings

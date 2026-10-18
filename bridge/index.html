@@ -436,7 +436,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
     </section>
     <section class="tab" id="tab-alerts">
       <div class="top"><div class="big">Alerts</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="list" id="alerts"><div id="vent"></div><div id="di"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
+      <div class="list" id="alerts"><div id="vent"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
     </section>
   </div>
 
@@ -1536,8 +1536,6 @@ function tickCd() {
   });
   if (done) schedule();
 }
-// Apururu announces Domain Invasion on Unity. Matched by speaker only, so a reworded line still shows.
-function isDI(m) { return m.ch === "unity" && m.dir === "in" && /^apururu$/i.test(m.name || ""); }
 function renderAlerts() {
   var v = msgs.filter(function (m) { return m.ch === "venture"; });
   var hid = {};
@@ -1595,13 +1593,6 @@ function renderAlerts() {
   if (zoneLine && zoneLine.ts >= DONE && !hid["z|" + zoneLine.ts]) h += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(zoneLine.body) + '</span><button class="ax" data-dismiss="z|' + zoneLine.ts + '" aria-label="Dismiss">&times;</button></div>';
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
 
-  // Domain Invasion: Apururu's Unity lines from the last 30 minutes. They also stay in Unity chat.
-  var di = msgs.filter(function (m) { return isDI(m) && m.ts >= nowSec() - 1800 && !hid["d|" + m.ts]; }).slice(-3).reverse();
-  $("di").innerHTML = di.length ? '<div class="sect">DOMAIN INVASION</div>' +
-    card("unity", "var(--unity)", "Apururu", di[0].ts, di.map(function (m, i) {
-      return '<div class="abody"' + (i ? ' style="color:var(--soft);font-size:14px"' : "") + ">" + fmt(m.body) + (i ? ' <span class="vt">' + hhmm(m.ts) + "</span>" : "") + "</div>";
-    }).join(""), di.map(function (m) { return "d|" + m.ts; }).join(";;")) : "";
-
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
   $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add words to watch in Settings.</div>' :
     (men.length ? men.map(function (m) {
@@ -1623,7 +1614,7 @@ function renderAlerts() {
   msgs.forEach(function (m) {
     if (m.ts <= since) return;
     if (m._men) unseenMen++;
-    else if (m.ch === "venture" || m.ch === "server" || isDI(m) || (S.bazaar && m.ch === "bazaar")) other = true;
+    else if (m.ch === "venture" || m.ch === "server" || (S.bazaar && m.ch === "bazaar")) other = true;
   });
   var bd = $("bdg-alerts");
   bd.hidden = curTab === "alerts" || !(unseenMen || other);
