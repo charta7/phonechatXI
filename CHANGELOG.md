@@ -59,7 +59,7 @@ Alerts
 - Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (VNM, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
 - The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
 - Game modes: a command that only works in some of ACE, CW or WEW shows those modes' icons, and a filter (All, ACE, CW, WEW) under the search box shows only what works for your mode. The filter is remembered. It only tidies the list: favorites always show, and any command can still be typed and sent. The mode list lives in `commands.json` ("as of October 2026") and only labels and filters; it doesn't change what can be sent.
-- Emotes use a waving figure icon everywhere (tab, chat lines, picker) instead of a smiley, so it doesn't look like the `:)` emoticon button.
+- Emotes use a `/bow` tag as their icon everywhere (tab, chat lines, picker) instead of a smiley, so it's clear that's where the slash emotes are and it doesn't look like the `:)` emoticon button.
 - Ventures shows only Populox's VNM alert: VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - If Populox's line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
 - The VNM card and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.
