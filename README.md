@@ -33,7 +33,7 @@ FFXI's chat is hard to read and type in with a controller, especially on a Steam
 - **Mentions.** Pick words to watch, like your name. Matches are marked in chat and listed in Alerts.
 - **LS message of the day** pinned at the top of chat.
 - **Commands tab:** every stock emote grouped by mood, plus dances, chair poses and job emotes, and CatsEye server commands like `!points` and `!dailies`. Commands that change something ask first.
-- **Alerts tab:** venture alerts from Populox as a card with zones and map squares, the ventures addon's progress line, venture Party Finder groups, active venture seals, mentions, bazaar visits (off by default) and server notices.
+- **Alerts tab:** the VNM card from Populox (Active with a 10 minute countdown, then Expired), the ventures addon's progress lines, active venture seals, mentions, bazaar visits (off by default) and server notices. Tap × to clear any of them. Party Finder ads stay in the chat filters, not here.
 - **Looks:** Midnight, Classic (the blue game-window look) or Onyx skins, Readable or Classic font, comfortable or compact, text size, 12 or 24-hour clock, and a color per channel.
 - **Settings follow you.** They're saved on the bridge too, and you can export them to a file.
 
@@ -46,8 +46,8 @@ FFXI's chat is hard to read and type in with a controller, especially on a Steam
 <p>
   <img src="docs/screenshots/chat-compact.png" width="180" alt="Compact layout">
   <img src="docs/screenshots/send-to.png" width="180" alt="Choosing where to send">
-  <img src="docs/screenshots/command-blocked.png" width="180" alt="Command screen blocking /ma and /attack">
-  <img src="docs/screenshots/ventures.png" width="180" alt="Venture alert card">
+  <img src="docs/screenshots/emote-action.png" width="180" alt="Emotes view showing only emote lines">
+  <img src="docs/screenshots/ventures.png" width="180" alt="VNM alert with countdown, ventures addon and seals">
 </p>
 
 ## What it will never do
