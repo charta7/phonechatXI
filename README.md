@@ -178,14 +178,13 @@ I built this with Claude. I designed it and tested every feature myself, and I'v
 
 ### If you change it or fork it
 
-It's open source, so you're welcome to read it, copy it and change it. Please keep this in mind:
+You're welcome to. Please:
 
-- **Don't test changes on the live server.** Test off the game first. [`tools/`](tools) has a fake chat session and a log replay that run the addon without connecting to CatsEye.
-- **New features need their own review.** If your version adds anything (new kinds of lines it reads, anything new it sends, anything that acts on its own) or goes past the scope below, it's a new addon. Give it a different name and submit it to CatsEyeXI staff through a GM ticket before you use it in game. Staff set this same condition for phonechatXI's own updates.
-- **Approval doesn't carry over.** Staff reviewed specific versions of phonechatXI from this repo. A changed copy isn't covered, even if most of the code is the same.
-- **Keep the core rules.** No automation, one tap sends one line, no game actions.
+- **Test off the live server.** [`tools/`](tools) runs the addon without the game.
+- **Get new features reviewed.** If your version reads or sends anything new, or does anything on its own, it's a new addon. Give it its own name and submit it to CatsEyeXI staff through a GM ticket before using it in game.
+- **Approval doesn't carry over.** It covers the versions staff reviewed from this repo, not changed copies.
 
-If you're not sure whether a change counts, ask staff before you run it. I can't approve anything; only they can.
+Not sure if a change counts? Ask staff first.
 
 ## Bugs and requests
 
