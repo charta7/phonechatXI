@@ -31,6 +31,7 @@
     "ventures": "Daily Venture objectives (optional category)",
     "wspoints": "Weapon skill points (main, sub or ranged)"
   },
+  "_not_included": "!campaign and !squire are on the BG-Wiki page but left out for now. Adding them changes what can be sent, so they wait for a staff review.",
   "_modes": "Game modes (ace, cw, wew) for commands that don't work in every mode. Leave a command out if it works in all three. Shown as icons and used by the mode filter on the phone. It doesn't change what can be sent.",
   "_modes_asof": "October 2026",
   "modes": {
