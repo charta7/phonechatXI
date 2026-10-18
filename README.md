@@ -2,7 +2,7 @@
 > **v1.0.0 was reviewed by CatsEyeXI staff: T1, Sanctioned** (October 2026). This is the version to use.
 
 > [!WARNING]
-> **Only use the approved version (v1.0.0).** Anything newer, including the `1.1-review` branch, is waiting on staff review and isn't cleared to run on CatsEyeXI. If you're just looking around, please don't install or run it until it's marked approved here.
+> **Only use the approved version (v1.0.0).** Anything newer, including the `1.1-review` branch, hasn't been reviewed by staff and isn't cleared to run on CatsEyeXI. If you're just looking around, please don't install or run it until it's marked approved here.
 
 # phonechatXI
 
