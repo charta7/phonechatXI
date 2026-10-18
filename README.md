@@ -4,7 +4,7 @@
 > **v1.0.0 was reviewed by CatsEyeXI staff: T1, Sanctioned** (October 2026).
 > From the review: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
 >
-> **v1.1.0 is waiting on staff review.** It reads a few new kinds of lines and the addon can start the bridge itself. What it sends hasn't changed. Don't use it in game until it's marked as a full release. See the [changelog](CHANGELOG.md).
+> **v1.1.0 hasn't been reviewed by staff yet.** It reads a few new kinds of lines and the addon can start the bridge itself. What it sends hasn't changed. Don't use it in game until staff have reviewed it and it's marked as a full release. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -72,9 +72,9 @@ Everything it's allowed to send is on a fixed list, checked twice: once by the b
 What staff reviewed in v1.0.0, and what v1.1.0 adds. Anything past this needs a new review first.
 
 - **Reads (1.0.0):** LS1, LS2, party, tells, say, shout, unity, yell, emotes, venture alerts, server notices and failed-tell messages. Never combat.
-- **Reads (new in 1.1.0, under review):** "X examines you", the ventures addon's progress line, Party Finder ads, the Active Venture Seals line, bazaar visits (off by default), and the LS message of the day.
+- **Reads (new in 1.1.0, not reviewed yet):** "X examines you", the ventures addon's progress line, Party Finder ads, the Active Venture Seals line, bazaar visits (off by default), and the LS message of the day.
 - **Sends (unchanged):** `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the CatsEye `!` server commands in `bridge/commands.json`. One tap, one line, 130 characters max, one line per second.
-- **Does (new in 1.1.0, under review):** the addon starts and stops the bridge program when you ask, and shows the QR code in an in-game window.
+- **Does (new in 1.1.0, not reviewed yet):** the addon starts and stops the bridge program when you ask, and shows the QR code in an in-game window.
 - **Never:** automation of any kind, game actions, `/yell`, or splitting a message into several sends.
 
 ## How it works
@@ -91,7 +91,7 @@ The bridge lives in a folder outside the addon (`~/phonechat/` on the Deck, `<As
 
 ## Install
 
-Grab `phonechatXI-v1.1.0.zip` from [Releases](../../releases). A full release has been reviewed by CatsEye staff (or they were told about it, for small fixes). A pre-release is waiting on that, so hold off using it in game.
+Grab `phonechatXI-v1.1.0.zip` from [Releases](../../releases). A full release has been reviewed by CatsEye staff (or they were told about it, for small fixes). A pre-release hasn't been reviewed yet, so hold off using it in game.
 
 ### Steam Deck
 

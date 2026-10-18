@@ -2,9 +2,9 @@
 
 Version numbers: **1.0.x** is fixes and looks only, and staff get an FYI. **1.x.0** changes what phonechatXI reads, sends or does, and goes back to staff for review first. Until staff sign off, a release is marked pre-release.
 
-## 1.1.0 (October 2026, waiting on staff review)
+## 1.1.0 (October 2026, not reviewed yet)
 
-1.0.1 was never released on its own, so it's folded in here (listed below). This version reads a few new kinds of lines and the addon can start the bridge itself, so it goes back to staff for review before anyone uses it in game.
+1.0.1 was never released on its own, so it's folded in here (listed below). This version reads a few new kinds of lines and the addon can start the bridge itself, so it needs staff review before it's used in game.
 
 **What it sends: unchanged.** Same fixed list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap, one line, 130 characters max, one line per second. No automation.
 
