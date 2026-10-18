@@ -176,6 +176,17 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 I built this with Claude. I designed it and tested every feature myself, and I've gone through the parts that decide what gets sent, but Claude wrote most of the code and I'm not a programmer by trade. I use it daily and plan to keep it working on CatsEye. If a server or Ashita update breaks it, I'll fix it when I can, but I can't promise how fast. It's all open source, so anyone can read it or pick it up.
 
+### If you change it or fork it
+
+It's open source, so you're welcome to read it, copy it and change it. Please keep this in mind:
+
+- **Don't test changes on the live server.** Test off the game first. [`tools/`](tools) has a fake chat session and a log replay that run the addon without connecting to CatsEye.
+- **New features need their own review.** If your version adds anything (new kinds of lines it reads, anything new it sends, anything that acts on its own) or goes past the scope below, it's a new addon. Give it a different name and submit it to CatsEyeXI staff through a GM ticket before you use it in game. Staff set this same condition for phonechatXI's own updates.
+- **Approval doesn't carry over.** Staff reviewed specific versions of phonechatXI from this repo. A changed copy isn't covered, even if most of the code is the same.
+- **Keep the core rules.** No automation, one tap sends one line, no game actions.
+
+If you're not sure whether a change counts, ask staff before you run it. I can't approve anything; only they can.
+
 ## Bugs and requests
 
 phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0, and that list isn't growing. There are no plans for more commands, addon controls or macros unless CatsEyeXI staff ask for them.
