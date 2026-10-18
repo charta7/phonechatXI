@@ -225,6 +225,7 @@ body.typing .tabbar{display:none}
 .vgrid.sm{width:auto;height:auto;padding:1px 6px;font-size:12px}
 .empty.sm{padding:6px 2px 10px;font-size:13.5px;text-align:left}
 #alerts .sect{margin-top:6px}
+.vcard{margin-bottom:10px}
 .vstatus{padding:10px 14px;border-radius:12px;background:#14193a;display:flex;gap:10px;align-items:center;font-size:14px;color:var(--soft);margin-top:10px}
 
 /* settings */
@@ -1552,8 +1553,9 @@ function renderAlerts() {
   var latest = {};
   v.forEach(function (m) { if (m.name === "ventures" && m.area) latest[(m.pool || "") + "|" + m.area] = m; });
   function rk(m) { return "va|" + (m.pool || "") + "|" + m.area + "|" + m.ts; }
+  var liveVnm = pop.length && pop[0].ts >= DONE && !hid["v|" + noticeKey(pop[0])];
   var addon = Object.keys(latest).map(function (k) { return latest[k]; })
-    .filter(function (m) { return !(m.pct >= 100 && m.ts < DONE) && !hid[rk(m)]; })
+    .filter(function (m) { return !(m.pct >= 100 && (m.ts < DONE || liveVnm)) && !hid[rk(m)]; })
     .sort(function (a, b) { return b.ts - a.ts; }).slice(0, 8);
   // Every alert card has the same head: icon and a bold label on the left, the time on the right.
   function card(icon, color, label, ts, body, x) {
@@ -1576,18 +1578,14 @@ function renderAlerts() {
     }
   }
   if (addon.length) {
-    h += card("vent", "var(--vent)", "Ventures addon", addon[0].ts, addon.map(function (m) {
+    h += card("vent", "var(--vent)", "In progress", addon[0].ts, addon.map(function (m) {
       return row('<span class="vpct">' + Math.round(m.pct) + "%</span>" + (m.pool ? "Pool " + esc(m.pool) + " &middot; " : "") + esc(m.area), 0, m.grid ? '<span class="vgrid sm">' + esc(m.grid) + "</span>" : "");
     }).join(""), addon.map(rk).join(";;"));
   }
   if (seals && !hid["s|" + seals.ts]) {
-    h += card("vent", "var(--vent)", "Venture seals", seals.ts, '<div class="abody">' + (seals.zones ? zl(seals.zones, " &middot; ") : esc(seals.body)) + "</div>", "s|" + seals.ts);
+    h += '<div class="vstatus">' + ico("vent", 18) + "<span><b>Seals</b> &middot; " + (seals.zones ? zl(seals.zones, " &middot; ") : esc(seals.body)) + '</span><button class="ax" data-dismiss="s|' + seals.ts + '" aria-label="Dismiss">&times;</button></div>';
   }
   if (zoneLine && zoneLine.ts >= DONE && !hid["z|" + zoneLine.ts]) h += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(zoneLine.body) + '</span><button class="ax" data-dismiss="z|' + zoneLine.ts + '" aria-label="Dismiss">&times;</button></div>';
-  var older = pop.slice(1, 6).filter(function (m) { return !hid["v|" + noticeKey(m)]; });
-  if (older.length) {
-    h += older.map(function (m) { return card("vent", "var(--mute)", "VNM &middot; Expired", m.ts, '<div class="abody">' + zl(m.zones, " / ") + "</div>", "v|" + noticeKey(m)); }).join("");
-  }
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();

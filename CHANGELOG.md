@@ -45,7 +45,7 @@ Version numbers: **1.0.x** is fixes and looks only, and staff get an FYI. **1.x.
 - Bottom bar: Chat, Tells, Commands (Emotes and Server commands), Alerts (Ventures, Mentions, Bazaar, Notices).
 - Alerts cards all share one layout: icon and bold label on the left, time on the right.
 - Notices, venture cards and seals can be dismissed with an x (Notices also have Clear all). This only hides them on the phone, and it's remembered.
-- Venture cards are labelled VNM · Active, then VNM · Expired about 10 minutes after the alert. The Active card shows a 10:00 countdown. Expired alerts shrink to one line, and pools at 100% drop off after the same 10 minutes. Pools under 100% stay until you dismiss them.
+- Venture cards are labelled VNM · Active, then VNM · Expired about 10 minutes after the alert. The Active card shows a 10:00 countdown. Expired alerts shrink to one line, and pools at 100% drop off after the same 10 minutes. Pools under 100% stay until you dismiss them. Alerts shows only the latest VNM, a single "In progress" card for pools under 100% (the 100% pool lives on the VNM card, not twice), and the seals as one plain line.
 - Text buttons (Save them, Got it, Show QR, Export, Import, Reset, Clear all) have a gold oval outline so they read as buttons.
 - The Tells banner about saving tells can be dismissed.
 - Settings gear on every tab. Tap the tab you're on to jump to the latest.
