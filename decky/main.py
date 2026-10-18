@@ -33,6 +33,21 @@ def _vtuple(v):
     return tuple(int(x) for x in re.findall(r"\d+", v or "0"))
 
 
+def _bundled_files():
+    """Files to copy, from the bridge's manifest.txt (one path per line). Older bundles had no manifest."""
+    try:
+        with open(os.path.join(BUNDLED, "manifest.txt"), "r", encoding="utf-8") as f:
+            names = [ln.strip().replace("\\", "/") for ln in f if ln.strip() and not ln.startswith("#")]
+    except OSError:
+        names = list(BRIDGE_FILES)
+        for sub in ("icons", "fonts"):
+            d = os.path.join(BUNDLED, sub)
+            if os.path.isdir(d):
+                names += [sub + "/" + n for n in os.listdir(d)]
+    # Never let a manifest point outside the bridge folder, and never touch the link.
+    return [n for n in names if ".." not in n.split("/") and not n.startswith("/") and n != "config.json"]
+
+
 def _install_bridge():
     """Copy the bridge bundled with this plugin into ~/phonechat/bridge when it is newer.
     Keeps config.json (token, port, tell-saving setting) and the saved tells."""
@@ -41,10 +56,12 @@ def _install_bridge():
     if not ship or (have and _vtuple(have) >= _vtuple(ship)):
         return ""
     os.makedirs(BRIDGE_DIR, exist_ok=True)
-    for name in BRIDGE_FILES:
+    for name in _bundled_files():
         src = os.path.join(BUNDLED, name)
-        if os.path.exists(src):
-            shutil.copyfile(src, os.path.join(BRIDGE_DIR, name))
+        if os.path.isfile(src):
+            dst = os.path.join(BRIDGE_DIR, name)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            shutil.copyfile(src, dst)
     try:
         os.chmod(os.path.join(BRIDGE_DIR, "start.sh"), 0o755)
     except OSError:
@@ -144,6 +161,8 @@ class Plugin:
             await asyncio.sleep(0.25)
             st = _status()
             if st["running"]:
+                if NOTICE["text"].startswith("Bridge updated"):
+                    NOTICE["text"] = ""    # the new version is running now; no need to keep saying so
                 return st
             if not _find_pids():
                 break
@@ -181,6 +200,24 @@ class Plugin:
                 os.remove(STATUS)
             except OSError:
                 pass
+        return _status()
+
+    async def new_link(self):
+        """Ask the bridge for a new phone link. The old link stops working."""
+        old = _status().get("url", "")
+        try:
+            os.makedirs(BASE, exist_ok=True)
+            with open(os.path.join(BASE, "newlink.request"), "w") as f:
+                f.write(str(int(time.time())))
+        except OSError as exc:
+            return {**_status(), "error": "Could not ask for a new link: %s" % exc}
+        if _find_pids():
+            for _ in range(24):                     # the bridge checks every few seconds
+                await asyncio.sleep(0.25)
+                if _status().get("url", "") not in ("", old):
+                    break
+        NOTICE["text"] = ("New link made. Scan the QR again on your phone." if _status().get("running")
+                          else "A new link will be made when the bridge starts.")
         return _status()
 
     async def get_autostart(self):

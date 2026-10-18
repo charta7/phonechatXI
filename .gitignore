@@ -1,0 +1,18 @@
+# per-install files: never commit these
+bridge/config.json
+config.json
+tells/
+feed-*.log
+outbox-*.log
+debug-*.log
+status.json
+stop.request
+addon-settings.txt
+__pycache__/
+decky/node_modules/
+decky/dist/
+*.zip
+phone-settings.json
+newlink.request
+bridge.log
+phonechatXI Bridge.desktop

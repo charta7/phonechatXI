@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-phonechatXI bridge v1.0.0
+phonechatXI bridge v1.1.0
 
 Tails feed-<Character>.log files written by the phonechat addon, keeps recent
 history in memory, serves the phone page on your home network, and passes
 replies and server commands from the phone back to the addon.
 
-    python3 bridge.py [--dir /home/deck/phonechat] [--port 8765] [--host 0.0.0.0]
+    python3 bridge.py [--dir /home/deck/phonechat] [--port 8765] [--host 0.0.0.0] [--open]
+
+The addon copies this folder into its shared folder (<shared>/bridge) and starts it from
+there, so the shared folder is normally just the folder above this one.
+Needs Python 3.7 or newer (Steam's game container ships 3.7).
 
 Rules this file enforces (see the spec):
   * Nothing is sent unless the phone asked for that one message. The bridge never
@@ -37,7 +41,7 @@ from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Max messages kept in memory per channel, so shout/yell spam can't push out LS or tells.
@@ -45,8 +49,9 @@ CAPS = {
     "ls1": 500, "ls2": 500, "party": 500, "tell": 600,
     "unity": 300, "say": 300, "shout": 300, "yell": 300, "emote": 200,
     "venture": 200, "server": 100, "system": 150, "zone": 100, "echo": 50,
-    "_ack": 300,
+    "_ack": 300, "finder": 300, "bazaar": 100, "motd": 10,
 }
+SCROLLBACK = (1, 2, 4)          # Settings > Scrollback multiplies the chat caps above
 DEFAULT_CAP = 200
 
 FEED_ROTATE_BYTES = 5 * 1024 * 1024
@@ -68,6 +73,7 @@ ARGS_RE = re.compile(r"^[A-Za-z0-9 _\-]{0,40}$")
 CALL_RE = re.compile(r"<\s*call\s*(\d{1,2})\s*>", re.I)
 ZONE_RE = re.compile(r"^\s*(.+?)\s*\(([A-Z]-\d+)\)\s*$")
 YELL_RE = re.compile(r"^(.+?)\[(.*)\]$")
+ALERT_RE = re.compile(r"^(?:Pool ([AB]) )?(.+?) is now ([\d.]+)% complete(?: at \(([A-Z]-\d+)\))?")
 
 CURLY = {"‘": "'", "’": "'", "“": '"', "”": '"', "…": "...",
          "–": "-", "—": "-", " ": " "}
@@ -101,6 +107,7 @@ class Store:
         self.next_id = 1
         self.by_ch = {}
         self.boot = int(time.time() * 1000)
+        self.mult = 1
 
     def add(self, msg):
         with self.cond:
@@ -108,7 +115,7 @@ class Store:
             self.next_id += 1
             dq = self.by_ch.setdefault(msg["ch"], deque())
             dq.append(msg)
-            cap = CAPS.get(msg["ch"], DEFAULT_CAP)
+            cap = CAPS.get(msg["ch"], DEFAULT_CAP) * self.mult
             while len(dq) > cap:
                 dq.popleft()
             self.cond.notify_all()
@@ -501,6 +508,21 @@ class Tailer(threading.Thread):
             self.tells.record(msg)
 
     def handle_venture(self, char, msg):
+        if msg["name"] == "Seals":                   # "A (F-7) / B (G-6), C (D-9) / D (H-9)"
+            pairs = [parse_zones(p) for p in msg["body"].split(", ")]
+            if all(pairs):
+                msg["zones"] = [z for pair in pairs for z in pair]
+            store.add(msg)
+            return
+        if msg["name"] == "ventures":                # alert line from the ventures addon
+            m = ALERT_RE.match(msg["body"])
+            if m:
+                msg["pool"], msg["area"] = m.group(1) or "", m.group(2)
+                msg["pct"] = float(m.group(3))
+                if m.group(4):
+                    msg["grid"] = m.group(4)
+            store.add(msg)
+            return
         zones = parse_zones(msg["body"])
         with self.plock:
             held = self.pending.pop(char, None)
@@ -563,11 +585,22 @@ class Tailer(threading.Thread):
                     self.handle_line(char, line)
 
         if st["off"] > FEED_ROTATE_BYTES:
+            # Move the file aside, read anything the addon appended in the meantime, then drop
+            # it. The addon opens the feed for each line, so its next line starts a new file.
+            old = path + ".old"
             try:
-                os.truncate(path, 0)
-                st["off"], st["buf"] = 0, b""
+                os.replace(path, old)
+                with open(old, "rb") as f:
+                    f.seek(st["off"])
+                    rest = f.read()
+                os.remove(old)
             except OSError:
-                pass
+                rest = b""
+            data = st["buf"] + rest
+            st["off"], st["buf"] = 0, b""
+            for line in data.split(b"\n"):
+                if line:
+                    self.handle_line(char, line)
 
     def run(self):
         while True:
@@ -606,6 +639,43 @@ def save_config(cfg):
         os.replace(tmp, CFG_PATH)
     except OSError as exc:
         print("could not save config:", exc, file=sys.stderr)
+
+
+LINK = {"cfg": None, "port": 0, "folder": ""}
+
+
+def new_link():
+    """Replace the phone link token. Old links stop working right away."""
+    cfg = LINK["cfg"]
+    cfg["token"] = secrets.token_urlsafe(12)
+    save_config(cfg)
+    Handler.token = cfg["token"]
+    Handler.url = "http://%s:%d/?t=%s" % (lan_ip(), LINK["port"], cfg["token"])
+    Handler.gen += 1
+    with store.cond:
+        store.cond.notify_all()
+    write_status(LINK["folder"], Handler.url, True)
+    print("new phone link:", Handler.url)
+
+
+PREFS_MAX = 64 * 1024
+
+
+def load_prefs(folder):
+    try:
+        with open(os.path.join(folder, "phone-settings.json"), "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else None
+    except (OSError, ValueError):
+        return None
+
+
+def save_prefs(folder, prefs):
+    path = os.path.join(folder, "phone-settings.json")
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(prefs, f)
+    os.replace(tmp, path)
 
 
 def lan_ip():
@@ -671,14 +741,25 @@ def host_ok(host):
         return False
 
 
+# Icons are public (iOS fetches the home-screen icon without the token). Nothing private in them.
+ICONS = ("apple-touch-icon.png", "icon-512.png", "favicon-32.png", "pearl-48.png", "pearl-96.png", "wordmark.png")
+# Fonts ship with the bridge so the phone page never calls out to Google Fonts. Also public.
+FONTS = ("cinzel-latin-600-normal.woff2", "cinzel-latin-700-normal.woff2",
+         "atkinson-hyperlegible-latin-400-normal.woff2", "atkinson-hyperlegible-latin-700-normal.woff2",
+         "atkinson-hyperlegible-latin-400-italic.woff2",
+         "jetbrains-mono-latin-400-normal.woff2", "jetbrains-mono-latin-700-normal.woff2")
+
 SETUP_PAGE = """<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>phonechatXI setup</title><script src="/qr.js"></script>
+<title>phonechatXI setup</title><script src="/qr.js"></script><link rel="icon" href="/icons/favicon-32.png">
 <style>body{margin:0;background:#0b1020;color:#e8ecf6;font:16px system-ui,sans-serif;display:flex;justify-content:center}
 main{max-width:420px;padding:32px 20px;text-align:center}h1{color:#d9b45a;font-weight:700;letter-spacing:.5px}
 #qr{background:#fff;border-radius:12px;padding:10px;width:240px;margin:20px auto}a{color:#7fb2ff;word-break:break-all}
-p{color:#c9d2ec;line-height:1.5}</style></head><body><main><h1>phonechatXI</h1>
+p{color:#c9d2ec;line-height:1.5}</style></head><body><main><h1><img src="/icons/wordmark.png" alt="phonechatXI" style="width:100%%;max-width:380px"></h1>
 <p>Scan with your phone's camera. Your phone has to be on the same Wi-Fi.</p><div id="qr"></div>
-<p><a href="%(url)s">%(url)s</a></p><p>Bridge %(version)s is running. Watching %(folder)s</p></main>
+<p><a href="%(url)s">%(url)s</a></p><p>Bridge %(version)s is running. Watching %(folder)s</p>
+<form method="post" action="/setup/newlink" onsubmit="return confirm('Make a new phone link? The old link stops working and you will need to scan the new QR.')">
+<button style="font:inherit;color:#e8ecf6;background:#1d2850;border:1px solid #3a4a80;border-radius:10px;padding:10px 16px">Make a new link</button></form>
+<p style="font-size:13px;color:#8e9ac0">Use this if someone else saw your link or QR. Your phone will need to scan again.</p></main>
 <script>var q=qrcode(0,"M");q.addData("%(url)s");q.make();document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true});</script>
 </body></html>"""
 
@@ -688,6 +769,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     token = ""
     url = ""
+    gen = 0          # bumps when the link changes; open streams on the old link close
     folder = ""
     sender = None
     tells = None
@@ -725,7 +807,13 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         q = parse_qs(u.query)
         if u.path == "/favicon.ico":
-            self.send_body(204, "")
+            self.static("icons/favicon-32.png", "image/png")
+            return
+        if u.path.startswith("/icons/") and u.path[7:] in ICONS:
+            self.static("icons/" + u.path[7:], "image/png")
+            return
+        if u.path.startswith("/fonts/") and u.path[7:] in FONTS:
+            self.static("fonts/" + u.path[7:], "font/woff2")
             return
         if u.path == "/qr.js":
             self.static("qrcode.js", "application/javascript; charset=utf-8")
@@ -746,7 +834,10 @@ class Handler(BaseHTTPRequestHandler):
             self.stream()
         elif u.path == "/api/status":
             self.send_json(200, {"version": VERSION, "url": self.url, "boot": store.boot,
-                                 "char": self.sender.char, "save_tells": self.tells.enabled})
+                                 "char": self.sender.char, "save_tells": self.tells.enabled,
+                                 "scrollback": store.mult})
+        elif u.path == "/api/prefs":
+            self.send_json(200, {"prefs": load_prefs(self.folder)})
         elif u.path == "/api/commands":
             self.send_json(200, self.commands.public())
         else:
@@ -757,6 +848,19 @@ class Handler(BaseHTTPRequestHandler):
         if not host_ok(self.headers.get("Host")):
             self.send_body(403, "bad host")
             return
+        if u.path == "/setup/newlink":
+            # Only from the computer running the bridge, and only from its own /setup page.
+            origin = self.headers.get("Origin") or ""
+            local = ("http://localhost:%d" % self.server.server_port, "http://127.0.0.1:%d" % self.server.server_port)
+            if self.client_address[0] not in ("127.0.0.1", "::1") or (origin and origin not in local):
+                self.send_body(403, "forbidden")
+                return
+            new_link()
+            self.send_response(303)
+            self.send_header("Location", "/setup")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
         if not self.headers.get("X-Token") or not secrets.compare_digest(self.headers.get("X-Token"), self.token):
             self.send_body(403, "forbidden")
             return
@@ -765,7 +869,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            if n > 4096:
+            if n > (PREFS_MAX if u.path == "/api/prefs" else 4096):
                 raise ValueError
             body = json.loads(self.rfile.read(n) or b"{}")
             if not isinstance(body, dict):
@@ -785,9 +889,21 @@ class Handler(BaseHTTPRequestHandler):
             elif u.path == "/api/settings":
                 if "save_tells" in body:
                     self.tells.set_enabled(bool(body["save_tells"]))
-                self.send_json(200, {"ok": True, "save_tells": self.tells.enabled})
+                if body.get("scrollback") in SCROLLBACK:
+                    store.mult = int(body["scrollback"])
+                    self.tells.cfg["scrollback"] = store.mult
+                    self.tells.save_cfg()
+                self.send_json(200, {"ok": True, "save_tells": self.tells.enabled, "scrollback": store.mult})
             elif u.path == "/api/tells/clear":
                 self.tells.clear()
+                self.send_json(200, {"ok": True})
+            elif u.path == "/api/prefs":
+                # Phone page settings (views, colors, favorites...), kept so a new Home Screen
+                # shortcut or a second phone picks them up. Never holds the link token.
+                prefs = body.get("prefs")
+                if not isinstance(prefs, dict):
+                    raise SendError("Settings must be an object.")
+                save_prefs(self.folder, prefs)
                 self.send_json(200, {"ok": True})
             else:
                 self.send_body(404, "not found")
@@ -810,8 +926,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.close_connection = True
         my_boot = None
+        my_gen = Handler.gen
         try:
             while True:
+                if Handler.gen != my_gen:
+                    return                       # the link was replaced
                 with store.cond:
                     if my_boot == store.boot:
                         items = store._since(last)
@@ -840,11 +959,24 @@ class Handler(BaseHTTPRequestHandler):
             return
 
 
+def dir_from_txt(addon_dir):
+    """When run from inside the addon folder: use the addon's dir.txt (a Z:\\ path on Linux)."""
+    try:
+        with open(os.path.join(addon_dir, "dir.txt"), "r", encoding="utf-8-sig") as f:
+            txt = f.read().strip()
+    except OSError:
+        return ""
+    if re.match(r"^[Zz]:\\", txt):
+        txt = txt[2:].replace("\\", "/")
+    return txt.rstrip("/\\") if txt else ""
+
+
 def main():
     ap = argparse.ArgumentParser(description="phonechatXI bridge")
     ap.add_argument("--dir", default="", help="shared folder with the addon's feed files (remembered)")
     ap.add_argument("--port", type=int, default=0, help="web port (remembered, default 8765)")
     ap.add_argument("--host", default="0.0.0.0", help="address to listen on")
+    ap.add_argument("--open", action="store_true", help="open the setup page (QR) in a browser")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -852,15 +984,29 @@ def main():
         cfg["dir"] = os.path.abspath(os.path.expanduser(args.dir))
     if args.port:
         cfg["port"] = args.port
+    if "dir" not in cfg and os.path.exists(os.path.join(os.path.dirname(HERE), "phonechat.lua")):
+        guess = dir_from_txt(os.path.dirname(HERE))       # running from the addon folder
+        if guess:
+            cfg["dir"] = guess
     cfg.setdefault("dir", os.path.dirname(HERE))
     cfg.setdefault("port", 8765)
     cfg.setdefault("save_tells", False)
+    if cfg.get("scrollback") in SCROLLBACK:
+        store.mult = int(cfg["scrollback"])
     if not cfg.get("token"):
         cfg["token"] = secrets.token_urlsafe(12)
     save_config(cfg)
 
     folder = cfg["dir"]
     os.makedirs(folder, exist_ok=True)
+    newlink_file = os.path.join(folder, "newlink.request")
+    if os.path.exists(newlink_file):            # asked for a new link while the bridge was off
+        cfg["token"] = secrets.token_urlsafe(12)
+        save_config(cfg)
+        try:
+            os.remove(newlink_file)
+        except OSError:
+            pass
     start_fresh(folder)
     port = int(cfg["port"])
     url = "http://%s:%d/?t=%s" % (lan_ip(), port, cfg["token"])
@@ -871,6 +1017,7 @@ def main():
 
     Handler.token = cfg["token"]
     Handler.url = url
+    LINK.update(cfg=cfg, port=port, folder=folder)
     Handler.folder = folder
     Handler.sender = sender
     Handler.tells = tells
@@ -890,7 +1037,13 @@ def main():
                 print("stop requested from the game")
                 os.kill(os.getpid(), signal.SIGTERM)
                 return
-            write_status(folder, url, True)
+            if os.path.exists(newlink_file):      # "New phone link" from the in-game window
+                try:
+                    os.remove(newlink_file)
+                except OSError:
+                    pass
+                new_link()
+            write_status(folder, Handler.url, True)
             time.sleep(STATUS_SECONDS)
 
     atexit.register(clear_status, folder)
@@ -907,6 +1060,15 @@ def main():
     print("watching:", folder)
     print("open on your phone:", url)
     print("on this computer: http://localhost:%d/setup" % port)
+    sys.stdout.flush()
+    if args.open:
+        def open_setup():
+            try:
+                import webbrowser
+                webbrowser.open("http://localhost:%d/setup" % port)
+            except Exception:
+                pass
+        threading.Timer(1.0, open_setup).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
