@@ -1310,7 +1310,7 @@ function confirmCommand(text, inp) {
 // text emoticons as you type. You see the result in the box before you send. Phone-side only.
 var EMO = [
   ["👀", "<_<"], ["🙂", ":)"], ["😊", ":)"], ["😀", ":D"], ["😃", ":D"],
-  ["😄", ":D"], ["😂", "XD"], ["😛", ":P"], ["😜", ":P"], ["😆", "^^"],
+  ["😄", ":D"], ["😂", "XD"], ["😛", ":P"], ["😜", ";P"], ["😉", ";)"], ["😆", "^^"],
   ["😁", "^^"], ["😢", "T_T"], ["😭", "T_T"], ["😑", "-_-"], ["😳", "o_o"],
   ["😮", "O_O"], ["😠", ">_<"], ["😡", ">_<"], ["❤", "<3"]
 ];
@@ -1325,7 +1325,7 @@ function emoSwap(inp) {
   try { inp.setSelectionRange(pos, pos); } catch (e) {}
 }
 // A row of text emoticons above the box. Tapping one puts it in the box; you still hit send.
-var EMO_PICK = ["^^", "^_^", ":)", ":D", ":P", ":(", "XD", "<_<", ">_>", ">_<", "T_T", "-_-", "o_o", "O_O", "<3"];
+var EMO_PICK = ["^^", "^_^", ":)", ";)", "=)", ":D", ";D", "=D", ":P", ";P", ":(", "XD", "<_<", ">_>", ">_<", "T_T", "-_-", "o_o", "O_O", "<3"];
 function setupEmoStrip(el, inp) {
   var old = el.previousElementSibling;
   if (old && old.classList.contains("emostrip")) old.remove();

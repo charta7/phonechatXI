@@ -30,7 +30,7 @@ Version numbers: **1.0.x** is fixes and looks only, and staff get an FYI. **1.x.
 **Chat**
 - Scrolling fixed. Starting to scroll up from the newest line no longer shakes or snaps back, and reading back no longer jumps when new lines arrive or you send.
 - Your own lines get a faint background tint.
-- Emoticon button next to the chat box opens a row of text emoticons (`^^`, `:D`, `<_<`, `T_T` and so on). Tapping one puts it in the box. You still hit send.
+- Emoticon button next to the chat box opens a row of text emoticons (`^^`, `:D`, `;)`, `=)`, `<_<`, `T_T` and so on). Tapping one puts it in the box. You still hit send.
 - Emoji turn into the game's text emoticons as you type (for example 👀 becomes `<_<`, 😀 becomes `:D`). You see the swap in the box before you send. Emoji were already dropped before sending, so this only changes what you see and what's left to send.
 - Mentions: add words to watch in Settings. They save as you type (leaving the box by tapping Back used to lose them on iPhone). Matching lines are marked in chat and listed in Alerts with a badge.
 - Item links only for real items (`{{Item}}` from the game's item auto-translate). Auto-translate phrases are styled but not linked.
