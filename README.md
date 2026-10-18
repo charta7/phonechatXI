@@ -1,6 +1,8 @@
-> [!CAUTION]
-> **UNDER REVIEW: NOT APPROVED TO USE.**
-> phonechatXI is waiting on a CatsEyeXI staff review. Don't install or run it until it's approved. This page will say so when it is.
+> [!NOTE]
+> **v1.0.0 was reviewed by CatsEyeXI staff: T1, Sanctioned** (October 2026). This is the version to use.
+
+> [!WARNING]
+> **Only use the approved version (v1.0.0).** Anything newer, including the `1.1-review` branch, is waiting on staff review and isn't cleared to run on CatsEyeXI. If you're just looking around, please don't install or run it until it's marked approved here.
 
 # phonechatXI
 
@@ -71,7 +73,9 @@ phone ->  bridge ->  outbox file ->  addon  ->  chat  (one line per tap)
 
 **Desktop Mode or any Linux:** run `./start.sh` in the bridge folder instead (add `--port 8780` if 8765 is taken). Open `http://localhost:8765/setup` on that computer for the QR.
 
-### Windows (written for it, not tested yet)
+### Windows (not tested, not supported yet)
+
+phonechatXI is built and tested for Steam Deck. Windows is untested and isn't part of this build yet. The steps below were written but never run, so treat them as a rough guide.
 
 1. Install Python 3 from python.org and tick "Add to PATH".
 2. Put the `bridge` folder and `start-bridge.bat` in `<Ashita>\config\addons\phonechat\`. No `dir.txt` needed.
