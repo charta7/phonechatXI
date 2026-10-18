@@ -102,6 +102,17 @@ phonechatXI is built and tested for Steam Deck. Windows is untested and isn't pa
 - Only tells can be saved, and only if you turn on "Remember tells". That keeps the last 50 lines per person, and "Clear saved tells" deletes them. Linkshell and party chat are never saved.
 - Anyone on your Wi-Fi with your link can read and send, so keep your link to yourself.
 
+## If you change it or fork it
+
+It's open source, so you're welcome to read it, copy it and change it. Please keep this in mind:
+
+- **Don't test changes on the live server.** Test off the game first.
+- **New features need their own review.** If your version adds anything (new kinds of lines it reads, anything new it sends, anything that acts on its own) or goes past what's listed above, it's a new addon. Give it a different name and submit it to CatsEyeXI staff through a GM ticket before you use it in game. Staff set this same condition for phonechatXI's own updates.
+- **Approval doesn't carry over.** Staff reviewed specific versions of phonechatXI from this repo. A changed copy isn't covered, even if most of the code is the same.
+- **Keep the core rules.** No automation, one tap sends one line, no game actions.
+
+If you're not sure whether a change counts, ask staff before you run it. I can't approve anything; only they can.
+
 ## Credits
 
 - Built with help from Claude.
