@@ -163,9 +163,13 @@ Windows isn't tested or supported yet. These steps have never been run.
 - Phone settings (views, colors, watch words) are saved on the bridge in `phone-settings.json`. No chat goes in that file.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.
 
+## About the code
+
+I built this with Claude. I designed it and tested every feature myself, and I've gone through the parts that decide what gets sent, but Claude wrote most of the code and I'm not a programmer by trade. I use it daily and plan to keep it working on CatsEye. If a server or Ashita update breaks it, I'll fix it when I can, but I can't promise how fast. It's all open source, so anyone can read it or pick it up.
+
 ## Credits
 
-- Built with help from Claude.
+- Built by Charta with Claude.
 - `bridge/qrcode.js` is [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT).
 - The in-game QR code uses [luaqrcode](https://github.com/speedata/luaqrcode) by speedata (BSD-3), in `addon/phonechat/qrencode.lua`.
 - The retired Decky plugin (`decky/`) started from the Decky plugin template (BSD-3).
