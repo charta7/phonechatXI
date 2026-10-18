@@ -1435,20 +1435,21 @@ $("modeseg").addEventListener("click", function (e) {
 function cmdDesc(n) { return commands.info[n] || commands.action[n] || ""; }
 function renderCmdList() {
   var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
-  function row(t) {
+  // The mode filter only hides rows in this list. Favorites always show, and any command can still be typed.
+  function row(t, fav) {
     var n = cmdName(t), d = cmdDesc(n), ms = cmdModes(n);
-    if (!inMode(n)) return "";
+    if (!fav && !inMode(n)) return "";
     if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
     return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
       '<button class="m" data-cmdpick="' + esc(t) + '"><b>' + esc(t) + '</b><span class="d">' + esc(d) + "</span>" +
       (ms ? '<span class="mds">' + ms.map(function (m) { return modeIcon(m, 16); }).join("") + "</span>" : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
   }
-  var favs = S.favs.map(row).join("");
+  var favs = S.favs.map(function (f) { return row(f, true); }).join("");
   var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
   var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n); }).join("");
   $("cmdlist").innerHTML = (favs ? '<div class="sect">FAVORITES</div>' + favs : "") +
     (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
-    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes." : "") + "</div>");
+    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes. The filter only tidies this list; you can still type any command." : "") + "</div>");
 }
 // Tapping a command always asks first. One tap on Send = one command.
 function askSend(t) {
