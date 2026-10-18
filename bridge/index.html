@@ -550,7 +550,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -1154,7 +1154,7 @@ function placeholder(t) {
 function buildComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp;
-    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" spellcheck="true"' + (ctx === "cmd" ? ' class="mono" autocapitalize="off" autocorrect="off" spellcheck="false"' : "") + ' maxlength="400"><span class="left" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
+    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' + (ctx === "cmd" ? ' class="mono"' : "") + ' maxlength="400"><span class="left" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
     var inp = el.querySelector("input"), btn = el.querySelector(".send");
     if (ctx !== "cmd") setupEmoStrip(el, inp);
     inp.addEventListener("input", function () { if (ctx !== "cmd") emoSwap(inp); btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); });
@@ -1166,10 +1166,15 @@ function buildComposers() {
   applyCaps();
   updateComposers();
 }
-// Most FFXI chat is typed lowercase, so the phone's keyboard doesn't capitalize unless you turn it on.
-// (An iPhone setting can still override this, and autocorrect may still turn "i" into "I".)
+// Most FFXI chat is typed lowercase and full of game words (Jeuno, San d'Oria, lvl, pt), so the
+// phone's keyboard doesn't capitalize or autocorrect unless you turn those on in Settings.
+// (An iPhone-wide setting can still override capitalization.)
 function applyCaps() {
-  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) input').forEach(function (i) { i.setAttribute("autocapitalize", S.caps ? "sentences" : "off"); });
+  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) input').forEach(function (i) {
+    i.setAttribute("autocapitalize", S.caps ? "sentences" : "off");
+    i.setAttribute("autocorrect", S.autocorrect ? "on" : "off");
+    i.setAttribute("spellcheck", S.autocorrect ? "true" : "false");
+  });
 }
 // FFXI chat lines are capped at 130 Shift-JIS bytes, prefix included. Shown as a countdown near the end.
 var LINE_BYTES = 130;
@@ -1683,6 +1688,7 @@ function renderSettings() {
     srow("Bazaar visits", "Listed in Alerts when someone browses your bazaar.", tog(S.bazaar, "bazaar")) +
     '<div class="sect">TYPING</div>' +
     srow("Capitalize first letter", "Off by default, since most people type lowercase in game.", tog(S.caps, "caps")) +
+    srow("Autocorrect", "Off by default, so game words like Jeuno or Windurst aren't changed.", tog(S.autocorrect, "autocorrect")) +
     '<div class="sect">PRIVACY</div>' +
     srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
@@ -1740,6 +1746,7 @@ $("settings").addEventListener("click", function (e) {
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
+    else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
     else if (k === "save_tells") {
       api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); });
       return;

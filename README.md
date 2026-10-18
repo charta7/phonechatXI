@@ -33,7 +33,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
 - Linked items (`{{Suppanomimi}}`) open a BG-Wiki search.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts.
-- The keyboard doesn't capitalize the first letter, since most people type lowercase in game. You can turn it on in Settings.
+- The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab for CatsEye `!` commands like `!points` and `!dailies`. The ones that change something ask first.
