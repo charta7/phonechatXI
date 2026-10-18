@@ -1,6 +1,6 @@
 # Changelog
 
-Versioning: 1.x.y is fixes and looks only, listed here. 1.x.0 changes what phonechatXI reads, sends or does, and goes to staff for review first. Until staff sign off, a release stays marked as a pre-release.
+Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first. Until staff sign off, a release stays marked as a pre-release.
 
 ## 1.1.0 (October 2026, not reviewed yet)
 
