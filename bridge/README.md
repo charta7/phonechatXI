@@ -2,7 +2,7 @@
 
 This folder is the bridge: a small Python program (3.7 or newer, no extra packages) that serves the phone page on your home Wi-Fi.
 
-You don't need to touch it. The phonechat addon copies it here and starts it for you: `/pchat config` in game, then **Start**.
+You don't need to touch it. The phonechat addon copies it here and starts it for you: `/pchat` in game, then **Start**.
 
 - `start.sh`: starts the bridge on Steam Deck or Linux. Its log goes to `../bridge.log`.
 - `start-bridge.bat`: starts the bridge on Windows.

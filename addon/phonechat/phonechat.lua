@@ -13,7 +13,7 @@
 
     Commands (/pchat, /pcxi and /phonechat all work):
         /pchat            status, phone link and the list of options
-        /pchat config     the phonechatXI window: start/stop, QR code, settings
+        /pchat            the phonechatXI window: start/stop, QR code, settings
         /pchat qr         the same window
         /pchat start      start the bridge
         /pchat stop       stop the bridge
@@ -493,7 +493,7 @@ local function new_link()
         return
     end
     S.qr_url = nil
-    note('Made a new phone link. The old one stops working. Scan the new QR in /pchat config.')
+    note('Made a new phone link. The old one stops working. Scan the new QR in the /pchat window.')
 end
 
 local function print_link()
@@ -547,7 +547,7 @@ local function check_bridge()
         end
         if not on and not S.hinted and not S.starting_at then
             S.hinted = true
-            note('Type /pchat start to start the bridge, or /pchat config for the QR and settings.')
+            note('Type /pchat start to start the bridge, or /pchat for the QR and settings.')
         end
     end
 end

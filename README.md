@@ -35,7 +35,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Mentions: words you pick, like your name, are highlighted in chat and collected in Alerts.
 - The LS message of the day is pinned above chat.
 - A Commands tab with the stock emotes (plus dances, chair poses and job emotes) and CatsEye `!` commands like `!points` and `!dailies`. Commands that change something ask first.
-- An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, server notices, and bazaar visits if you turn them on. Tap × to clear a card.
+- An Alerts tab with Populox's VNM alert and a 10 minute countdown, the ventures addon's progress line, active venture seals, mentions, Domain Invasion announcements from Apururu, server notices, and bazaar visits if you turn them on. Tap × to clear a card. If CatsEye rewords one of these lines, it still shows as plain text.
 - An emoticon button, and emoji swap to text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show emoji.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
 
@@ -67,6 +67,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 <p>
   <img src="docs/screenshots/settings.png" width="220" alt="Settings">
   <img src="docs/screenshots/command-confirm.png" width="220" alt="Confirm step before an action command">
+  <img src="docs/screenshots/debug-info.png" width="220" alt="Debug info for a bug report">
 </p>
 
 ### New in 1.1.0 (not reviewed yet)
@@ -155,6 +156,7 @@ Windows isn't tested or supported yet. These steps have never been run.
 | A message says "failed" | The game rejected it, usually a tell to someone offline. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
 | Page says "This link was replaced" | Scan the new QR code and remove the old shortcut. |
+| Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose). |
 
 ## Privacy
 
@@ -166,6 +168,15 @@ Windows isn't tested or supported yet. These steps have never been run.
 ## About the code
 
 I built this with Claude. I designed it and tested every feature myself, and I've gone through the parts that decide what gets sent, but Claude wrote most of the code and I'm not a programmer by trade. I use it daily and plan to keep it working on CatsEye. If a server or Ashita update breaks it, I'll fix it when I can, but I can't promise how fast. It's all open source, so anyone can read it or pick it up.
+
+## Bugs and requests
+
+phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. That's the whole scope.
+
+- Bugs: open a [bug report](../../issues/new/choose) and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
+- Requests are read, but most of my time goes to fixing bugs, so I can't promise a timeline. Anything that changes what it reads from the game or sends to it needs CatsEyeXI staff review first.
+
+To test without the game, see [`tools/`](tools): a fake chat session, and a replay of real `/pchat debug` logs through the addon.
 
 ## Credits
 

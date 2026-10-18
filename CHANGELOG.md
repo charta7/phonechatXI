@@ -33,6 +33,8 @@ Two checks are stricter:
 - `/pchat debug` also logs lines printed by other addons, flagged as such. The debug log starts over past 2 MB.
 - The bridge logs to `~/phonechat/bridge.log` on the Deck.
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
+- Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
+- GitHub issue templates for bug reports and requests.
 - The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code stays in `decky/` but isn't released.
 
 ### Phone page
@@ -58,6 +60,8 @@ Alerts
 - The VNM alert shows as VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
 - Pools under 100% are listed on one In progress card. A pool at 100% shows on the VNM card instead, and drops off with it after 10 minutes.
 - Active seals show as one line.
+- Domain Invasion: Apururu's lines (Unity, already read in 1.0.0) also show on a card in Alerts for 30 minutes. They stay in Unity chat too.
+- If a venture or Apururu line is worded differently than expected, it still shows in Alerts as plain text instead of disappearing.
 - Venture cards, seals and notices can be cleared with ×. Notices also have Clear all. Clearing only hides them on the phone, and it's remembered.
 
 Look and settings
@@ -67,6 +71,7 @@ Look and settings
 - Scrollback: the bridge keeps 500, 1,000 or 2,000 lines.
 - Phone settings are also saved on the bridge, so a new Home Screen shortcut or a second phone picks them up. Export and Import back them up to a file.
 - Plainer wording in banners, tips, empty screens, Settings and About.
+- Copy debug info in Settings: versions, connection, settings and recent errors for a bug report. It leaves out the phone link, watch words and all chat.
 - Classic skin: the tap cursor is gold so it shows on light rows.
 - Removed the star next to the command box. Star commands from the All commands list.
 

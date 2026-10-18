@@ -436,7 +436,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
     </section>
     <section class="tab" id="tab-alerts">
       <div class="top"><div class="big">Alerts</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="list" id="alerts"><div id="vent"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
+      <div class="list" id="alerts"><div id="vent"></div><div id="di"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
     </section>
   </div>
 
@@ -527,8 +527,17 @@ function dayLabel(ts) {
   return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) + " " + hhmm(ts);
 }
 function nowSec() { return Math.floor(Date.now() / 1000); }
+// Recent problems, kept in memory only, for "Copy debug info". Never holds the link or chat.
+var errLog = [];
+function logErr(text) {
+  errLog.push(new Date().toTimeString().slice(0, 8) + " " + String(text).slice(0, 160));
+  if (errLog.length > 20) errLog.shift();
+}
+window.addEventListener("error", function (e) { logErr("page error: " + (e.message || "unknown") + (e.lineno ? " (line " + e.lineno + ")" : "")); });
+window.addEventListener("unhandledrejection", function (e) { logErr("page error: " + ((e.reason && e.reason.message) || e.reason || "unknown")); });
 var toastTimer = null;
 function toast(text) {
+  logErr("toast: " + text);
   var t = $("toast");
   t.textContent = text;
   t.classList.add("on");
@@ -764,7 +773,7 @@ function connect() {
     if (es.readyState !== 2) return;
     // A closed stream is either the bridge being off or this link being replaced. Ask which.
     fetch("/api/status?t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}}).then(function (r) {
-      if (r.status === 403) { linkDead = true; render(); return; }
+      if (r.status === 403) { linkDead = true; logErr("link was replaced"); render(); return; }
       setTimeout(connect, 3000);
     }).catch(function () { setTimeout(connect, 3000); });
   };
@@ -772,7 +781,7 @@ function connect() {
 function setConnected(on) {
   if (on === connected) return;
   connected = on;
-  if (on) everConnected = true; else offlineSince = Date.now();
+  if (on) everConnected = true; else { offlineSince = Date.now(); logErr("lost connection to the bridge"); }
   render();
   if (!on) setTimeout(render, 3500);
 }
@@ -1527,6 +1536,8 @@ function tickCd() {
   });
   if (done) schedule();
 }
+// Apururu announces Domain Invasion on Unity. Matched by speaker only, so a reworded line still shows.
+function isDI(m) { return m.ch === "unity" && m.dir === "in" && /^apururu$/i.test(m.name || ""); }
 function renderAlerts() {
   var v = msgs.filter(function (m) { return m.ch === "venture"; });
   var hid = {};
@@ -1570,8 +1581,26 @@ function renderAlerts() {
   if (seals && !hid["s|" + seals.ts]) {
     h += '<div class="vstatus">' + ico("vent", 18) + "<span><b>Seals</b> &middot; " + (seals.zones ? zl(seals.zones, " &middot; ") : esc(seals.body)) + '</span><button class="ax" data-dismiss="s|' + seals.ts + '" aria-label="Dismiss">&times;</button></div>';
   }
+  // Safety net: a venture line the page doesn't understand (say CatsEye rewords Populox or the
+  // ventures addon) still shows as plain text instead of vanishing. Kept for 30 minutes.
+  var odd = v.filter(function (m) {
+    if (m.name === "Seals" || m.name === "Zone" || m.zones) return false;
+    if (m.name === "ventures" && m.area) return false;
+    if (m.name === "Populox" && pop.some(function (p) { return p.teaser === m.body && Math.abs(p.ts - m.ts) < 10; })) return false;
+    return m.ts >= nowSec() - 1800 && !hid["vo|" + m.ts + "|" + (m.body || "").slice(0, 24)];
+  }).slice(-3).reverse();
+  odd.forEach(function (m) {
+    h += card("vent", "var(--vent)", esc(m.name === "ventures" ? "Ventures addon" : (m.name || "Venture")), m.ts, '<div class="abody">' + fmt(m.body) + "</div>", "vo|" + m.ts + "|" + (m.body || "").slice(0, 24));
+  });
   if (zoneLine && zoneLine.ts >= DONE && !hid["z|" + zoneLine.ts]) h += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(zoneLine.body) + '</span><button class="ax" data-dismiss="z|' + zoneLine.ts + '" aria-label="Dismiss">&times;</button></div>';
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
+
+  // Domain Invasion: Apururu's Unity lines from the last 30 minutes. They also stay in Unity chat.
+  var di = msgs.filter(function (m) { return isDI(m) && m.ts >= nowSec() - 1800 && !hid["d|" + m.ts]; }).slice(-3).reverse();
+  $("di").innerHTML = di.length ? '<div class="sect">DOMAIN INVASION</div>' +
+    card("unity", "var(--unity)", "Apururu", di[0].ts, di.map(function (m, i) {
+      return '<div class="abody"' + (i ? ' style="color:var(--soft);font-size:14px"' : "") + ">" + fmt(m.body) + (i ? ' <span class="vt">' + hhmm(m.ts) + "</span>" : "") + "</div>";
+    }).join(""), di.map(function (m) { return "d|" + m.ts; }).join(";;")) : "";
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
   $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add words to watch in Settings.</div>' :
@@ -1594,7 +1623,7 @@ function renderAlerts() {
   msgs.forEach(function (m) {
     if (m.ts <= since) return;
     if (m._men) unseenMen++;
-    else if (m.ch === "venture" || m.ch === "server" || (S.bazaar && m.ch === "bazaar")) other = true;
+    else if (m.ch === "venture" || m.ch === "server" || isDI(m) || (S.bazaar && m.ch === "bazaar")) other = true;
   });
   var bd = $("bdg-alerts");
   bd.hidden = curTab === "alerts" || !(unseenMen || other);
@@ -1636,8 +1665,8 @@ function renderSettings() {
   var h = '<div class="sect">CONNECTION</div>' +
     srow("Bridge", connected ? "Connected" + (status.version ? " &middot; " + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
     (showQr ? '<div id="qrbox"></div><div class="sfoot" style="text-align:center;word-break:break-all">' + esc(link) + "</div>" : "") +
-    srow("Start with the game", "Turn on in <span class=\"code\">/pchat config</span>.", "") +
-    srow("New phone link", "In <span class=\"code\">/pchat config</span>, or type <span class=\"code\">/pchat newlink</span>.", "") +
+    srow("Start with the game", "Turn on in the <span class=\"code\">/pchat</span> window.", "") +
+    srow("New phone link", "In the <span class=\"code\">/pchat</span> window, or type <span class=\"code\">/pchat newlink</span>.", "") +
     '<div class="sect">CHANNELS</div>' +
     CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Trade spam. Read only." : (c === "shout" ? "Local area" : (c === "say" ? "Nearby" : (c === "finder" ? "Read only." : ""))), tog(S.master[c], "m." + c)); }).join("") +
     '<div class="sect">CALLS</div>' +
@@ -1668,6 +1697,7 @@ function renderSettings() {
     srow("What it sends", "Only what you tap: chat, emotes and CatsEye ! commands, one line per tap. Never game actions, never on its own.", "") +
     srow("On iPhone", "No tell notifications. It pauses when the phone locks and catches up when you come back.", "") +
     srow("Your data", "Stays on your home network. Only item links leave it, to BG-Wiki.", "") +
+    srow("Something wrong?", "Copy details for a bug report. Your phone link isn't included.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';
   $("settings").innerHTML = h;
   if (showQr && window.qrcode) {
@@ -1720,6 +1750,7 @@ $("settings").addEventListener("click", function (e) {
   if (!a) return;
   if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
   if (a.dataset.act === "export") { exportPrefs(); return; }
+  if (a.dataset.act === "debug") { showDebug(); return; }
   if (a.dataset.act === "import") { $("importin").click(); return; }
   if (a.dataset.act === "qr") { showQr = !showQr; loadQr(render); render(); }
   if (a.dataset.act === "clear") {
@@ -1839,6 +1870,44 @@ $("focus-filters").addEventListener("click", function (e) {
   focus.filter = b.dataset.f; seenCount["pane-focus"] = undefined; render();
 });
 var sheetHandler = null;
+// Debug info for bug reports. Leaves out the link, the token, watch words and all chat text.
+function debugText() {
+  var last = msgs.length ? msgs[msgs.length - 1].ts : 0;
+  var lines = [
+    "phonechatXI debug info",
+    "bridge: " + (status.version || "unknown") + (connected ? ", connected" : ", not connected") + (linkDead ? ", link replaced" : ""),
+    "character seen: " + (status.char ? "yes" : "no"),
+    "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
+    "settings: skin " + (S.skin || "midnight") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+      ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
+    "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
+    "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
+    "browser: " + navigator.userAgent,
+    "recent problems:" + (errLog.length ? "" : " none")
+  ];
+  return lines.concat(errLog.map(function (x) { return "  " + x; })).join("\n");
+}
+function showDebug() {
+  var text = debugText();
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">DEBUG INFO</div></div>' +
+    '<div class="sfoot" style="padding-top:0">Paste this into your bug report. It doesn\'t include your phone link or any chat.</div>' +
+    '<textarea id="dbgtxt" class="sinput" readonly style="height:240px;font:16px/1.35 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto">' + esc(text) + '</textarea>' +
+    '<div class="sbtns"><button class="sec" data-sb="x">Close</button><button class="pri" data-sb="copy">Copy</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    if (b.dataset.sb === "x") { closeSheet(); return; }
+    var ta = $("dbgtxt");
+    function fallback() {
+      ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (err) {}
+      toast(ok ? "Copied." : "Select the text and copy it.");
+    }
+    // The clipboard API needs https, which a home-network page doesn't have, so fall back.
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(ta.value).then(function () { toast("Copied."); }, fallback);
+    else fallback();
+  });
+}
 function openSheet(html, onClick) {
   $("sheet").innerHTML = html;
   sheetHandler = onClick;
@@ -1855,7 +1924,7 @@ $("scrim").addEventListener("click", closeSheet);
 
 function banner() {
   if (linkDead) {
-    return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat config</span> in game).</div>';
+    return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat</span> in game).</div>';
   }
   if (!connected && everConnected && Date.now() - offlineSince > 3000) {
     return '<div class="banner bad"><b>Bridge offline. Reconnecting...</b>Start it with <span class="code">/pchat start</span>. If the Deck\'s address changed, scan the QR again.</div>';
@@ -1968,7 +2037,7 @@ buildComposers();
 render();
 setTabH();
 if (!TOKEN) {
-  $("ban-chat").innerHTML = '<div class="banner bad"><b>Missing link token</b>Scan the QR in <span class="code">/pchat config</span>, or open the full link (it ends in ?t=...).</div>';
+  $("ban-chat").innerHTML = '<div class="banner bad"><b>Missing link token</b>Scan the QR in the <span class="code">/pchat</span> window, or open the full link (it ends in ?t=...).</div>';
 } else {
   connect();
   syncPrefs();
