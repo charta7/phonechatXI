@@ -17,6 +17,8 @@ Stricter checks:
 - The addon now checks `!` commands against the same list as the bridge, instead of accepting any `!word`.
 - The addon refuses a chat line whose message starts with a space, so `/s  !command` can't slip past the check for a leading `!`.
 - If the same line shows up twice in the outbox, the addon types it once.
+- Target tokens like `<st>` and `<lastst>` in a chat line are blocked by the bridge and the addon, so a line from the phone can never open target selection. `<t>`, `<me>` and `<call>` still work.
+- If two of your characters are logged in and both have had chat in the last 5 minutes, the bridge refuses to send and says why, so a line can't be typed by the wrong character.
 
 ### Reads
 
@@ -58,7 +60,7 @@ Chat
 - Mentions save as you type. Before, leaving the box with Back on iPhone lost them.
 - Mentions are for your name: up to 3 words, letters only, 2 to 15 characters each. Yell (trade spam) and emotes aren't checked, so "X waves to you" doesn't count as a mention. Your name is still highlighted in those lines.
 - The keyboard no longer capitalizes the first letter or autocorrects, so game words like Jeuno or Windurst aren't changed. Both can be turned back on in Settings, Typing. The command box never autocorrects (before, it could).
-- Only real items (`{{Item}}`) are linked. Auto-translate phrases are styled but not linked.
+- Only real items (`{{Item}}`) are linked. Auto-translate phrases are styled but not linked. Web addresses in chat are plain text, not links, so the only outside page the phone opens is a BG-Wiki item search.
 - Party Finder ads are styled like the game's: the poster's name stands out and the ad is in italics.
 - 12-hour (default) or 24-hour clock.
 - New lines fade in, unless Reduce Motion is on.
@@ -68,7 +70,7 @@ Chat
 
 Alerts
 - Tabs are Chat, Tells, Emotes, Server (CatsEye `!` commands) and Alerts (VNM, mentions, bazaar, notices). Emotes and the `!` commands each have their own tab instead of sharing one called Commands.
-- The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
+- The Server tab opens on the full `!` command list: one line each, a search box, a star to keep one at the bottom, and CONFIRM on the ones that change something. Tapping a command asks before it sends, from the list or from your starred row. Commands that need more after them, like `!box`, go in the box instead so you can finish typing. Replies show in a small area under the list.
 - Game modes: a command that only works in some of ACE, CW or WEW shows those modes' icons, and a filter (All, ACE, CW, WEW) under the search box shows only what works for your mode. The filter is remembered. It only tidies the list: favorites always show, and any command can still be typed and sent. The mode list lives in `commands.json` ("as of October 2026") and only labels and filters; it doesn't change what can be sent.
 - Emotes use a `/bow` tag as their icon everywhere (tab, chat lines, picker) instead of a smiley, so it's clear that's where the slash emotes are and it doesn't look like the `:)` emoticon button.
 - Ventures shows only Populox's VNM alert: VNM · Active with a 10 minute countdown, then VNM · Expired on one line. Only the latest VNM is shown.
@@ -80,7 +82,7 @@ Look and settings
 - The Tells banner about saving tells can be dismissed.
 - A settings gear on every tab. Tapping the current tab jumps to the newest line.
 - Scrollback: the bridge keeps 500, 1,000 or 2,000 lines.
-- Phone settings are also saved on the bridge, so a new Home Screen shortcut or a second phone picks them up. Export and Import back them up to a file.
+- Phone settings are also saved on the bridge, so a new Home Screen shortcut or a second phone picks them up. Export and Import back them up to a file. Your mention names, tell history and last tell target stay on the phone: they're never sent to the bridge or exported, and the bridge removes them from an older settings file when it starts.
 - Plainer wording in banners, tips, empty screens, Settings and About.
 - Copy debug info in Settings: versions, connection, settings and recent errors for a bug report. It leaves out the phone link, watch words and all chat.
 - Classic skin: the tap cursor is gold so it shows on light rows.

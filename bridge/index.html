@@ -128,7 +128,6 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .picked{animation:picked .7s ease-out}
 @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
 .tgt.bump{animation:bump .35s ease-out}
-a.url{color:#7fb2ff;background:#18254d;border-radius:6px;padding:0 6px;text-decoration:none;white-space:nowrap}
 /* compact */
 .cl{display:flex;gap:8px;align-items:flex-start}
 .cl .rail{align-self:stretch}
@@ -599,9 +598,21 @@ function save() {
   // Keep a copy on the bridge, so a new Home Screen shortcut or another phone gets them back.
   if (!prefsReady) return;
   clearTimeout(pushTimer);
-  pushTimer = setTimeout(function () { api("/api/prefs", {prefs: S}).catch(function () {}); }, 2500);
+  pushTimer = setTimeout(function () { api("/api/prefs", {prefs: shareable(S)}).catch(function () {}); }, 2500);
+}
+// Names stay on this phone: your mention names, who you've had tells with, and the last tell
+// target are never sent to the bridge or put in an export file.
+var PHONE_ONLY = ["watch", "read", "target"];
+function shareable(s) {
+  var out = JSON.parse(JSON.stringify(s));
+  PHONE_ONLY.forEach(function (k) { delete out[k]; });
+  return out;
 }
 function adopt(obj) {
+  var keep = {};
+  PHONE_ONLY.forEach(function (k) { keep[k] = S[k]; });
+  obj = shareable(obj || {});
+  PHONE_ONLY.forEach(function (k) { if (keep[k] !== undefined) obj[k] = keep[k]; });
   S = merged(obj);
   try { localStorage.setItem("pcxi", JSON.stringify(S)); } catch (e) {}
   applyLook(); setWatch(); buildComposers(); seenCount = {}; render();
@@ -616,7 +627,7 @@ function syncPrefs() {
   }).catch(function () { prefsReady = true; });
 }
 function exportPrefs() {
-  var blob = new Blob([JSON.stringify(S, null, 1)], {type: "application/json"});
+  var blob = new Blob([JSON.stringify(shareable(S), null, 1)], {type: "application/json"});
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
   a.download = "phonechatXI-settings.json";
@@ -815,12 +826,7 @@ function fmt(body) {
   if (S.calls !== "off") {
     h = h.replace(CALL_RE, function (all, n) { n = +n; return n >= 1 && n <= 25 ? '<span class="callp">CALL ' + n + "</span>" : all; });
   }
-  h = h.replace(URL_RE, function (u) {
-    var raw = u.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
-    var href = /^https?:/i.test(raw) ? raw : "https://" + raw;
-    var dom = href.replace(/^https?:\/\//i, "").split(/[\/?#]/)[0];
-    return '<a class="url" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(dom) + " &#8599;</a>";
-  });
+  // Web addresses stay plain text: the only outside page the phone opens is a BG-Wiki item search.
   // {{Item}} = an auto-translated item: link it. {Phrase} = auto-translate phrase or zone: style only.
   h = h.replace(/\{\{([^{}<>\n]{1,40})\}\}/g, function (all, name) {
     var q = name.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
@@ -1403,7 +1409,12 @@ function renderCmd() {
 $("cmdchips").addEventListener("click", function (e) {
   var c = e.target.closest("[data-chip]");
   if (!c) return;
-  sendCommand(c.dataset.chip, false, null);
+  var t = c.dataset.chip;
+  if (NEEDS_ARGS.test(t)) {
+    var i = cmdInput(); i.value = t + " "; i.dispatchEvent(new Event("input")); i.focus();
+    return;
+  }
+  askSend(t);    // starred commands ask before sending, same as the list
 });
 // Commands that need something after them (an item, an amount) go in the box so you can finish typing.
 var NEEDS_ARGS = /^!(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/;

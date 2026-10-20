@@ -579,6 +579,7 @@ for e in ([[amazed angry bell blush bow cheer clap comfort cry dance dance1 danc
     surprised think toss upset wave welcome yes]]):gmatch('%S+') do EMOTES[e] = true end
 local JOBS = {}
 for j in ('war mnk whm blm rdm thf pld drk bst brd rng sam nin drg smn blu cor pup dnc sch geo run'):gmatch('%S+') do JOBS[j] = true end
+local SUBTARGETS = { 'st', 'stpc', 'stnpc', 'stpt', 'stal', 'lastst' }
 -- CatsEye ! commands (same list as the bridge's commands.json, info and action together).
 local SERVER = {}
 for c in ([[artifacts currency dailies dailykills essences fatigue help hunter incursion keys lsstats maat
@@ -631,7 +632,13 @@ local function allowed(cmd)
         local first = body:sub(1, 1)
         if first == '/' or first == '!' then return false end
         -- No ; followed by a command, in case anything treats ; as "run the next command".
-        return body:find(';%s*[/!]') == nil
+        if body:find(';%s*[/!]') then return false end
+        -- No sub-target tokens: they make the game open target selection.
+        local low = body:lower()
+        for _, t in ipairs(SUBTARGETS) do
+            if low:find('<%s*' .. t .. '%s*>') then return false end
+        end
+        return true
     end
     local name = cmd:match('^/say !(%a+)$') or cmd:match('^/say !(%a+) [%w_%-][%w _%-]*$')
     if name then return SERVER[name:lower()] == true end

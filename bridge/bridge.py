@@ -64,12 +64,15 @@ SEND_QUEUE_MAX = 8              # lines waiting; more than this is refused
 CONFIRM_SECONDS = 8.0          # no echo from the game after this = "unconfirmed"
 FAIL_LINK_SECONDS = 5.0        # a mode 123 line this soon after a send = that send failed
 LINE_BYTES = 130                # FFXI's chat line limit; counted on the whole typed line, prefix included
+LIVE_SECONDS = 300              # a character with chat in this window counts as logged in
 TELLS_KEEP = 50                 # saved lines per person
 
 TARGETS = {"ls1": "/l", "ls2": "/l2", "party": "/p", "tell": "/t", "say": "/s", "shout": "/sh"}
 NAME_RE = re.compile(r"^[A-Za-z]{3,15}$")
 ARGS_RE = re.compile(r"^[A-Za-z0-9 _\-]{0,40}$")
 CALL_RE = re.compile(r"<\s*call\s*(\d{1,2})\s*>", re.I)
+# Sub-target tokens make the game open target selection. Never sent from the phone.
+SUBTARGET_RE = re.compile(r"<\s*(?:st|stpc|stnpc|stpt|stal|lastst)\s*>", re.I)
 ZONE_RE = re.compile(r"^\s*(.+?)\s*\(([A-Z]-\d+)\)\s*$")
 YELL_RE = re.compile(r"^(.+?)\[(.*)\]$")
 
@@ -302,10 +305,21 @@ class Sender(threading.Thread):
         self.pending = {}              # pid -> info, for chat lines waiting on the game's echo
         self.last_cmd = 0.0            # when the last command went out (for showing replies)
         self.char = None               # character the outbox belongs to
+        self.heard = {}                # character -> when their feed last had new lines
+
+    def check_one_char(self):
+        """Refuse to send while more than one character has had chat recently, so a line
+        can never be typed by a different character than the one you're reading."""
+        now = time.time()
+        live = sorted(c for c, t in list(self.heard.items()) if now - t < LIVE_SECONDS)
+        if len(live) > 1:
+            raise SendError("Sending is paused: %s are both logged in. It resumes about %d minutes after only one "
+                            "has chat." % (" and ".join(live), LIVE_SECONDS // 60))
 
     def outbox(self):
         if not self.char:
             raise SendError("The game is not connected yet (no character seen).")
+        self.check_one_char()
         return os.path.join(self.folder, "outbox-%s.log" % self.char)
 
     def enqueue(self, items):
@@ -327,6 +341,8 @@ class Sender(threading.Thread):
             raise SendError("Use the Emotes or Server tab for those, not chat.")
         if re.search(r";\s*[/!]", text):
             raise SendError("Blocked: a ; followed by a command.")
+        if SUBTARGET_RE.search(text):
+            raise SendError("Blocked: target tokens like <st> can't be sent from the phone.")
         prefix = TARGETS[target]
         if target == "tell":
             if not NAME_RE.fullmatch(peer or ""):
@@ -543,6 +559,8 @@ class Tailer(threading.Thread):
             except OSError:
                 return
             st["off"] += len(data)
+            if data.strip():
+                self.sender.heard[char] = time.time()
             data = st["buf"] + data
             lines = data.split(b"\n")
             st["buf"] = lines.pop()
@@ -625,13 +643,19 @@ def new_link():
 
 
 PREFS_MAX = 64 * 1024
+# Phone settings that stay on the phone: mention names, tell history, last tell target.
+PHONE_ONLY = ("watch", "read", "target")
+
+
+def strip_private(prefs):
+    return {k: v for k, v in prefs.items() if k not in PHONE_ONLY}
 
 
 def load_prefs(folder):
     try:
         with open(os.path.join(folder, "phone-settings.json"), "r", encoding="utf-8") as f:
             data = json.load(f)
-        return data if isinstance(data, dict) else None
+        return strip_private(data) if isinstance(data, dict) else None
     except (OSError, ValueError):
         return None
 
@@ -640,7 +664,7 @@ def save_prefs(folder, prefs):
     path = os.path.join(folder, "phone-settings.json")
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(prefs, f)
+        json.dump(strip_private(prefs), f)
     os.replace(tmp, path)
 
 
@@ -983,6 +1007,12 @@ def main():
         except OSError:
             pass
     start_fresh(folder)
+    old_prefs = load_prefs(folder)
+    if old_prefs is not None:
+        try:
+            save_prefs(folder, old_prefs)      # rewrites an older file without names in it
+        except OSError:
+            pass
     port = int(cfg["port"])
     url = "http://%s:%d/?t=%s" % (lan_ip(), port, cfg["token"])
 

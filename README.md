@@ -31,15 +31,15 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Views, like the game's chat windows. All, Linkshells and Party & tells are built in, and you can add your own.
 - A Tells tab with a thread per person.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
-- Linked items (`{{Suppanomimi}}`) open a BG-Wiki search.
+- Linked items (`{{Suppanomimi}}`) open a BG-Wiki search. Web addresses in chat show as plain text.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
-- A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends.
+- A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends, starred ones too.
 - An Alerts tab: Populox's VNM alert with a 10 minute countdown, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
 - An emoticon button. Emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
-- Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported.
+- Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
 
 <p>
   <img src="docs/screenshots/skin-midnight.png" width="180" alt="Midnight skin">
@@ -57,7 +57,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 ## What it won't do
 
 - Automate anything. Every line, emote or command is one tap from you. No auto-replies, timers, repeats or macros, and nothing reacts to chat. Mentions only highlight.
-- Take game actions. `/ma`, `/ja`, `/ws`, `/item`, `/attack`, `/follow`, targeting and movement are blocked.
+- Take game actions. `/ma`, `/ja`, `/ws`, `/item`, `/attack`, `/follow`, targeting and movement are blocked, and so are target tokens like `<st>` in a chat line.
 - Use `/yell`.
 - Split messages. One tap sends one line of 130 characters at most, and no more than one line per second.
 - Read the combat log.
@@ -148,6 +148,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 - Safari pauses the page when the phone locks or you switch apps. It catches up when you come back, as long as the bridge kept running.
 - The screen sleeps on its normal timer. Raise Auto-Lock in iPhone Settings to keep it on longer.
 - If your router gives the Deck a new address, the saved link breaks. Scan the QR code again, or reserve an address for the Deck in your router (a DHCP reservation).
+- One character at a time. If two characters are logged in and both have chat, sending pauses so a line can't come from the wrong one. It resumes about 5 minutes after only one has chat.
 - Home Wi-Fi only. The link and chat aren't encrypted, so on public Wi-Fi anyone on the network could see them, and anyone with your link could read and send.
 
 ## Troubleshooting
@@ -161,6 +162,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
 | A message says "unconfirmed" | The game didn't echo it back within a few seconds. Check in game before sending again. |
 | A message says "failed" | The game rejected it, usually a tell to someone offline. |
+| "Sending is paused" | Two of your characters are logged in. Log one out; sending resumes about 5 minutes after it last had chat. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
 | Page says "This link was replaced" | Scan the new QR code and remove the old shortcut. |
 | Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose). |
@@ -169,7 +171,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 - Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
-- Phone settings (views, colors, your name for mentions) are saved on the bridge in `phone-settings.json`. No chat goes in that file.
+- Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names and who you've had tells with stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.
 
 ## About the code
