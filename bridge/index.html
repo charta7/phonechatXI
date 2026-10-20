@@ -1561,7 +1561,7 @@ function renderTells() {
     '<span class="bt">Tells clear when the bridge stops.<button class="linkbtn" data-go="settings">Save them</button></span>';
   $("ban-tells").innerHTML = S.tellsBan ? "" : '<div class="banner info dis">' + tb + '<button class="ax" data-bandis="tells" aria-label="Dismiss">&times;</button></div>';
   $("tells-list").innerHTML = peers.length ? peers.map(function (p) {
-    var m = p.last, prev = m.state === "failed" ? (m.reason || "Not delivered") : ((m.dir === "out" ? "&gt;&gt; " : "") + esc(m.body));
+    var m = p.last, prev = m.state === "failed" ? esc(m.reason || "Not delivered") : ((m.dir === "out" ? "&gt;&gt; " : "") + esc(m.body));
     return '<button class="lrow" data-thread="' + esc(p.name) + '"><div class="av">' + esc(p.name.charAt(0).toUpperCase()) + '</div><div class="lmain"><div class="ltop"><b>' + esc(p.name) + (p.saved ? '<span class="tag">SAVED</span>' : "") + "</b><span>" + hhmm(m.ts) + '</span></div><div class="lsub' + (p.failed ? " bad" : "") + '">' + prev + "</div></div>" + (p.unread ? '<span class="cnt">' + p.unread + "</span>" : "") + "</button>";
   }).join("") : '<div class="empty">No tells yet.</div>';
   var total = peers.reduce(function (n, p) { return n + p.unread; }, 0);

@@ -3,9 +3,9 @@ rem phonechatXI bridge for Windows. /pchat start in game runs this; you can also
 title phonechatXI bridge
 cd /d "%~dp0"
 rem Prefer the py launcher: a bare "python" can be the Microsoft Store stub.
-where py >/dev/null 2>nul
+where py >nul 2>nul
 if not errorlevel 1 goto run_py
-where python >/dev/null 2>nul
+where python >nul 2>nul
 if not errorlevel 1 goto run_python
 echo.
 echo Python 3 is not installed, or not on PATH.

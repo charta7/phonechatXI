@@ -64,7 +64,7 @@ Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Stea
 - Read other addons. Lines they print are ignored, the ventures addon's included.
 - Go online. There's no cloud or outside server. The only outside page is BG-Wiki, when you tap an item.
 
-What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
+What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again against the same list right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
 <p>
   <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
@@ -77,7 +77,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 - Reads "X examines you", Party Finder ads, bazaar visits (off by default) and the LS message of the day.
 - Starts and stops the bridge when you ask, and shows the QR code in an in-game window.
-- Sends the same list as 1.0.0. A `;` followed by a command is now blocked.
+- Sends the same list as 1.0.0. A `;` followed by a command is now blocked, and so is text the game's own chat box can't type (like raw auto-translate bytes).
 
 ## How it works
 
@@ -138,7 +138,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | `/pchat start`, `/pchat stop` | Starts or stops the bridge |
 | `/pchat url` | Prints the phone link |
 | `/pchat newlink` | Makes a new phone link. The old one stops working. |
-| `/pchat debug` | Logs every chat line with its mode number, for troubleshooting |
+| `/pchat debug` | Logs every line the game shows, with its mode number, for troubleshooting. That includes other players' chat and combat lines, so don't post the log publicly. Your phone link is left out. |
 
 `/pcxi` and `/phonechat` work too.
 
@@ -148,7 +148,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 - Safari pauses the page when the phone locks or you switch apps. It catches up when you come back, as long as the bridge kept running.
 - The screen sleeps on its normal timer. Raise Auto-Lock in iPhone Settings to keep it on longer.
 - If your router gives the Deck a new address, the saved link breaks. Scan the QR code again, or reserve an address for the Deck in your router (a DHCP reservation).
-- Home Wi-Fi only. On public Wi-Fi, anyone with your link could read and send.
+- Home Wi-Fi only. The link and chat aren't encrypted, so on public Wi-Fi anyone on the network could see them, and anyone with your link could read and send.
 
 ## Troubleshooting
 
@@ -167,7 +167,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 ## Privacy
 
-- Chat is held in the bridge's memory and is gone when it stops. The feed file is cleared when the bridge starts and when the addon loads.
+- Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
 - Phone settings (views, colors, your name for mentions) are saved on the bridge in `phone-settings.json`. No chat goes in that file.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.

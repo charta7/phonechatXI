@@ -163,7 +163,7 @@ class Tells:
             return
         peer = msg.get("name") or ""
         char = msg.get("char") or ""
-        if not NAME_RE.match(peer) or not re.match(r"^[\w\-]+$", char):
+        if not NAME_RE.fullmatch(peer) or not re.fullmatch(r"[A-Za-z0-9_\-]+", char):
             return
         row = {k: msg[k] for k in ("ts", "dir", "name", "body")}
         path = self._path(char, peer)
@@ -224,9 +224,11 @@ class SendError(Exception):
 
 def clean_text(text):
     text = "".join(CURLY.get(c, c) for c in (text or ""))
-    text = re.sub(r"[\x00-\x1f\x7f]", " ", text)          # control characters and newlines
+    text = re.sub(r"[\x00-\x1f\x7f-\x9f]", " ", text)     # control characters and newlines
     out = []
     for c in text:
+        if "\ue000" <= c <= "\uf8ff":
+            continue    # private use: cp932 turns some of these into raw 0xFD-0xFF bytes (0xFD = auto-translate)
         try:
             c.encode("cp932")
         except UnicodeEncodeError:
@@ -284,7 +286,7 @@ class Commands:
         name, args = m.group(1).lower(), (m.group(2) or "").strip()
         if name not in self.info and name not in self.action:
             raise SendError("Blocked: not an allowed command.")
-        if not ARGS_RE.match(args):
+        if not ARGS_RE.fullmatch(args):
             raise SendError("Blocked: arguments can only use letters, numbers, spaces, _ and -.")
         if name in self.action and not confirmed:
             raise SendError("needs_confirm")
@@ -327,7 +329,7 @@ class Sender(threading.Thread):
             raise SendError("Blocked: a ; followed by a command.")
         prefix = TARGETS[target]
         if target == "tell":
-            if not NAME_RE.match(peer or ""):
+            if not NAME_RE.fullmatch(peer or ""):
                 raise SendError("Tell needs a character name (letters only).")
             prefix = "/t " + peer
         room = LINE_BYTES - len((prefix + " ").encode("cp932"))
@@ -757,9 +759,12 @@ class Handler(BaseHTTPRequestHandler):
     def send_json(self, code, obj):
         self.send_body(code, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
 
+    def token_ok(self, given):
+        # Compared as bytes: compare_digest raises on non-ASCII str.
+        return bool(given) and secrets.compare_digest(given.encode("utf-8"), self.token.encode("utf-8"))
+
     def authed(self, q):
-        given = self.headers.get("X-Token") or (q.get("t") or [""])[0]
-        return bool(given) and secrets.compare_digest(given, self.token)
+        return self.token_ok(self.headers.get("X-Token") or (q.get("t") or [""])[0])
 
     def static(self, name, ctype):
         try:
@@ -771,6 +776,11 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         q = parse_qs(u.query)
+        # Same Host check as POST, on every page: stops a web page that points its own name at
+        # this machine (DNS rebinding) from reading /setup, the link or the chat stream.
+        if not host_ok(self.headers.get("Host")):
+            self.send_body(403, "bad host")
+            return
         if u.path == "/favicon.ico":
             self.static("icons/favicon-32.png", "image/png")
             return
@@ -826,7 +836,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Content-Length", "0")
             self.end_headers()
             return
-        if not self.headers.get("X-Token") or not secrets.compare_digest(self.headers.get("X-Token"), self.token):
+        if not self.token_ok(self.headers.get("X-Token") or ""):
             self.send_body(403, "forbidden")
             return
         if not (self.headers.get("Content-Type") or "").startswith("application/json"):
@@ -834,7 +844,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            if n > (PREFS_MAX if u.path == "/api/prefs" else 4096):
+            if n < 0 or n > (PREFS_MAX if u.path == "/api/prefs" else 4096):
                 raise ValueError
             body = json.loads(self.rfile.read(n) or b"{}")
             if not isinstance(body, dict):

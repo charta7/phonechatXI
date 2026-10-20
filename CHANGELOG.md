@@ -10,17 +10,24 @@ Includes 1.0.1, which was never released on its own. This version reads new kind
 
 Same fixed list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap sends one line, 130 characters at most, one line per second. No automation.
 
-Two checks are stricter:
+Stricter checks:
 - A chat line with a `;` followed by a command (like `hi ; /wave`) is blocked by the bridge and the addon.
 - The bridge looks for a leading `/` or `!` after cleaning the text, so a hidden character can't get a command past it.
+- Text the game's own chat box can't type is blocked by both: raw auto-translate bytes (0xFD), stray single bytes and private-use characters. Before, a few private-use characters on the phone turned into those bytes.
+- The addon now checks `!` commands against the same list as the bridge, instead of accepting any `!word`.
+- The addon refuses a chat line whose message starts with a space, so `/s  !command` can't slip past the check for a leading `!`.
+- If the same line shows up twice in the outbox, the addon types it once.
 
 ### Reads
 
 - "X examines you" lines, shown with emotes.
-- Other players' emotes on every chat mode they use. Emotes were already read in 1.0.0.
 - Party Finder ads, as their own chat channel (on by default). Not shown in Alerts.
-- Bazaar visits ("X begins to browse your bazaar"). Off by default.
+- Bazaar visits ("X begins to browse your bazaar"). Always read, but only shown on the phone if you turn it on (off by default).
 - The linkshell message of the day, pinned above chat instead of listed in Notices.
+- Party Finder ads and bazaar visits are also picked out of server messages.
+
+No longer read (1.0.0 read these):
+- Lines containing "venture" from the plain system-message modes and from server messages. Ventures now shows only Populox's VNM alert, which comes from Unity chat as before.
 
 ### Addon and setup
 
@@ -28,11 +35,15 @@ Two checks are stricter:
 - The addon starts and stops the bridge: `/pchat start`, `/pchat stop`, or Start with the game. Tested on Steam Deck in Game Mode. Windows is untested.
 - An in-game window (`/pchat`) with bridge on/off, the QR code, New phone link and settings. It opens by itself the first time. `/pchat help` prints the commands in chat.
 - `/phonechat` works as a command.
-- `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB.
+- `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB (counting what's already in the file), and never includes your phone link.
 - The bridge logs to `~/phonechat/bridge.log` on the Deck.
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
 - Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
 - GitHub issue templates for bug reports and requests.
+- The bridge refuses requests that use another site's name for this computer, on every page (it already did for sending). This stops a web page from reading the setup page or chat through a renamed address.
+- The ACE, CW and WEW icons are now copied with the bridge, so they show after an install.
+- Windows: fixed a Linux-style redirect in the start script that most likely made it report Python as missing. Windows is still untested.
+- In the Tells list, a "failed" reason from the game is shown as text.
 - The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code is removed from the repo; it's still in the 1.0.0 history.
 
 ### Phone page

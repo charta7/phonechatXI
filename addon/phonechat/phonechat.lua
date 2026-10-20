@@ -6,7 +6,7 @@
 
     What it will type (anything else is dropped, even if the bridge asks):
         /l  /l2  /p  /s  /sh  /t Name   followed by your message
-        /say !command [simple arguments]     CatsEye server commands
+        /say !command [simple arguments]     CatsEye server commands (only those in commands.json)
         /wave, /bow ... [motion|text]       stock emotes (and /sitchair 1-4, /jobemote job)
     It never types anything on its own: no auto replies, triggers, timers or repeats.
     Each line comes from one tap on the phone.
@@ -264,11 +264,26 @@ local function emit(channel, dir, name, body)
     end
 end
 
+local function file_size(path)
+    local f = io.open(path, 'rb')
+    if f == nil then return 0 end
+    local n = f:seek('end') or 0
+    f:close()
+    return n
+end
+
 local function debug_log(raw_mode, mode, message, injected)
     if not S.debug then return end
     local path = S.dir .. 'debug-' .. (S.name or 'unknown') .. '.log'
+    if S.debug_for ~= path then
+        -- Count what's already in the file (from earlier sessions) toward the 2 MB cap.
+        S.debug_for = path
+        S.debug_bytes = file_size(path)
+    end
+    -- Never write the phone link token: our own "Phone link: ...?t=..." lines come back here.
+    local text = (tostring(message or ''):gsub('([?&]t=)[%w_%-]+', '%1(removed)'))
     local line = ('%s\t%d\t%d\t%s%s\n'):format(os.date('%H:%M:%S'), raw_mode, mode,
-        injected and '[addon] ' or '', esc(message))
+        injected and '[addon] ' or '', esc(text))
     if S.debug_bytes + #line > DEBUG_MAX then
         write_file(path, '')          -- start over instead of growing forever
         S.debug_bytes = 0
@@ -564,6 +579,34 @@ for e in ([[amazed angry bell blush bow cheer clap comfort cry dance dance1 danc
     surprised think toss upset wave welcome yes]]):gmatch('%S+') do EMOTES[e] = true end
 local JOBS = {}
 for j in ('war mnk whm blm rdm thf pld drk bst brd rng sam nin drg smn blu cor pup dnc sch geo run'):gmatch('%S+') do JOBS[j] = true end
+-- CatsEye ! commands (same list as the bridge's commands.json, info and action together).
+local SERVER = {}
+for c in ([[artifacts currency dailies dailykills essences fatigue help hunter incursion keys lsstats maat
+    mog pass pf points pops prestige quest re rifts rubyweather scroll skills summitcalc trials vault
+    ventures wspoints box chef config dawnunstuck delexp newadventurer sanction sigil signet skipfloor
+    summit summitnotify summitreward venture]]):gmatch('%S+') do SERVER[c] = true end
+
+-- Is this valid Shift-JIS text the game's own chat box could produce? Rejects bytes no keyboard
+-- can type: a lone 0x80 or 0xA0, 0xFD-0xFF (0xFD starts an auto-translate block), the
+-- unused and user-defined rows (lead bytes 0xEF-0xF9) and a lead byte without a valid second byte.
+local function sjis_ok(s)
+    local i, n = 1, #s
+    while i <= n do
+        local b = s:byte(i)
+        if b < 0x80 then
+            i = i + 1
+        elseif b >= 0xA1 and b <= 0xDF then            -- half-width katakana
+            i = i + 1
+        elseif (b >= 0x81 and b <= 0x9F) or (b >= 0xE0 and b <= 0xEE) or (b >= 0xFA and b <= 0xFC) then
+            local t = s:byte(i + 1)
+            if t == nil or t < 0x40 or t == 0x7F or t > 0xFC then return false end
+            i = i + 2
+        else
+            return false                               -- 0x80, 0xA0, 0xEF-0xF9, 0xFD-0xFF
+        end
+    end
+    return true
+end
 
 local function emote_ok(cmd)
     local name, opt = cmd:match('^/(%l[%l%d]*)$'), ''
@@ -578,22 +621,36 @@ end
 local function allowed(cmd)
     if cmd:find('[%z\1-\31\127]') then return false end
     if #cmd > 130 then return false end      -- FFXI's chat line limit; nothing longer is ever typed
+    if not sjis_ok(cmd) then return false end
     local body = cmd:match('^/l2? (.+)$') or cmd:match('^/p (.+)$') or cmd:match('^/sh (.+)$')
               or cmd:match('^/s (.+)$') or cmd:match('^/t %a+ (.+)$')
     if body then
+        -- The bridge never sends a message that starts with a space, so "/s  !cmd" is refused too.
+        if body:find('^%s') then return false end
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
         local first = body:sub(1, 1)
         if first == '/' or first == '!' then return false end
         -- No ; followed by a command, in case anything treats ; as "run the next command".
         return body:find(';%s*[/!]') == nil
     end
-    if cmd:match('^/say ![%a]+$') or cmd:match('^/say ![%a]+ [%w _%-]+$') then return true end
+    local name = cmd:match('^/say !(%a+)$') or cmd:match('^/say !(%a+) [%w_%-][%w _%-]*$')
+    if name then return SERVER[name:lower()] == true end
     return emote_ok(cmd)
 end
+
+-- Ids of recent outbox lines, so a line that shows up twice is only typed once.
+local seen_ids, seen_order = {}, {}
 
 local function take_line(line)
     local id, ts, cmd = line:match('^([%w%-]+)\t(%d+)\t(.+)$')
     if id == nil then return end
+    if seen_ids[id] then
+        S.dropped = S.dropped + 1
+        return
+    end
+    seen_ids[id] = true
+    seen_order[#seen_order + 1] = id
+    if #seen_order > 200 then seen_ids[table.remove(seen_order, 1)] = nil end
     if math.abs(os.time() - tonumber(ts)) > STALE_SECONDS then
         S.dropped = S.dropped + 1
         return

@@ -26,6 +26,6 @@ python3 replay.py sample-debug-Charta.log --instant
 
 `--fast` plays at 5x, and `--instant` doesn't wait between lines. Without the game, auto-translate isn't expanded, so items show as `[item]`.
 
-To get a log, turn on `/pchat debug` on an approved version, play normally, then turn it off. Debug logs hold other players' chat, so don't share them publicly. `sample-debug-Charta.log` is a made-up one in the same format.
+To get a log, turn on `/pchat debug` on an approved version, play normally, then turn it off. Debug logs hold other players' chat and combat lines, so don't share them publicly. Like the addon, `replay.py` empties that character's feed file in the bridge folder when it starts. `sample-debug-Charta.log` is a made-up one in the same format.
 
 Both tools need Python 3.7 or newer. Pass `--dir` if the bridge's folder isn't `~/phonechat`.

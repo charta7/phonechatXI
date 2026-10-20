@@ -1,4 +1,4 @@
-# build 20261018-015605
+# build 20261020-030854
 README.md
 bridge.py
 commands.json
@@ -15,6 +15,9 @@ fonts/jetbrains-mono-latin-700-normal.woff2
 icons/apple-touch-icon.png
 icons/favicon-32.png
 icons/icon-512.png
+icons/mode-ace.png
+icons/mode-cw.png
+icons/mode-wew.png
 icons/pearl-48.png
 icons/pearl-96.png
 icons/wordmark.png
