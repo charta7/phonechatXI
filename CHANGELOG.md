@@ -17,15 +17,18 @@ Stricter checks:
 - The addon now checks `!` commands against the same list as the bridge, instead of accepting any `!word`.
 - The addon refuses a chat line whose message starts with a space, so `/s  !command` can't slip past the check for a leading `!`.
 - If the same line shows up twice in the outbox, the addon types it once.
+- A tell is shown as "failed" only when the game says "Your tell was not received". Before, any system message right after a send could mark it failed and invite a second send.
 - Target tokens like `<st>` and `<lastst>` in a chat line are blocked by the bridge and the addon, so a line from the phone can never open target selection. `<t>`, `<me>` and `<call>` still work.
 - If two of your characters are logged in and both have had chat in the last 5 minutes, the bridge refuses to send and says why, so a line can't be typed by the wrong character.
 
 ### Reads
 
 - "X examines you" lines, shown with emotes.
+- Other players' emotes ("X points at Y."), shown with emotes. 1.0.0 only showed the emote lines in chat mode 7.
+- Replies to a `!` command you send from the phone, for 10 seconds after it's typed (like the `!points` totals). They show only in the Server tab's reply area, never in chat. A command typed in game doesn't open this window.
 - Party Finder ads, as their own chat channel (on by default). Not shown in Alerts.
 - Bazaar visits ("X begins to browse your bazaar"). Always read, but only shown on the phone if you turn it on (off by default).
-- The linkshell message of the day, pinned above chat instead of listed in Notices.
+- The linkshell message of the day, pinned above the chat for its linkshell. Only the message is read, not the date it was set.
 - Party Finder ads and bazaar visits are also picked out of server messages.
 
 No longer read (1.0.0 read these):

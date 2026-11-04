@@ -75,7 +75,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 ### New in 1.1.0 (not reviewed yet)
 
-- Reads "X examines you", Party Finder ads, bazaar visits (off by default) and the LS message of the day.
+- Reads "X examines you", other players' emotes, Party Finder ads, bazaar visits (off by default), the LS message of the day, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
 - Starts and stops the bridge when you ask, and shows the QR code in an in-game window.
 - Sends the same list as 1.0.0. A `;` followed by a command is now blocked, and so is text the game's own chat box can't type (like raw auto-translate bytes).
 

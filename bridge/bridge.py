@@ -387,11 +387,16 @@ class Sender(threading.Thread):
         return best
 
     def match_failure(self, body):
+        # Only the game's own tell failure ("Your tell was not received. The recipient is either
+        # offline or changing areas.") marks a send as failed. Any other system line is ignored, so
+        # a sent line is never shown as failed by mistake (which would invite a second send).
+        if "not received" not in (body or "").lower():
+            return
         now = time.time()
         with self.lock:
             hit = None
             for pid, p in sorted(self.pending.items(), key=lambda kv: -kv[1]["at"]):
-                if p["state"] == "sending" and now - p["at"] <= FAIL_LINK_SECONDS and p["ch"] in ("tell", "party"):
+                if p["state"] == "sending" and now - p["at"] <= FAIL_LINK_SECONDS and p["ch"] == "tell":
                     hit = pid
                     break
             hits = []

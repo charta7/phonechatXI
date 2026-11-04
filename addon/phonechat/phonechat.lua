@@ -99,6 +99,7 @@ local MODES = {
     [10]  = { 'shout',  'in'  },
     [11]  = { 'yell',   'in'  },
     [7]   = { 'emote',  'in'  },
+    [15]  = { 'emote',  'in'  },   -- other players' emotes ("X points at Y.")
     [208] = { 'emote',  'in'  },   -- "X examines you."
     [123] = { 'system', 'in'  },
     [200] = { 'server', 'in'  },
@@ -108,6 +109,10 @@ local MODES = {
 -- Plain system-message modes that can carry Party Finder ads and bazaar
 -- visits. Combat modes are never on this list.
 local NOTICE_MODES = { [9] = true, [121] = true, [127] = true, [131] = true, [142] = true }
+
+local MOTD_MODE   = 217   -- linkshell message of the day: "[n]< LS name: set by >", then the message
+local REPLY_MODE  = 9     -- replies to ! server commands ("CatsEyeXI: Domain Shards (...)")
+local REPLY_WAIT  = 10    -- seconds after we type a ! command that its replies are passed on
 
 ----------------------------------------------------------------------------------------------------
 -- Helpers
@@ -704,7 +709,12 @@ local function send_next()
     local ok = pcall(function ()
         AshitaCore:GetChatManager():QueueCommand(1, cmd)
     end)
-    if ok then S.sent = S.sent + 1 else S.errors = S.errors + 1 end
+    if ok then
+        S.sent = S.sent + 1
+        if cmd:sub(1, 6) == '/say !' then S.cmd_at = os.clock() end   -- its replies are read for REPLY_WAIT s
+    else
+        S.errors = S.errors + 1
+    end
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -772,6 +782,24 @@ local function handle_line(raw_mode, message)
             end
             return
         end
+        -- Replies to a ! command typed from the phone, only for a few seconds after it was typed.
+        if mode == REPLY_MODE and S.cmd_at and os.clock() - S.cmd_at <= REPLY_WAIT then
+            if not system_line(text) then emit('echo', 'in', '', text) end
+            return
+        end
+    end
+
+    -- Linkshell message of the day: a "[n]< LS name: set by >" line, then the message itself.
+    if mode == MOTD_MODE then
+        local n = text:match('^%[(%d)%]<.*>$')
+        if n == '1' or n == '2' then
+            S.motd_for = { n = n, at = os.clock() }
+        elseif S.motd_for and os.clock() - S.motd_for.at <= 5 then
+            local msg = (text:gsub('%s*%(%d%d%d%d, [^%)]*%)%s*$', ''))   -- drop the "(2026, Jul. 21 23:18:24)" stamp
+            if msg ~= '' then emit('motd', 'in', 'ls' .. S.motd_for.n, msg) end
+            S.motd_for = nil
+        end
+        return
     end
 
     local info = MODES[mode]
