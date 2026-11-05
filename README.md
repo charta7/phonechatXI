@@ -176,7 +176,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 - Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
 - Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names, who you've had tells with, and the alert cards you've dismissed stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
-- Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If someone else might have it, make a new link with `/pchat newlink` and the old one stops working.
+- Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If you'd like to refresh it, make a new link with `/pchat newlink` and the old one stops working.
 
 ## About the code
 
