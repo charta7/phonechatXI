@@ -17,7 +17,7 @@ There are three parts:
 - The bridge, a small Python program on the same machine as the game. It serves the phone page, comes in the addon zip, and the addon starts it.
 - The phone page. Add it to your Home Screen and it opens like an app.
 
-Needs Ashita v4 (the CatsEye launcher), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck with an iPhone.
+Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck and on Windows 11, with an iPhone.
 
 <p>
   <img src="docs/screenshots/chat.png" width="220" alt="Chat feed with linkshell, party, tells, say and shout">
@@ -90,7 +90,7 @@ The addon writes chat lines to a feed file, and the bridge streams them to the p
 
 When the bridge runs, a small window called "phonechatXI bridge" sits next to the game (minimized on Windows). That's the local relay: it says what it is, shows your phone link, and notes when the game or a phone connects. Leave it open while you use phonechatXI. `/pchat stop` or closing the window turns phone chat off. If the game closes or freezes (or the addon is unloaded), the window says so; after 10 seconds without the game it gives you 90 seconds to close it, wait for the game to come back, or let it close by itself. A bridge started without the game (Desktop Mode, the test tools) stays open.
 
-The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows. On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
+The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows (`<VanaCore>\config\addons\phonechat\` on VanaCore). On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
 
 ## Install
 
@@ -106,14 +106,16 @@ The bridge is copied to `/home/deck/phonechat/` the first time it starts. To run
 
 If you used the old Decky plugin, uninstall it in Decky. Keep `~/phonechat`, because your link is saved there.
 
-### Windows (untested)
+### Windows
 
-Windows isn't tested or supported yet. These steps have never been run.
-
-1. Install Python 3 from [python.org](https://www.python.org/downloads/) and tick **Add python.exe to PATH**.
+1. Install Python 3 from [python.org](https://www.python.org/downloads/) (any version from 3.7 up). Say yes when it offers to add Python to your PATH. Then close and reopen the CatsEye launcher, so the game sees Python.
 2. Add the zip with the launcher's Add New Addon and turn it on.
-3. In game, type `/pchat` and click **Start**. Leave the bridge window open. If Windows asks about the firewall, allow private networks.
+3. In game, type `/pchat` and click **Start**. A small "phonechatXI bridge" window opens minimized next to the game: that's the local relay. If Windows asks about the firewall, allow private networks.
 4. Scan the QR code in the phonechatXI window.
+
+The addon puts the bridge in `<Ashita>\config\addons\phonechat\` (on VanaCore, `<VanaCore>\config\addons\phonechat\`), so you never move files by hand. Ashita and VanaCore each keep their own copy and phone link.
+
+Tested on Windows 11 with Python 3.15, on Ashita and on VanaCore's beta: chat, tells, sending from the phone, and starting and stopping the bridge from the game. The in-game part was tested with the approved 1.0.0; 1.1's own setup steps were tested off the game until 1.1 is approved.
 
 ### Updating
 
@@ -121,14 +123,14 @@ Windows isn't tested or supported yet. These steps have never been run.
 2. In the CatsEye launcher, use Add New Addon and pick the new zip.
 3. Start the game and the bridge as usual. The bridge updates itself.
 
-The phone page updates itself, and nothing you've set up is lost. Your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`), which updates don't touch. For a new Home Screen icon, remove the shortcut and add it again.
+The phone page updates itself, and nothing you've set up is lost. Your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`, or VanaCore's), which updates don't touch. For a new Home Screen icon, remove the shortcut and add it again.
 
 If the bridge was running from Desktop Mode during the update, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`.
 
 ### Uninstall
 
 1. `/pchat stop`, then remove the addon in the launcher.
-2. Delete `/home/deck/phonechat/` (Deck) or `<Ashita>\config\addons\phonechat\` (Windows).
+2. Delete `/home/deck/phonechat/` (Deck) or `<Ashita>\config\addons\phonechat\` (Windows; `<VanaCore>\config\addons\phonechat\` on VanaCore).
 3. Remove the shortcut from your Home Screen.
 
 ## In-game commands
@@ -163,7 +165,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | "Port in use" | Another bridge is running, often the old Decky one. Uninstall the Decky plugin, or `/pchat stop` and start again. |
 | Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
 | A message says "unconfirmed" | The game didn't echo it back within a few seconds. Check in game before sending again. |
-| Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should be `<Ashita>\config\addons\phonechat`. If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
+| Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should match the folder at the bottom of the `/pchat` window (`<Ashita>\config\addons\phonechat`, or VanaCore's). If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
 | A message says "failed" | The game rejected it, usually a tell to someone offline. |
 | "Sending is paused" | Two of your characters are logged in. Log one out; sending resumes about 5 minutes after it last had chat. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |

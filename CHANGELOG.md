@@ -37,7 +37,7 @@ No longer read (1.0.0 read these):
 ### Addon and setup
 
 - One zip. Add it with the CatsEye launcher's Add New Addon. The bridge is inside it, and the addon copies it out the first time it starts it. Updates keep your phone link.
-- The addon starts and stops the bridge: `/pchat start`, `/pchat stop`, or Start with the game. Tested on Steam Deck in Game Mode. Windows is untested.
+- The addon starts and stops the bridge: `/pchat start`, `/pchat stop`, or Start with the game. Tested on Steam Deck in Game Mode, and on Windows 11 (Ashita and VanaCore's beta).
 - An in-game window (`/pchat`) with bridge on/off, the QR code, New phone link and settings. It opens by itself the first time. `/pchat help` prints the commands in chat.
 - `/phonechat` works as a command.
 - `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB (counting what's already in the file), and never includes your phone link.
@@ -52,7 +52,7 @@ No longer read (1.0.0 read these):
 - GitHub issue templates for bug reports and requests.
 - The bridge refuses requests that use another site's name for this computer, on every page (it already did for sending). This stops a web page from reading the setup page or chat through a renamed address.
 - The ACE, CW and WEW icons are now copied with the bridge, so they show after an install.
-- Windows: fixed a Linux-style redirect in the start script that most likely made it report Python as missing. Windows is still untested.
+- Windows: fixed a Linux-style redirect in the start script that most likely made it report Python as missing. 
 - In the Tells list, a "failed" reason from the game is shown as text.
 - The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code is removed from the repo; it's still in the 1.0.0 history.
 
