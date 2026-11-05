@@ -706,7 +706,7 @@ class GameWatch:
         if self.quiet_at is None:
             self.quiet_at = beat if beat is not None else now - GAME_QUIET_SECONDS
             say("No response from the game for %d seconds." % GAME_QUIET_SECONDS,
-                "It may have closed, frozen or lost its connection. You can:",
+                "The game may have closed or frozen, or the addon was unloaded. You can:",
                 "  - close this window now,",
                 "  - wait: it carries on by itself if the game comes back,",
                 "  - or leave it: it closes by itself in %d seconds." % AUTO_CLOSE_SECONDS)
