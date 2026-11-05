@@ -12,16 +12,19 @@ Use:
   2. Run this:   python3 fakefeed.py            (plays one short session)
                  python3 fakefeed.py --loop     (repeats a venture alert every few minutes)
                  python3 fakefeed.py --fast     (5x speed, for a quick look)
+                 python3 fakefeed.py --game     (acts like a running game, then "closes" at the end,
+                                                 so you see the bridge's no-response notice and auto-close)
   3. Open the phone page as usual.
 
 If the bridge's folder isn't ~/phonechat, pass it:  --dir "Z:\\home\\deck\\phonechat"
 Python 3.7 or newer, no extra packages.
 """
-import argparse, os, sys, time, random
+import argparse, os, sys, threading, time, random
 
 # (seconds to wait first, channel, direction, name, body)
 SESSION = [
     (0,  "zone",    "in", "", "Lower Jeuno"),
+    (1,  "motd",    "in", "ls1", "Dynamis Saturday 9pm, bring meds"),
     (1,  "ls1",     "in", "Marlow", "anyone up for a Dynamis run tonight?"),
     (4,  "ls2",     "in", "Quenby", "what lvl cap are we doing"),
     (5,  "party",   "in", "Mara", "pulling in 10"),
@@ -74,12 +77,22 @@ def main():
     ap.add_argument("--char", default="Charta", help="character name the feed file is for")
     ap.add_argument("--loop", action="store_true", help="keep going: a venture alert every ~3 minutes plus chatter")
     ap.add_argument("--fast", action="store_true", help="5x speed")
+    ap.add_argument("--game", action="store_true",
+                    help="write game.heartbeat like the addon does while this runs, then stop, to test the auto-close")
     a = ap.parse_args()
     if not os.path.isdir(a.dir):
         sys.exit("Can't find %s. Start the bridge once so it makes that folder, or pass --dir." % a.dir)
     path = os.path.join(a.dir, "feed-%s.log" % a.char)
     speed = 5.0 if a.fast else 1.0
     print("Writing to", path, "(Ctrl+C to stop)")
+    if a.game:
+        beat = os.path.join(a.dir, "game.heartbeat")
+        def beats():
+            while True:
+                with open(beat, "w", encoding="utf-8") as f:
+                    f.write("%d %s" % (int(time.time()), a.char))
+                time.sleep(2)
+        threading.Thread(target=beats, daemon=True).start()
     try:
         for wait, ch, d, name, body in SESSION:
             time.sleep(wait / speed)
@@ -101,6 +114,9 @@ def main():
     except KeyboardInterrupt:
         print("\nStopped.")
     print("Done.")
+    if a.game:
+        print("The fake game has stopped. In about 10 seconds the bridge window and the phone say there's no response,")
+        print("and the bridge closes about 90 seconds after that. Run this again before then to see it carry on.")
 
 
 if __name__ == "__main__":

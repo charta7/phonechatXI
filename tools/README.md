@@ -6,13 +6,16 @@ Close the game first, then start the bridge by itself (the phonechatXI Bridge la
 
 ## fakefeed.py
 
-Plays a short made-up session into the bridge: linkshell chat, tells, emotes, a Party Finder ad, a Populox VNM alert, Apururu and a bazaar visit. The lines are already in the format the addon writes, so this tests the bridge and the phone page.
+Plays a short made-up session into the bridge: a linkshell message of the day, linkshell chat, tells, emotes, a Party Finder ad, a Populox VNM alert, Apururu and a bazaar visit. The lines are already in the format the addon writes, so this tests the bridge and the phone page.
 
 ```
 python3 fakefeed.py            one session
 python3 fakefeed.py --loop     keeps going, with a VNM alert every few minutes
 python3 fakefeed.py --fast     5x speed
+python3 fakefeed.py --game     acts like a running game, then stops at the end
 ```
+
+With `--game`, the bridge sees a game while it plays. When it ends, the bridge window and the phone show the no-response notice after about 10 seconds, and the bridge closes itself about 90 seconds later. Run it again before then and the bridge carries on.
 
 ## replay.py
 
