@@ -169,14 +169,14 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | "Emotes and ! commands have their own tabs" | Chat lines can't start with `/` or `!` (apart from a lone `/`, `!`, `!!` or `!?`). Use the Emotes or Server tab. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
 | Page says "This link was replaced" | Scan the new QR code, then remove the old Home Screen shortcut and add the new one. |
-| Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose). |
+| Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose) or the phonechatXI thread on the CatsEyeXI Discord. |
 
 ## Privacy
 
 - Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
 - Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names, who you've had tells with, and the alert cards you've dismissed stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
-- Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.
+- Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If someone else might have it, make a new link with `/pchat newlink` and the old one stops working.
 
 ## About the code
 
@@ -196,7 +196,7 @@ Not sure if a change counts? Ask staff first.
 
 phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0, and that list isn't growing. There are no plans for more commands, addon controls or macros unless CatsEyeXI staff ask for them.
 
-- Bugs: open a [bug report](../../issues/new/choose) and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
+- Bugs: open a [bug report](../../issues/new/choose) or post in the phonechatXI thread on the CatsEyeXI Discord, and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
 - Requests are read, but most of my time goes to fixing bugs, so I can't promise a timeline. Anything that changes what it reads from the game or sends to it needs CatsEyeXI staff review first.
 
 To test without the game, see [`tools/`](tools): a fake chat session, and a replay of real `/pchat debug` logs through the addon.
