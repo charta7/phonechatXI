@@ -75,9 +75,9 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 ### New in 1.1.0 (not reviewed yet)
 
-- Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (off by default), the LS message of the day, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
-- Starts and stops the bridge when you ask, and shows the QR code in an in-game window.
-- Sends the same list as 1.0.0. A `;` followed by a command is now blocked, and so is text the game's own chat box can't type (like raw auto-translate bytes).
+- Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (off by default), the LS message of the day, say lines that are just `!`, `!!` or `!?`, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
+- Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>`, full-width lookalikes and text the game's chat box can't type are all blocked. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
+- Starts and stops the bridge when you ask, shows the QR code in an in-game window, and closes the bridge by itself about 100 seconds after the game is gone.
 
 ## How it works
 
@@ -164,9 +164,9 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | Bridge won't start on Windows | The bridge window says why. Usually Python isn't installed or isn't on PATH. |
 | "Port in use" | Another bridge is running, often the old Decky one. Uninstall the Decky plugin, or `/pchat stop` and start again. |
 | Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
-| A message says "unconfirmed" | The game didn't echo it back within a few seconds. Check in game before sending again. |
+| A line says "The game didn't confirm this one" | The game didn't echo it back within a few seconds. Check in game before sending it again. |
 | Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should match the folder at the bottom of the `/pchat` window (`<Ashita>\config\addons\phonechat`, or VanaCore's). If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
-| A message says "failed" | The game rejected it, usually a tell to someone offline. |
+| A line shows a red error from the game | The game rejected it, usually a tell to someone offline or a party line with no party. The phone shows the game's own message. |
 | "Sending is paused" | Two of your characters are logged in. Log one out; sending resumes about 5 minutes after it last had chat. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
 | Page says "This link was replaced" | Scan the new QR code and remove the old shortcut. |
