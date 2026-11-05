@@ -185,6 +185,7 @@ body.typing .tabbar{display:none}
 .banner.bad{background:var(--badbg);border:1px solid var(--badedge);color:#ffd0d0}
 .banner.info{background:#14193a;border:1px solid var(--edge);color:var(--soft)}
 .banner b{display:block;margin-bottom:2px}
+.banner .cdown{font-weight:700;font-variant-numeric:tabular-nums}
 .code{font-family:var(--mono);color:var(--gold)}
 .list{flex:1;min-height:0;overflow-y:auto;padding:0 18px 12px}
 .sect{padding:16px 0 6px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:1.2px;color:var(--gold)}
@@ -1991,7 +1992,7 @@ function gameBanner() {
   var left = Math.max(0, Math.round(gameQuiet - Date.now() / 1000));
   if (!gameTimer) gameTimer = setTimeout(function () { gameTimer = null; if (gameQuiet) render(); }, 5000);
   return '<div class="banner bad"><b>No response from the game</b>The game may have closed or frozen, or the addon was unloaded. ' +
-    (left > 0 ? 'The bridge closes by itself in about ' + left + ' seconds unless the game comes back.' : 'The bridge is closing.') + '</div>';
+    (left > 0 ? 'The bridge closes by itself unless the game comes back (<span class="cdown">' + left + ' seconds</span>).' : 'The bridge is closing.') + '</div>';
 }
 function banner() {
   if (linkDead) {
