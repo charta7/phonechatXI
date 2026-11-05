@@ -120,10 +120,10 @@ Tested on Windows 11 with Python 3.15, on Ashita and on VanaCore's beta: chat, t
 ### Updating
 
 1. Close the game.
-2. In the CatsEye launcher, use Add New Addon and pick the new zip.
+2. In the CatsEye launcher, remove phonechat, then use Add New Addon and pick the new zip.
 3. Start the game and the bridge as usual. The bridge updates itself.
 
-The phone page updates itself, and nothing you've set up is lost. Your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`, or VanaCore's), which updates don't touch. For a new Home Screen icon, remove the shortcut and add it again.
+Removing the addon doesn't lose anything. The phone page updates itself, and your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`, or VanaCore's), outside the addon folder. For a new Home Screen icon, remove the shortcut and add it again.
 
 If the bridge was running from Desktop Mode during the update, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`.
 
