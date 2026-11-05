@@ -602,7 +602,7 @@ function save() {
 }
 // Names stay on this phone: your mention names, who you've had tells with, and the last tell
 // target are never sent to the bridge or put in an export file.
-var PHONE_ONLY = ["watch", "read", "target"];
+var PHONE_ONLY = ["watch", "read", "target", "hidden"];
 function shareable(s) {
   var out = JSON.parse(JSON.stringify(s));
   PHONE_ONLY.forEach(function (k) { delete out[k]; });
@@ -907,8 +907,9 @@ function stateHtml(m) {
 function failHtml(m) {
   if (!m.pending && m.failed) return '<div class="failbox"><span>' + esc(m.reason || "Not delivered") + "</span></div>";
   if (!m.pending || (m.state !== "failed" && m.state !== "unconfirmed")) return "";
-  var why = m.state === "failed" ? (m.reason || "Not delivered") : "The game didn't confirm this one";
-  return '<div class="failbox"><span>' + esc(why) + '</span><button data-retry="' + esc(m.pid) + '">Retry</button></div>';
+  // Unconfirmed may well have gone through: no Retry, so it isn't sent twice by accident.
+  if (m.state === "unconfirmed") return '<div class="failbox"><span>The game didn\'t confirm this one. Check in game before sending it again.</span></div>';
+  return '<div class="failbox"><span>' + esc(m.reason || "Not delivered") + '</span><button data-retry="' + esc(m.pid) + '">Retry</button></div>';
 }
 // Party Finder ads read like the game's: the poster's name stands out, the rest is italic.
 function fmtFinder(body) {

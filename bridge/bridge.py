@@ -36,6 +36,7 @@ import signal
 import socket
 import sys
 import threading
+import unicodedata
 import time
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -315,8 +316,11 @@ class Sender(threading.Thread):
         now = time.time()
         live = sorted(c for c, t in list(self.heard.items()) if now - t < LIVE_SECONDS)
         if len(live) > 1:
-            raise SendError("Sending is paused: %s are both logged in. It resumes about %d minutes after only one "
-                            "has chat." % (" and ".join(live), LIVE_SECONDS // 60))
+            if live != getattr(self, "paused_for", None):
+                self.paused_for = live
+                say("Sending paused: %s are both logged in." % " and ".join(live))
+            raise SendError("Sending is paused: two of your characters are logged in. It resumes about %d minutes "
+                            "after only one has chat." % (LIVE_SECONDS // 60))
 
     def outbox(self):
         if not self.char:
@@ -339,11 +343,13 @@ class Sender(threading.Thread):
         if not text:
             raise SendError("Nothing to send after cleaning the text.")
         # Checked after cleaning, so a hidden character can't sneak a command past this.
-        if text.startswith("/") or text.startswith("!"):
+        # Checked on a copy with full-width lookalikes folded to ASCII (／ ！ ； ＜ｓｔ＞ ...); the text sent is unchanged.
+        chk = unicodedata.normalize("NFKC", text)
+        if chk.startswith("/") or chk.startswith("!"):
             raise SendError("Use the Emotes or Server tab for those, not chat.")
-        if re.search(r";\s*[/!]", text):
+        if re.search(r";\s*[/!]", chk):
             raise SendError("Blocked: a ; followed by a command.")
-        if SUBTARGET_RE.search(text):
+        if SUBTARGET_RE.search(chk):
             raise SendError("Blocked: target tokens like <st> can't be sent from the phone.")
         prefix = TARGETS[target]
         if target == "tell":
@@ -404,15 +410,19 @@ class Sender(threading.Thread):
             return
         now = time.time()
         with self.lock:
-            hit = None
-            for pid, p in sorted(self.pending.items(), key=lambda kv: -kv[1]["at"]):
-                if p["ch"] == ch and p["state"] in ("sending", "sent", "unconfirmed") and now - p["at"] <= FAIL_LINK_SECONDS:
-                    hit = pid
-                    break
-            if hit:
-                self.pending[hit]["state"] = "failed"
-        if hit:
-            ack(hit, "failed", body)
+            hits = [pid for pid, p in self.pending.items()
+                    if p["ch"] == ch and p["state"] in ("sending", "sent", "unconfirmed") and now - p["at"] <= FAIL_LINK_SECONDS]
+            if len({self.pending[pid]["peer"].lower() for pid in hits}) > 1:
+                # Tells to more than one person in the last few seconds, and the game doesn't say which one
+                # failed: say so on each instead of guessing (a wrong guess hides the real failure).
+                reason = "One of your last tells wasn't received, and the game doesn't say which. Check in game."
+            else:
+                hits = sorted(hits, key=lambda pid: -self.pending[pid]["at"])[:1]
+                reason = body
+            for pid in hits:
+                self.pending[pid]["state"] = "failed"
+        for pid in hits:
+            ack(pid, "failed", reason)
 
     def run(self):
         while True:
@@ -650,6 +660,14 @@ def say(*lines):
     sys.stdout.flush()
 
 
+def shown_link(url):
+    """The phone link for the window. In a log file (bridge.log on the Deck) the token is left out, so it
+    can't end up pasted into a bug report; the in-game /pchat window has the QR."""
+    if sys.stdout.isatty():
+        return url
+    return re.sub(r"([?&]t=)[^&\s]+", r"\1(hidden in the log: see /pchat in game)", url)
+
+
 def banner(url, port, folder):
     rule = "  " + "-" * 64
     print("")
@@ -660,7 +678,7 @@ def banner(url, port, folder):
     print("   the game and your phone over your home Wi-Fi only. Nothing here")
     print("   goes to the internet. Leave it open while you use phonechatXI.")
     print("")
-    print("   Phone link   %s" % url)
+    print("   Phone link   %s" % shown_link(url))
     print("   QR code      http://localhost:%d/setup   (open on this computer)" % port)
     print("   Folder       %s" % folder)
     print("")
@@ -736,12 +754,12 @@ def new_link():
     with store.cond:
         store.cond.notify_all()
     write_status(LINK["folder"], Handler.url, True)
-    say("New phone link made. The old one no longer works.", "Phone link   " + Handler.url)
+    say("New phone link made. The old one no longer works.", "Phone link   " + shown_link(Handler.url))
 
 
 PREFS_MAX = 64 * 1024
 # Phone settings that stay on the phone: mention names, tell history, last tell target.
-PHONE_ONLY = ("watch", "read", "target")
+PHONE_ONLY = ("watch", "read", "target", "hidden")
 
 
 def strip_private(prefs):

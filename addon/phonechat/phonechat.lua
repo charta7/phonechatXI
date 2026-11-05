@@ -98,6 +98,7 @@ local MODES = {
     [214] = { 'ls2',    'in'  },
     [211] = { 'unity',  'out' },
     [212] = { 'unity',  'in'  },
+    [2]   = { 'shout',  'out' },   -- your own shout (so a shout sent from the phone shows as sent)
     [10]  = { 'shout',  'in'  },
     [11]  = { 'yell',   'in'  },
     [7]   = { 'emote',  'in'  },
@@ -628,6 +629,31 @@ local function emote_ok(cmd)
 end
 
 -- Only these shapes are ever typed. Everything else is dropped.
+-- The same text with full-width lookalikes as plain ASCII, for the checks below only (what's typed is
+-- unchanged): full-width space, ! / ; < > and letters. Other double-byte characters become '#', so they
+-- can't form a pattern by accident.
+local FOLD81 = { [0x40] = ' ', [0x49] = '!', [0x5E] = '/', [0x47] = ';', [0x83] = '<', [0x84] = '>' }
+local function fold(s)
+    local out, i, n = {}, 1, #s
+    while i <= n do
+        local b = s:byte(i)
+        if b < 0x80 or (b >= 0xA1 and b <= 0xDF) then
+            out[#out + 1] = s:sub(i, i)
+            i = i + 1
+        else
+            local t = s:byte(i + 1) or 0
+            local c = '#'
+            if b == 0x81 and FOLD81[t] then c = FOLD81[t]
+            elseif b == 0x82 and t >= 0x60 and t <= 0x79 then c = string.char(t - 0x60 + 65)   -- A-Z
+            elseif b == 0x82 and t >= 0x81 and t <= 0x9A then c = string.char(t - 0x81 + 97)   -- a-z
+            end
+            out[#out + 1] = c
+            i = i + 2
+        end
+    end
+    return table.concat(out)
+end
+
 local function allowed(cmd)
     if cmd:find('[%z\1-\31\127]') then return false end
     if #cmd > 130 then return false end      -- FFXI's chat line limit; nothing longer is ever typed
@@ -635,6 +661,7 @@ local function allowed(cmd)
     local body = cmd:match('^/l2? (.+)$') or cmd:match('^/p (.+)$') or cmd:match('^/sh (.+)$')
               or cmd:match('^/s (.+)$') or cmd:match('^/t %a+ (.+)$')
     if body then
+        body = fold(body)
         -- The bridge never sends a message that starts with a space, so "/s  !cmd" is refused too.
         if body:find('^%s') then return false end
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
@@ -762,7 +789,7 @@ local function system_line(text)
         return true
     end
     local low = text:lower()
-    if low:find('your bazaar', 1, true) then
+    if low:find('your bazaar', 1, true) and not low:find('^you ') then
         emit('bazaar', 'in', '', text)
         return true
     end

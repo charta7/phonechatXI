@@ -59,7 +59,7 @@ Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too), Python 3.7 or
 - Automate anything. Every line, emote or command is one tap from you. No auto-replies, timers, repeats or macros, and nothing reacts to chat. Mentions only highlight.
 - Take game actions. `/ma`, `/ja`, `/ws`, `/item`, `/attack`, `/follow`, targeting and movement are blocked, and so are target tokens like `<st>` in a chat line.
 - Use `/yell`.
-- Split messages. One tap sends one line of 130 characters at most, and no more than one line per second.
+- Split messages. One tap sends one line of 130 bytes at most, counted on the whole typed line (so about 127 letters on a linkshell, fewer for a tell or Japanese text), and no more than one line per second.
 - Read the combat log.
 - Read other addons. Lines they print are ignored, the ventures addon's included.
 - Go online. There's no cloud or outside server. The only outside page is BG-Wiki, when you tap an item.
@@ -75,7 +75,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 ### New in 1.1.0 (not reviewed yet)
 
-- Reads "X examines you", other players' emotes, Party Finder ads, bazaar visits (off by default), the LS message of the day, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
+- Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (off by default), the LS message of the day, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
 - Starts and stops the bridge when you ask, and shows the QR code in an in-game window.
 - Sends the same list as 1.0.0. A `;` followed by a command is now blocked, and so is text the game's own chat box can't type (like raw auto-translate bytes).
 
@@ -176,7 +176,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 - Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
-- Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names and who you've had tells with stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
+- Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names, who you've had tells with, and the alert cards you've dismissed stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If it gets out, make a new one.
 
 ## About the code
