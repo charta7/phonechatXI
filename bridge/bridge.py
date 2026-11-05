@@ -963,6 +963,17 @@ class Handler(BaseHTTPRequestHandler):
             return
 
 
+class Server(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        # A phone that locks or switches apps drops its connection: normal, not worth a traceback in the window.
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, TimeoutError)):
+            return
+        print("request from %s failed: %r" % (client_address[0], exc), file=sys.stderr)
+
+
 def dir_from_txt(addon_dir):
     """When run from inside the addon folder: use the addon's dir.txt (a Z:\\ path on Linux)."""
     try:
@@ -1063,7 +1074,7 @@ def main():
     signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))
 
     try:
-        httpd = ThreadingHTTPServer((args.host, port), Handler)
+        httpd = Server((args.host, port), Handler)
     except OSError as exc:
         print("Could not use port %d (%s). Try: start.sh --port 8780" % (port, exc))
         sys.exit(1)
