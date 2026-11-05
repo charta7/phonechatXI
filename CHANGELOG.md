@@ -2,68 +2,49 @@
 
 Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first. Until staff sign off, a release stays marked as a pre-release.
 
-## 1.1.0 (October 2026, not reviewed yet)
+## 1.1.0 (not reviewed yet)
 
-Includes 1.0.1, which was never released on its own. This version reads new kinds of lines and the addon can start the bridge, so it needs staff review before it's used in game.
+Includes 1.0.1, which was never released on its own. It reads new kinds of lines and the addon can start the bridge, so it needs staff review before it's used in game.
 
 ### Sends
 
-Same fixed list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap sends one line, 130 bytes at most, counted on the whole typed line (so about 127 letters on a linkshell, fewer for a tell or Japanese text), one line per second. No automation.
+Same list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap sends one line, one line per second at most, no automation. A line is at most 130 bytes including the `/l ` or `/t Name ` part (about 127 letters on a linkshell).
 
-Stricter checks:
-- A chat line with a `;` followed by a command (like `hi ; /wave`) is blocked by the bridge and the addon.
-- The bridge looks for a leading `/` or `!` after cleaning the text, so a hidden character can't get a command past it.
-- Text the game's own chat box can't type is blocked by both: raw auto-translate bytes (0xFD), stray single bytes and private-use characters. Before, a few private-use characters on the phone turned into those bytes.
-- The addon now checks `!` commands against the same list as the bridge, instead of accepting any `!word`.
-- The addon refuses a chat line whose message starts with a space, so `/s  !command` can't slip past the check for a leading `!`.
-- If the same line shows up twice in the outbox, the addon types it once.
-- A line is shown as "failed" only when the game refuses it: "Your tell was not received..." for a tell, "There are no party members." for party. Before, any system message right after a send could mark it failed and invite a second send. The game shows the line first and refuses it right after, so the refusal can turn a "sent" line into "failed" for a few seconds. If you sent tells to more than one person in those seconds, the game doesn't say which failed, so each says "one of your last tells wasn't received" instead of guessing.
-- A line the game didn't confirm has no Retry button any more ("Check in game before sending it again"), so it isn't sent twice by accident.
-- The addon's own checks treat full-width lookalikes (full-width space, ！ ／ ； ＜ ＞ and letters) as their plain versions, so `！points`, `hi；／wave` or `＜ｓｔ＞` are blocked like the plain ones. The bridge does the same. What's typed is unchanged.
-- Target tokens like `<st>` and `<lastst>` in a chat line are blocked by the bridge and the addon, so a line from the phone can never open target selection. `<t>`, `<me>` and `<call>` still work.
-- If two of your characters are logged in and both have had chat in the last 5 minutes, the bridge refuses to send and says why, so a line can't be typed by the wrong character. The names are shown only in the bridge window, not on the phone.
+Stricter, in both the bridge and the addon:
+- Blocked: a `;` followed by a command (`hi ; /wave`), target tokens like `<st>` (`<t>`, `<me>` and `<call>` still work), and full-width lookalikes of `/`, `!`, `;` and `<st>`.
+- Blocked: text the game's chat box can't type, like raw auto-translate bytes.
+- The addon checks `!` commands against the same list as the bridge, and refuses a message starting with a space.
+- A lone `/` (a wave) is allowed. Anything else starting with `/` or `!` still isn't.
+- A line that shows up twice is typed once.
+- Sending pauses while two of your characters are logged in, so a line can't come from the wrong one.
+
+Send status on the phone:
+- "Failed" only when the game says so (an offline tell, a party line with no party). If you'd sent tells to two people, it says one of them failed instead of guessing which.
+- "Didn't confirm" has no Retry button, so nothing gets sent twice by accident.
 
 ### Reads
 
-- Chat mode 208 ("X examines you"), shown with emotes. Every line in that mode is shown.
-- Chat mode 15, other players' emotes ("X points at Y."), shown with emotes. Every line in that mode is shown. 1.0.0 only showed chat mode 7.
-- Your own shouts (chat mode 2), so a shout sent from the phone shows as sent instead of "unconfirmed".
-- For 10 seconds after the addon types a `!` command from the phone, every line in chat mode 9 that isn't someone talking (mostly the command's reply, like the `!points` totals). They show only in the Server tab's reply area, never in chat. A command typed in game doesn't open this window.
-- Party Finder ads, as their own chat channel (on by default). Not shown in Alerts.
-- Bazaar lines: any system line mentioning "your bazaar" that doesn't start with "You" ("X begins to browse...", "X leaves your bazaar."). Always read, but only shown on the phone if you turn it on (off by default).
-- The linkshell message of the day, pinned above the chat for its linkshell. Only the message is read, not the date it was set.
-- Party Finder ads and bazaar visits are also picked out of server messages.
+New:
+- "X examines you" (mode 208) and other players' emotes (mode 15), shown with emotes.
+- Your own shouts (mode 2), so a shout sent from the phone shows as sent.
+- Replies to a `!` command sent from the phone: the non-chat lines in mode 9 for 10 seconds after it's typed. Shown only in the Server tab.
+- Party Finder ads, as their own channel.
+- Bazaar visits ("X begins to browse your bazaar"). Shown only if you turn it on.
+- The linkshell message of the day, pinned above that linkshell's chat.
 
-No longer read (1.0.0 read these):
-- Lines containing "venture" from the plain system-message modes (9, 121, 127, 131, 142).
-
-Changed:
-- Server messages (modes 200 and 205) are read as before, but ones mentioning "venture" are no longer sorted into Ventures. They show as ordinary server notices. Ventures shows Populox's VNM alert from Unity chat, plus any Populox line it can't read, as plain text for 30 minutes.
+No longer read: lines mentioning "venture" in the plain system modes. Server messages about ventures now show as ordinary server notices; the Ventures card only shows Populox's VNM alert.
 
 ### Addon and setup
 
-- One zip. Add it with the CatsEye launcher's Add New Addon. The bridge is inside it, and the addon copies it out the first time it starts it. Updates keep your phone link.
-- The addon starts and stops the bridge: `/pchat start`, `/pchat stop`, or Start with the game. Tested on Steam Deck in Game Mode, and on Windows 11 (Ashita and VanaCore's beta).
-- An in-game window (`/pchat`) with bridge on/off, the QR code, New phone link and settings. It opens by itself the first time. `/pchat help` prints the commands in chat.
-- `/phonechat` works as a command.
-- `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB (counting what's already in the file), and never includes your phone link.
-- The bridge logs to `~/phonechat/bridge.log` on the Deck.
-- The bridge window is plain and labeled: what it is (a local relay over your home Wi-Fi only), your phone link, the QR page, the folder, how to stop it, and a timed line when the game or a phone connects.
-- The bridge closes itself when the game is gone. The addon rewrites a tiny local file (`game.heartbeat`: the time and your character name, nothing else) every 2 seconds. After 10 seconds without it, the window explains and counts down 90 seconds, and the game coming back cancels it. A bridge that never saw the game (Desktop Mode, the test tools) stays open.
-- The addon tells the bridge which folder to watch every time it starts it, so a bridge folder copied from another install (say from Ashita to VanaCore) can't end up watching the wrong one.
-- On the Deck, `bridge.log` no longer contains your phone link (the window shows it; the log says to use `/pchat`).
-- Dismissed alert cards stay on that phone: they aren't saved on the bridge or put in an export.
-- `tools/build_zip.py` builds the addon zip from the file list only, and refuses to include per-install or private files.
-- `/pchat stop` closes the bridge window. Before, on Windows, it stayed open on "Press any key".
-- A phone dropping its connection (locking, switching apps) no longer prints error tracebacks in the bridge window.
-- Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
-- Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
-- GitHub issue templates for bug reports and requests.
-- The bridge refuses requests that use another site's name for this computer, on every page (it already did for sending). This stops a web page from reading the setup page or chat through a renamed address.
-- The ACE, CW and WEW icons are now copied with the bridge, so they show after an install.
-- Windows: fixed a Linux-style redirect in the start script that most likely made it report Python as missing. 
-- In the Tells list, a "failed" reason from the game is shown as text.
-- The Decky plugin is retired. The in-game window replaces it. If you have it, uninstall it in Decky, which also stops its bridge. Its code is removed from the repo; it's still in the 1.0.0 history.
+- One zip for everyone, installed with the launcher's Add New Addon. The addon copies the bridge into place and starts it (`/pchat start`, `/pchat stop`, or Start with the game). Updates keep your phone link.
+- Tested on Steam Deck, and on Windows 11 with Ashita and VanaCore's beta.
+- `/pchat` opens a window with the bridge's status, the QR code, New phone link and settings. `/pchat help` lists the commands. `/phonechat` works too.
+- The bridge window says what it is (a local relay over your home Wi-Fi), shows your link, and notes when the game or a phone connects.
+- The bridge closes itself about 100 seconds after the game is gone (it says so first, and cancels if the game comes back). The addon touches a small local file every 2 seconds for this.
+- `/pchat debug` also logs lines other addons print (never sent to the phone). The debug log tops out at 2 MB and never holds your phone link; neither does the Deck's `bridge.log`.
+- The bridge only answers requests addressed to this computer, which stops a web page from reaching it through a borrowed address.
+- Desktop Mode launcher on the Deck. Test tools and a zip builder in `tools/` (not in the addon zip). GitHub issue templates.
+- The Decky plugin is retired; the in-game window replaces it.
 
 ### Phone page
 

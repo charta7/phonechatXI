@@ -665,8 +665,9 @@ local function allowed(cmd)
         -- The bridge never sends a message that starts with a space, so "/s  !cmd" is refused too.
         if body:find('^%s') then return false end
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
+        -- (A lone "/" is a wave, not a command, so it's allowed.)
         local first = body:sub(1, 1)
-        if first == '/' or first == '!' then return false end
+        if (first == '/' and body ~= '/') or first == '!' then return false end
         -- No ; followed by a command, in case anything treats ; as "run the next command".
         if body:find(';%s*[/!]') then return false end
         -- No sub-target tokens: they make the game open target selection.
