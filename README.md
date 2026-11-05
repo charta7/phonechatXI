@@ -151,7 +151,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 - No push notifications. A page on your home network can't send them, so your phone won't buzz for tells.
 - Safari pauses the page when the phone locks or you switch apps. It catches up when you come back, as long as the bridge kept running.
 - The screen sleeps on its normal timer. Raise Auto-Lock in iPhone Settings to keep it on longer.
-- If your router gives the Deck a new address, the saved link breaks. Scan the QR code again, or reserve an address for the Deck in your router (a DHCP reservation).
+- If your router gives your Deck or PC a new address, the saved link breaks. Scan the QR code again, or reserve an address for it in your router (a DHCP reservation).
 - One character at a time. If two characters are logged in and both have chat, sending pauses so a line can't come from the wrong one. It resumes about 5 minutes after only one has chat.
 - Home Wi-Fi only. The link and chat aren't encrypted, so on public Wi-Fi anyone on the network could see them, and anyone with your link could read and send.
 

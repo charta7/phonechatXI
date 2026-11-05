@@ -1999,7 +1999,7 @@ function banner() {
     return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat</span> in game).</div>';
   }
   if (!connected && everConnected && Date.now() - offlineSince > 3000) {
-    return '<div class="banner bad"><b>Bridge offline. Reconnecting...</b>Start it with <span class="code">/pchat start</span>. If the Deck\'s address changed, scan the QR again.</div>';
+    return '<div class="banner bad"><b>Bridge offline. Reconnecting...</b>Start it with <span class="code">/pchat start</span>. If your Deck or PC got a new address, scan the QR again.</div>';
   }
   if (!connected && !everConnected && Date.now() - offlineSince > 4000) {
     return '<div class="banner bad"><b>Can\'t reach the bridge</b>Same Wi-Fi as the Deck or PC? Is the bridge on?</div>';
