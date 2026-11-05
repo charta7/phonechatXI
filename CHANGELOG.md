@@ -42,6 +42,10 @@ No longer read (1.0.0 read these):
 - `/phonechat` works as a command.
 - `/pchat debug` also logs lines printed by other addons, flagged as such. They're only logged, never sent to the phone. The debug log starts over past 2 MB (counting what's already in the file), and never includes your phone link.
 - The bridge logs to `~/phonechat/bridge.log` on the Deck.
+- The bridge window is plain and labeled: what it is (a local relay over your home Wi-Fi only), your phone link, the QR page, the folder, how to stop it, and a timed line when the game or a phone connects.
+- The bridge closes itself when the game is gone. The addon rewrites a tiny local file (`game.heartbeat`: the time and your character name, nothing else) every 2 seconds. After 10 seconds without it, the window explains and counts down 90 seconds, and the game coming back cancels it. A bridge that never saw the game (Desktop Mode, the test tools) stays open.
+- `/pchat stop` closes the bridge window. Before, on Windows, it stayed open on "Press any key".
+- A phone dropping its connection (locking, switching apps) no longer prints error tracebacks in the bridge window.
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.
 - Test tools in `tools/` (not in the addon zip): `fakefeed.py` plays a made-up session into the bridge, and `replay.py` plays a `/pchat debug` log back through the addon code with a fake Ashita that can't type or start programs.
 - GitHub issue templates for bug reports and requests.

@@ -51,6 +51,7 @@ local STALE_SECONDS = 15    -- outbox lines older than this are dropped, never t
 local SENDQ_MAX     = 8
 local START_WAIT    = 20    -- seconds to wait for a started bridge before calling it a failure
 local DEBUG_MAX     = 2 * 1024 * 1024
+local HEARTBEAT_EVERY = 2   -- seconds between 'game still here' notes for the bridge (game.heartbeat)
 
 local S = {
     dir     = nil,
@@ -67,6 +68,7 @@ local S = {
     next_name  = 0,
     next_out   = 0,
     next_send  = 0,
+    next_beat  = 0,
     out_off    = nil,      -- read position in the outbox (nil = not opened yet)
     sendq      = {},
     errors  = 0,
@@ -1037,6 +1039,12 @@ ashita.events.register('d3d_present', 'phonechat_tick', function ()
     if not S.ready and clk >= S.next_name then
         S.next_name = clk + 1
         resolve_name()
+    end
+    if S.dir and now >= S.next_beat then
+        -- "Game still here" for the bridge: the time now and the character. Nothing else.
+        -- The bridge closes itself after the game has been gone a while (see the bridge window).
+        S.next_beat = now + HEARTBEAT_EVERY
+        write_file(S.dir .. 'game.heartbeat', ('%d %s'):format(now, S.name or ''))
     end
     if now >= S.next_check then
         S.next_check = now + CHECK_EVERY

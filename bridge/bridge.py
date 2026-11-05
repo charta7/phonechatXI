@@ -57,6 +57,8 @@ DEFAULT_CAP = 200
 FEED_ROTATE_BYTES = 5 * 1024 * 1024
 POLL_SECONDS = 0.5
 STATUS_SECONDS = 3
+GAME_QUIET_SECONDS = 10         # no "game still here" note from the addon this long = the game may be gone
+AUTO_CLOSE_SECONDS = 90         # ...and after that much longer, the bridge closes itself
 TEASER_HOLD_SECONDS = 3.0
 
 SEND_GAP_SECONDS = 1.0          # one line into the game per second at most
@@ -633,6 +635,93 @@ def save_config(cfg):
 LINK = {"cfg": None, "port": 0, "folder": ""}
 
 
+# --------------------------------------------------------------------------------------------
+# The bridge window: plain words, plain ASCII (the Deck's Python 3.7 may print to an ASCII log)
+# --------------------------------------------------------------------------------------------
+
+def say(*lines):
+    """One event in the window: the time, then its lines lined up under each other."""
+    stamp = time.strftime("%H:%M")
+    for i, line in enumerate(lines):
+        print(("  %s  " % stamp if i == 0 else "         ") + line)
+    sys.stdout.flush()
+
+
+def banner(url, port, folder):
+    rule = "  " + "-" * 64
+    print("")
+    print(rule)
+    print("   phonechatXI bridge %s" % VERSION)
+    print(rule)
+    print("   This window is phonechatXI's local relay. It passes chat between")
+    print("   the game and your phone over your home Wi-Fi only. Nothing here")
+    print("   goes to the internet. Leave it open while you use phonechatXI.")
+    print("")
+    print("   Phone link   %s" % url)
+    print("   QR code      http://localhost:%d/setup   (open on this computer)" % port)
+    print("   Folder       %s" % folder)
+    print("")
+    print("   To stop it: /pchat stop in game, or close this window.")
+    print("   It also closes by itself a little while after the game closes.")
+    print(rule)
+    print("")
+    sys.stdout.flush()
+
+
+class GameWatch:
+    """Reads game.heartbeat, which the addon rewrites every 2 seconds ("time name").
+    Says in the window when the game goes quiet, and decides when to close.
+    It only acts once it has seen the game since the bridge started, so a bridge started without
+    the game (Desktop Mode, the test tools) never closes by itself."""
+
+    def __init__(self, folder):
+        self.path = os.path.join(folder, "game.heartbeat")
+        self.seen = False
+        self.quiet_at = None          # when the game was last heard from, while it's quiet
+        self.warned = set()           # countdown lines already printed
+
+    def read(self):
+        try:
+            with open(self.path, "r", encoding="utf-8", errors="replace") as f:
+                parts = f.read().split()
+            return int(parts[0]), (parts[1] if len(parts) > 1 else "")
+        except (OSError, ValueError, IndexError):
+            return None, ""
+
+    def step(self, now):
+        """Returns "close" when it's time to close, else None. Prints what's happening."""
+        beat, name = self.read()
+        alive = beat is not None and now - beat < GAME_QUIET_SECONDS
+        if alive:
+            if not self.seen:
+                self.seen = True
+                say("Game connected%s." % ((" (" + name + ")") if name else ""))
+            if self.quiet_at is not None:
+                self.quiet_at = None
+                self.warned = set()
+                say("The game is back. Carrying on.")
+            return None
+        if not self.seen:
+            return None
+        if self.quiet_at is None:
+            self.quiet_at = beat if beat is not None else now - GAME_QUIET_SECONDS
+            say("No response from the game for %d seconds." % GAME_QUIET_SECONDS,
+                "It may have closed, frozen or lost its connection. You can:",
+                "  - close this window now,",
+                "  - wait: it carries on by itself if the game comes back,",
+                "  - or leave it: it closes by itself in %d seconds." % AUTO_CLOSE_SECONDS)
+        left = int(self.quiet_at + GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS - now)
+        for mark in (60, 30, 10):
+            if left <= mark and mark not in self.warned and left > 0:
+                self.warned.add(mark)
+                say("Closing in %d seconds." % mark)
+        if left <= 0:
+            say("Closing now: no response from the game for %d seconds." % (GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS),
+                "Start it again from the game with /pchat start.")
+            return "close"
+        return None
+
+
 def new_link():
     """Replace the phone link token. Old links stop working right away."""
     cfg = LINK["cfg"]
@@ -644,7 +733,7 @@ def new_link():
     with store.cond:
         store.cond.notify_all()
     write_status(LINK["folder"], Handler.url, True)
-    print("new phone link:", Handler.url)
+    say("New phone link made. The old one no longer works.", "Phone link   " + Handler.url)
 
 
 PREFS_MAX = 64 * 1024
@@ -711,10 +800,11 @@ def start_fresh(folder):
                 os.truncate(p, 0)
             except OSError:
                 pass
-    try:
-        os.remove(os.path.join(folder, "stop.request"))
-    except OSError:
-        pass
+    for name in ("stop.request", "game.heartbeat"):
+        try:
+            os.remove(os.path.join(folder, name))
+        except OSError:
+            pass
 
 
 # --------------------------------------------------------------------------------------------
@@ -918,7 +1008,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_json(400, {"ok": False, "error": msg})
 
+    phones = set()
+    phones_lock = threading.Lock()
+
     def stream(self):
+        ip = self.client_address[0]
+        with Handler.phones_lock:
+            new_phone = ip not in Handler.phones
+            Handler.phones.add(ip)
+        if new_phone:
+            say("Phone connected from %s." % ip)
         try:
             last = int(self.headers.get("Last-Event-ID") or 0)
         except ValueError:
@@ -1047,28 +1146,38 @@ def main():
     sender.start()
     Tailer(folder, sender, tells).start()
 
+    def close(*lines):
+        # Exit with code 0. os.kill(SIGTERM) on Windows ends the process with code 15, which made
+        # start-bridge.bat think Python had failed and leave its window open on "Press any key".
+        if lines:
+            say(*lines)
+        clear_status(folder)
+        sys.stdout.flush()
+        os._exit(0)
+
     def status_loop():
         stop_file = os.path.join(folder, "stop.request")
+        watch = GameWatch(folder)
+        next_status = 0
         while True:
             if os.path.exists(stop_file):          # /pchat stop from inside the game
                 try:
                     os.remove(stop_file)
                 except OSError:
                     pass
-                print("stop requested from the game")
-                # Exit with code 0. os.kill(SIGTERM) on Windows ends the process with code 15, which made
-                # start-bridge.bat think Python had failed and leave its window open on "Press any key".
-                clear_status(folder)
-                sys.stdout.flush()
-                os._exit(0)
+                close("Stopped from the game (/pchat stop). Closing.")
             if os.path.exists(newlink_file):      # "New phone link" from the in-game window
                 try:
                     os.remove(newlink_file)
                 except OSError:
                     pass
                 new_link()
-            write_status(folder, Handler.url, True)
-            time.sleep(STATUS_SECONDS)
+            if watch.step(time.time()) == "close":
+                close()
+            if time.time() >= next_status:
+                write_status(folder, Handler.url, True)
+                next_status = time.time() + STATUS_SECONDS
+            time.sleep(1)
 
     atexit.register(clear_status, folder)
     signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))
@@ -1076,15 +1185,14 @@ def main():
     try:
         httpd = Server((args.host, port), Handler)
     except OSError as exc:
-        print("Could not use port %d (%s). Try: start.sh --port 8780" % (port, exc))
+        say("Can't start: port %d is already in use (%s)." % (port, exc),
+            "Another phonechatXI bridge may already be running. Close it and try again,",
+            "or start this one on another port: start.sh --port 8780 (start-bridge.bat --port 8780).")
         sys.exit(1)
     httpd.daemon_threads = True
     threading.Thread(target=status_loop, daemon=True).start()
-    print("phonechatXI bridge %s" % VERSION)
-    print("watching:", folder)
-    print("open on your phone:", url)
-    print("on this computer: http://localhost:%d/setup" % port)
-    sys.stdout.flush()
+    banner(url, port, folder)
+    say("Bridge started. Waiting for the game...")
     if args.open:
         def open_setup():
             try:

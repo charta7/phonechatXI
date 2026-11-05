@@ -88,6 +88,8 @@ phone ->  bridge ->  outbox file  ->  addon   ->  chat (one line per tap)
 
 The addon writes chat lines to a feed file, and the bridge streams them to the phone. Lines you send go into an outbox file. The addon reads it and types each line through Ashita's command queue, the same as typing it yourself. No packet injection.
 
+When the bridge runs, a small window called "phonechatXI bridge" sits next to the game (minimized on Windows). That's the local relay: it says what it is, shows your phone link, and notes when the game or a phone connects. Leave it open while you use phonechatXI. `/pchat stop` or closing the window turns phone chat off. If the game closes, freezes or loses its connection, the window says so; after 10 seconds without the game it gives you 90 seconds to close it, wait for the game to come back, or let it close by itself. A bridge started without the game (Desktop Mode, the test tools) stays open.
+
 The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows. On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
 
 ## Install
@@ -161,6 +163,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | "Port in use" | Another bridge is running, often the old Decky one. Uninstall the Decky plugin, or `/pchat stop` and start again. |
 | Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
 | A message says "unconfirmed" | The game didn't echo it back within a few seconds. Check in game before sending again. |
+| Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should be `<Ashita>\config\addons\phonechat`. If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
 | A message says "failed" | The game rejected it, usually a tell to someone offline. |
 | "Sending is paused" | Two of your characters are logged in. Log one out; sending resumes about 5 minutes after it last had chat. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
