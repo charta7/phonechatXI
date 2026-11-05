@@ -345,7 +345,8 @@ class Sender(threading.Thread):
         # Checked after cleaning, so a hidden character can't sneak a command past this.
         # Checked on a copy with full-width lookalikes folded to ASCII (／ ！ ； ＜ｓｔ＞ ...); the text sent is unchanged.
         chk = unicodedata.normalize("NFKC", text)
-        if (chk.startswith("/") and chk != "/") or chk.startswith("!"):     # a lone "/" is a wave, not a command
+        # A lone "/" is a wave, and "!", "!!" or "!?" a reaction: neither can name a command.
+        if (chk.startswith("/") and chk != "/") or (chk.startswith("!") and not re.fullmatch(r"![!?]*", chk)):
             raise SendError("Use the Emotes or Server tab for those, not chat.")
         if re.search(r";\s*[/!]", chk):
             raise SendError("Blocked: a ; followed by a command.")

@@ -665,9 +665,9 @@ local function allowed(cmd)
         -- The bridge never sends a message that starts with a space, so "/s  !cmd" is refused too.
         if body:find('^%s') then return false end
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
-        -- (A lone "/" is a wave, not a command, so it's allowed.)
+        -- (A lone "/" is a wave, and "!", "!!" or "!?" is a reaction: neither can name a command.)
         local first = body:sub(1, 1)
-        if (first == '/' and body ~= '/') or first == '!' then return false end
+        if (first == '/' and body ~= '/') or (first == '!' and not body:find('^![!?]*$')) then return false end
         -- No ; followed by a command, in case anything treats ; as "run the next command".
         if body:find(';%s*[/!]') then return false end
         -- No sub-target tokens: they make the game open target selection.
@@ -809,7 +809,7 @@ local function handle_line(raw_mode, message)
     if mode == 9 or mode == 1 then
         local name, body = text:match('^(%S+) : (.*)$')
         if name then
-            if body:sub(1, 1) ~= '!' then
+            if not body:find('^!%a') then          -- "!points" is a server command; "!" or "!!" is just a reaction
                 emit('say', mode == 1 and 'out' or 'in', name, body)
             end
             return

@@ -14,7 +14,7 @@ Stricter, in both the bridge and the addon:
 - Blocked: a `;` followed by a command (`hi ; /wave`), target tokens like `<st>` (`<t>`, `<me>` and `<call>` still work), and full-width lookalikes of `/`, `!`, `;` and `<st>`.
 - Blocked: text the game's chat box can't type, like raw auto-translate bytes.
 - The addon checks `!` commands against the same list as the bridge, and refuses a message starting with a space.
-- A lone `/` (a wave) is allowed. Anything else starting with `/` or `!` still isn't.
+- A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) are allowed. Anything else starting with `/` or `!` still isn't. Say lines like these from others now show on the phone too (only `!` followed by a letter is treated as a server command).
 - A line that shows up twice is typed once.
 - Sending pauses while two of your characters are logged in, so a line can't come from the wrong one.
 
