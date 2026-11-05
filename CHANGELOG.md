@@ -44,6 +44,7 @@ No longer read (1.0.0 read these):
 - The bridge logs to `~/phonechat/bridge.log` on the Deck.
 - The bridge window is plain and labeled: what it is (a local relay over your home Wi-Fi only), your phone link, the QR page, the folder, how to stop it, and a timed line when the game or a phone connects.
 - The bridge closes itself when the game is gone. The addon rewrites a tiny local file (`game.heartbeat`: the time and your character name, nothing else) every 2 seconds. After 10 seconds without it, the window explains and counts down 90 seconds, and the game coming back cancels it. A bridge that never saw the game (Desktop Mode, the test tools) stays open.
+- The addon tells the bridge which folder to watch every time it starts it, so a bridge folder copied from another install (say from Ashita to VanaCore) can't end up watching the wrong one.
 - `/pchat stop` closes the bridge window. Before, on Windows, it stayed open on "Press any key".
 - A phone dropping its connection (locking, switching apps) no longer prints error tracebacks in the bridge window.
 - Desktop Mode: a phonechatXI Bridge launcher in the phonechat folder starts the bridge and opens the QR page.

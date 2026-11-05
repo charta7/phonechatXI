@@ -479,7 +479,8 @@ local function start_bridge(quiet)
     local cmd
     if up then
         -- Proton/Wine runs the Linux script directly; it works inside Steam's game container.
-        cmd = 'start /unix /bin/sh ' .. up .. 'bridge/start.sh'
+        -- --dir: this folder, always, so a bridge\config.json copied from another install can't point it elsewhere
+        cmd = 'start /unix /bin/sh ' .. up .. 'bridge/start.sh --dir ' .. up
     else
         local bat = S.dir .. 'bridge\\start-bridge.bat'
         if not exists(bat) then
@@ -487,7 +488,8 @@ local function start_bridge(quiet)
             if not quiet then note(S.start_error) end
             return
         end
-        cmd = 'start "" /min "' .. bat .. '"'
+        -- --dir without the trailing backslash: Windows would read \" as a quote inside the argument
+        cmd = 'start "" /min "' .. bat .. '" --dir "' .. (S.dir:gsub('[\\/]+$', '')) .. '"'
     end
     local done = pcall(function () os.execute(cmd) end)
     if not done then
