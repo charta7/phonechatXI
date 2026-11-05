@@ -1,7 +1,7 @@
 > [!NOTE]
 > **v1.0.0 was reviewed by CatsEyeXI staff: T1, Sanctioned** (October 2026). This is the version to use.
 >
-> I'm away until early November. Issues and messages will get a reply then.
+> v1.1.0 is with staff for review. Until it's approved, keep using v1.0.0.
 
 > [!WARNING]
 > **Only use the approved version (v1.0.0).** Anything newer, including the `1.1-review` branch, hasn't been reviewed by staff and isn't cleared to run on CatsEyeXI. If you're just looking around, please don't install or run it until it's marked approved here.
