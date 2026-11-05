@@ -746,6 +746,7 @@ function markWatch(h) {
 }
 function onMsg(m) {
   if (m.ch === "_ack") { onAck(m); return; }
+  if (m.ch === "_game") { gameQuiet = m.state === "quiet" ? m.closes_at : 0; schedule(); return; }
   if (m.ch === "motd") {
     lsMotd[m.name] = m.body;
     lsName[m.name] = m.body;
@@ -1984,6 +1985,14 @@ function closeSheet() {
 $("sheet").addEventListener("click", function (e) { if (sheetHandler) sheetHandler(e); });
 $("scrim").addEventListener("click", closeSheet);
 
+// The bridge window's "no response from the game" notice, shown on the phone too.
+var gameQuiet = 0, gameTimer = null;
+function gameBanner() {
+  var left = Math.max(0, Math.round(gameQuiet - Date.now() / 1000));
+  if (!gameTimer) gameTimer = setTimeout(function () { gameTimer = null; if (gameQuiet) render(); }, 5000);
+  return '<div class="banner bad"><b>No response from the game</b>The game may have closed or frozen, or the addon was unloaded. ' +
+    (left > 0 ? 'The bridge closes by itself in about ' + left + ' seconds unless the game comes back.' : 'The bridge is closing.') + '</div>';
+}
 function banner() {
   if (linkDead) {
     return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat</span> in game).</div>';
@@ -1994,6 +2003,7 @@ function banner() {
   if (!connected && !everConnected && Date.now() - offlineSince > 4000) {
     return '<div class="banner bad"><b>Can\'t reach the bridge</b>Same Wi-Fi as the Deck or PC? Is the bridge on?</div>';
   }
+  if (connected && gameQuiet) return gameBanner();
   if (connected && !status.char) {
     return '<div class="banner info"><b>Waiting for the game</b>Log in and chat shows up here.</div>';
   }

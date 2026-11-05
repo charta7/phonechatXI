@@ -50,7 +50,7 @@ CAPS = {
     "ls1": 500, "ls2": 500, "party": 500, "tell": 600,
     "unity": 300, "say": 300, "shout": 300, "yell": 300, "emote": 200,
     "venture": 200, "server": 100, "system": 150, "zone": 100, "echo": 50,
-    "_ack": 300, "finder": 300, "bazaar": 100, "motd": 10,
+    "_ack": 300, "_game": 5, "finder": 300, "bazaar": 100, "motd": 10,
 }
 SCROLLBACK = (1, 2, 4)          # Settings > Scrollback multiplies the chat caps above
 DEFAULT_CAP = 200
@@ -468,6 +468,12 @@ class Sender(threading.Thread):
             ack(pid, "unconfirmed")
 
 
+def game_state(state, closes_at=0):
+    """Tells open phone pages whether the game has gone quiet, so they say what the window says."""
+    store.add({"ts": int(time.time()), "char": "", "ch": "_game", "dir": "", "name": "", "body": "",
+               "state": state, "closes_at": int(closes_at)})
+
+
 def ack(pid, state, reason=""):
     store.add({"ts": int(time.time()), "char": "", "ch": "_ack", "dir": "", "name": "", "body": "",
                "pid": pid, "state": state, "reason": reason})
@@ -722,6 +728,7 @@ class GameWatch:
                 self.quiet_at = None
                 self.warned = set()
                 say("The game is back. Carrying on.")
+                game_state("ok")
             return None
         if not self.seen:
             return None
@@ -732,6 +739,7 @@ class GameWatch:
                 "  - close this window now,",
                 "  - wait: it carries on by itself if the game comes back,",
                 "  - or leave it: it closes by itself in %d seconds." % AUTO_CLOSE_SECONDS)
+            game_state("quiet", self.quiet_at + GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS)
         left = int(self.quiet_at + GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS - now)
         for mark in (60, 30, 10):
             if left <= mark and mark not in self.warned and left > 0:

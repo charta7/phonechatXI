@@ -41,7 +41,7 @@ Ventures: 1.0.0 sent any line mentioning "venture" in mode 9 or the plain system
 - 1.0.0 runs in game on the Steam Deck and on Windows 11 (Ashita, and VanaCore's beta). 1.1.0 has only been tested offline so far, since it isn't approved for the game yet.
 - `/pchat` opens a window with the bridge's status, the QR code, New phone link and settings. `/pchat help` lists the commands. `/phonechat` works too.
 - The bridge window says what it is (a local relay over your home Wi-Fi), shows your link, and notes when the game or a phone connects.
-- The bridge closes itself about 100 seconds after the game is gone (it says so first, and cancels if the game comes back). The addon writes a small local file every 2 seconds for this.
+- The bridge closes itself about 100 seconds after the game is gone. It says so first, in its window and on the phone, and cancels if the game comes back. The addon writes a small local file every 2 seconds for this.
 - `/pchat debug` also logs lines other addons print (never sent to the phone). The debug log tops out at 2 MB and never holds your phone link; neither does the Deck's `bridge.log`.
 - The bridge ignores requests sent to it under any other web address, so a website you visit can't use your browser to reach it.
 - Desktop Mode launcher on the Deck. Test tools and a zip builder in `tools/` (not in the addon zip). GitHub issue templates.
