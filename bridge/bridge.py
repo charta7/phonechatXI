@@ -389,27 +389,30 @@ class Sender(threading.Thread):
         return best
 
     def match_failure(self, body):
-        # Only the game's own tell failure ("Your tell was not received. The recipient is either
-        # offline or changing areas.") marks a send as failed. Any other system line is ignored, so
-        # a sent line is never shown as failed by mistake (which would invite a second send).
-        if "not received" not in (body or "").lower():
+        # Only the game's own failure lines mark a send as failed (seen in CatsEye captures, mode 123):
+        #   tell:  "Your tell was not received. The recipient is either offline or changing areas."
+        #   party: "There are no party members."
+        # The game shows the line as sent first and the failure right after, so a failure can turn a
+        # "sent" line into "failed" for a few seconds. Any other system line is ignored, so a line is
+        # never shown as failed by mistake (which would invite a second send).
+        low = (body or "").lower()
+        if "not received" in low:
+            ch = "tell"
+        elif "no party members" in low:
+            ch = "party"
+        else:
             return
         now = time.time()
         with self.lock:
             hit = None
             for pid, p in sorted(self.pending.items(), key=lambda kv: -kv[1]["at"]):
-                if p["state"] == "sending" and now - p["at"] <= FAIL_LINK_SECONDS and p["ch"] == "tell":
+                if p["ch"] == ch and p["state"] in ("sending", "sent", "unconfirmed") and now - p["at"] <= FAIL_LINK_SECONDS:
                     hit = pid
                     break
-            hits = []
             if hit:
-                sid = hit.split("-")[0]
-                for pid, p in self.pending.items():          # every part of a split message
-                    if pid.split("-")[0] == sid and p["state"] in ("sending", "unconfirmed"):
-                        p["state"] = "failed"
-                        hits.append(pid)
-        for pid in hits:
-            ack(pid, "failed", body)
+                self.pending[hit]["state"] = "failed"
+        if hit:
+            ack(hit, "failed", body)
 
     def run(self):
         while True:
