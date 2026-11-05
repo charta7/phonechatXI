@@ -17,7 +17,7 @@ There are three parts:
 - The bridge, a small Python program on the same machine as the game. It serves the phone page, comes in the addon zip, and the addon starts it.
 - The phone page. Add it to your Home Screen and it opens like an app.
 
-Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck and on Windows 11, with an iPhone.
+Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too on Windows, not tested on the Steam Deck yet), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck and on Windows 11, with an iPhone.
 
 <p>
   <img src="docs/screenshots/chat.png" width="220" alt="Chat feed with linkshell, party, tells, say and shout">
