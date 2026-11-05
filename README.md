@@ -157,17 +157,18 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 | Problem | Fix |
 |---|---|
-| Phone can't connect | Check the phone is on the same Wi-Fi and the bridge is on (`/pchat`). If the address changed, scan the QR code again. On Windows, allow Python through the firewall on private networks. |
-| Bridge won't start on the Deck | See `/home/deck/phonechat/bridge.log`. The error also shows in the phonechatXI window. |
-| Bridge won't start on Windows | The bridge window says why. Usually Python isn't installed or isn't on PATH. |
+| Phone says "Can't reach the bridge" or "Bridge offline" | Check the phone is on the same Wi-Fi and the bridge is on (`/pchat`). If your Deck or PC got a new address, scan the QR code again. On Windows, allow Python through the firewall on private networks. |
+| Bridge won't start on the Deck | The `/pchat` window shows the error. The full log is `~/phonechat/bridge.log`. |
+| Bridge won't start on Windows | The bridge window says why. Usually Python isn't installed or isn't on PATH. After installing it, close and reopen the CatsEye launcher so the game sees it. |
 | "Port in use" | Another bridge is already running. `/pchat stop`, then `/pchat start`. On Windows you can also close the old bridge window. |
-| Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
+| Phone says "Waiting for the game" | Log in with the addon on. `/pchat` should open its window; if it doesn't, turn the addon on in the launcher. If you're logged in and it still waits, the bridge is watching a different folder: close the bridge and start it again from the game with `/pchat start`. |
+| Phone says "No response from the game" | The game closed or froze, or the addon was unloaded. The bridge closes itself about 90 seconds later unless the game comes back. That's normal after you quit. |
 | A line says "The game didn't confirm this one" | The game didn't echo it back within a few seconds. Check in game before sending it again. |
-| Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should match the folder at the bottom of the `/pchat` window (`<Ashita>\config\addons\phonechat`, or VanaCore's). If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
 | A line shows a red error from the game | The game rejected it, usually a tell to someone offline or a party line with no party. The phone shows the game's own message. |
-| "Sending is paused" | Two of your characters are logged in. Log one out; sending resumes about 5 minutes after it last had chat. |
+| "Sending is paused" | Two of your characters are logged in with phonechat. Log one out, or unload it there with `/addon unload phonechat`. Sending resumes about 5 minutes after the other one last had chat. |
+| "Emotes and ! commands have their own tabs" | Chat lines can't start with `/` or `!` (apart from a lone `/`, `!`, `!!` or `!?`). Use the Emotes or Server tab. |
 | Someone saw your link or QR code | Make a new link in the phonechatXI window or with `/pchat newlink`. The old link stops working right away. |
-| Page says "This link was replaced" | Scan the new QR code and remove the old shortcut. |
+| Page says "This link was replaced" | Scan the new QR code, then remove the old Home Screen shortcut and add the new one. |
 | Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose). |
 
 ## Privacy
