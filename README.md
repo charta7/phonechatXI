@@ -94,7 +94,7 @@ The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>
 
 ## Install
 
-Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). Don't use a pre-release in game. It hasn't been reviewed yet.
+Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). There's no 1.1.0 release until staff have reviewed it.
 
 ### Steam Deck
 
