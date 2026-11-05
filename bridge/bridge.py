@@ -1045,8 +1045,11 @@ def main():
                 except OSError:
                     pass
                 print("stop requested from the game")
-                os.kill(os.getpid(), signal.SIGTERM)
-                return
+                # Exit with code 0. os.kill(SIGTERM) on Windows ends the process with code 15, which made
+                # start-bridge.bat think Python had failed and leave its window open on "Press any key".
+                clear_status(folder)
+                sys.stdout.flush()
+                os._exit(0)
             if os.path.exists(newlink_file):      # "New phone link" from the in-game window
                 try:
                     os.remove(newlink_file)
