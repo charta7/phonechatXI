@@ -162,7 +162,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | Bridge won't start on Windows | The bridge window says why. Usually Python isn't installed or isn't on PATH. After installing it, close and reopen the CatsEye launcher so the game sees it. |
 | "Port in use" | Another bridge is already running. `/pchat stop`, then `/pchat start`. On Windows you can also close the old bridge window. |
 | Phone says "Waiting for the game" | Log in with the addon on. `/pchat` should open its window; if it doesn't, turn the addon on in the launcher. If you're logged in and it still waits, the bridge is watching a different folder: close the bridge and start it again from the game with `/pchat start`. |
-| Phone says "No response from the game" | The game closed or froze, or the addon was unloaded. The bridge closes itself about 90 seconds later unless the game comes back. That's normal after you quit. |
+| Phone says "No response from the game" | The game closed or froze, or the addon was unloaded. The bridge closes itself about 90 seconds later unless the game comes back (this is normal after quitting the game). |
 | A line says "The game didn't confirm this one" | The game didn't echo it back within a few seconds. Check in game before sending it again. |
 | A line shows a red error from the game | The game rejected it, usually a tell to someone offline or a party line with no party. The phone shows the game's own message. |
 | "Sending is paused" | Two of your characters are logged in with phonechat. Log one out, or unload it there with `/addon unload phonechat`. Sending resumes about 5 minutes after the other one last had chat. |
