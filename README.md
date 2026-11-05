@@ -160,7 +160,7 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | Phone can't connect | Check the phone is on the same Wi-Fi and the bridge is on (`/pchat`). If the address changed, scan the QR code again. On Windows, allow Python through the firewall on private networks. |
 | Bridge won't start on the Deck | See `/home/deck/phonechat/bridge.log`. The error also shows in the phonechatXI window. |
 | Bridge won't start on Windows | The bridge window says why. Usually Python isn't installed or isn't on PATH. |
-| "Port in use" | Another bridge is already running. Close its window, or `/pchat stop` and start again. |
+| "Port in use" | Another bridge is already running. `/pchat stop`, then `/pchat start`. On Windows you can also close the old bridge window. |
 | Bridge is on but no chat shows | Check the addon is turned on in the launcher. `/pchat debug` logs every line it sees. |
 | A line says "The game didn't confirm this one" | The game didn't echo it back within a few seconds. Check in game before sending it again. |
 | Phone says "waiting for the game" on Windows | The bridge and the addon are using different folders. The bridge window's Folder line should match the folder at the bottom of the `/pchat` window (`<Ashita>\config\addons\phonechat`, or VanaCore's). If you copied a Deck install, delete `dir.txt` from the addon folder and `bridge\config.json`, then `/addon reload phonechat` and `/pchat start`. |
