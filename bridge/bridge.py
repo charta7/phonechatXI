@@ -73,6 +73,8 @@ TELLS_KEEP = 50                 # saved lines per person
 TARGETS = {"ls1": "/l", "ls2": "/l2", "party": "/p", "tell": "/t", "say": "/s", "shout": "/sh"}
 NAME_RE = re.compile(r"^[A-Za-z]{3,15}$")
 ARGS_RE = re.compile(r"^[A-Za-z0-9 _\-]{0,40}$")
+# Chat lines that may start with / or !: a wave and three reactions. None can name a command.
+REACTIONS = ("/", "!", "!!", "!?")
 CALL_RE = re.compile(r"<\s*call\s*(\d{1,2})\s*>", re.I)
 # Sub-target tokens make the game open target selection. Never sent from the phone.
 SUBTARGET_RE = re.compile(r"<\s*(?:st|stpc|stnpc|stpt|stal|lastst)\s*>", re.I)
@@ -346,7 +348,7 @@ class Sender(threading.Thread):
         # Checked on a copy with full-width lookalikes folded to ASCII (／ ！ ； ＜ｓｔ＞ ...); the text sent is unchanged.
         chk = unicodedata.normalize("NFKC", text)
         # A lone "/" is a wave, and "!", "!!" or "!?" a reaction: neither can name a command.
-        if (chk.startswith("/") and chk != "/") or (chk.startswith("!") and not re.fullmatch(r"![!?]*", chk)):
+        if chk[:1] in ("/", "!") and chk not in REACTIONS:
             raise SendError("Use the Emotes or Server tab for those, not chat.")
         if re.search(r";\s*[/!]", chk):
             raise SendError("Blocked: a ; followed by a command.")
@@ -499,6 +501,8 @@ class Tailer(threading.Thread):
         if len(parts) != 5:
             return
         ts, ch, direction, name, body = parts
+        if ch.startswith("_"):
+            return                               # _ack and _game come only from the bridge itself
         try:
             ts = int(ts)
         except ValueError:

@@ -632,7 +632,9 @@ end
 -- The same text with full-width lookalikes as plain ASCII, for the checks below only (what's typed is
 -- unchanged): full-width space, ! / ; < > and letters. Other double-byte characters become '#', so they
 -- can't form a pattern by accident.
-local FOLD81 = { [0x40] = ' ', [0x49] = '!', [0x5E] = '/', [0x47] = ';', [0x83] = '<', [0x84] = '>' }
+-- Chat lines that may start with / or !: a wave and three reactions. None can name a command.
+local REACTIONS = { ['/'] = true, ['!'] = true, ['!!'] = true, ['!?'] = true }
+local FOLD81 = { [0x40] = ' ', [0x49] = '!', [0x48] = '?', [0x5E] = '/', [0x47] = ';', [0x83] = '<', [0x84] = '>' }
 local function fold(s)
     local out, i, n = {}, 1, #s
     while i <= n do
@@ -667,7 +669,7 @@ local function allowed(cmd)
         -- No command hidden inside a chat line. /s !cmd would dodge the server command list.
         -- (A lone "/" is a wave, and "!", "!!" or "!?" is a reaction: neither can name a command.)
         local first = body:sub(1, 1)
-        if (first == '/' and body ~= '/') or (first == '!' and not body:find('^![!?]*$')) then return false end
+        if (first == '/' or first == '!') and not REACTIONS[body] then return false end
         -- No ; followed by a command, in case anything treats ; as "run the next command".
         if body:find(';%s*[/!]') then return false end
         -- No sub-target tokens: they make the game open target selection.

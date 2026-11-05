@@ -796,7 +796,7 @@ function connect() {
   es.addEventListener("hello", function (ev) {
     var j = {};
     try { j = JSON.parse(ev.data); } catch (e) {}
-    if (lastBoot !== null && j.boot !== lastBoot) { msgs = []; byId = {}; }
+    if (lastBoot !== null && j.boot !== lastBoot) { msgs = []; byId = {}; gameQuiet = 0; }
     lastBoot = j.boot;
     setConnected(true);
     refreshStatus();
@@ -1300,7 +1300,7 @@ function submit(ctx, inp) {
   if (ctx === "cmd") { sendCommand(text, false, inp); return; }
   var t = compTarget(ctx);
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
-  if (/^[\/!]/.test(text) && text !== "/" && !/^![!?]*$/.test(text)) { toast("Emotes and ! commands have their own tabs."); return; }
+  if (/^[\/!]/.test(text) && ["/", "!", "!!", "!?"].indexOf(text) < 0) { toast("Emotes and ! commands have their own tabs."); return; }
   if (sjisLen(text) > lineRoom(t)) { toast("Too long for one line. Trim it a bit."); return; }
   sending = true;
   api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {

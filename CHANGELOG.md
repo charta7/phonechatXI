@@ -11,7 +11,7 @@ Includes 1.0.1, which was never released on its own. It reads new kinds of lines
 Same list as 1.0.0: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, stock emotes and the CatsEye `!` commands. One tap sends one line, one line per second at most, no automation. A line is at most 130 bytes including the `/l ` or `/t Name ` part (about 127 letters on a linkshell).
 
 Stricter, in both the bridge and the addon:
-- Blocked: a `;` followed by a command (`hi ; /wave`), target tokens like `<st>` (`<t>`, `<me>` and calls like `<call14>` still work), and full-width lookalikes of `/`, `!`, `;` and `<st>`.
+- Blocked: a `;` followed by a command (`hi ; /wave`), target tokens like `<st>` (`<t>`, `<me>` and calls like `<call14>` still work), and full-width lookalikes are checked like the plain characters, so `！points` is blocked like `!points`.
 - Blocked: text the game's chat box can't type, like raw auto-translate bytes.
 - The addon checks `!` commands against the same list as the bridge, and refuses a message starting with a space.
 - A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) are allowed. Anything else starting with `/` or `!` still isn't.
