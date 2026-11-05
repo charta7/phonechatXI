@@ -3,7 +3,7 @@
 > [!NOTE]
 > v1.0.0 was reviewed by CatsEyeXI staff and sanctioned (T1, October 2026). Their condition: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
 >
-> **v1.1.0 hasn't been reviewed yet, and it's on hold until early November.** It goes to staff for review then. Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
+> **v1.1.0 is with CatsEyeXI staff for review.** Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
