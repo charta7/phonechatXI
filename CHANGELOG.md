@@ -2,9 +2,9 @@
 
 Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first. Nothing is released until staff sign off.
 
-## 1.1.0 (not reviewed yet)
+## 1.1.0 (November 2026)
 
-Includes 1.0.1, which was never released on its own. It reads new kinds of lines and the addon can start the bridge, so it needs staff review before it's used in game.
+Reviewed and approved by CatsEyeXI staff. Includes 1.0.1, which was never released on its own.
 
 ### Sends
 
@@ -38,7 +38,7 @@ Ventures: 1.0.0 sent any line mentioning "venture" in mode 9 or the plain system
 ### Addon and setup
 
 - One zip for everyone, installed with the launcher's Add New Addon. The addon copies the bridge into place and starts it (`/pchat start`, `/pchat stop`, or Start with the game). Updates keep your phone link.
-- 1.0.0 runs in game on the Steam Deck and on Windows 11 (Ashita, and VanaCore's beta). 1.1.0 has only been tested offline so far, since it isn't approved for the game yet.
+- 1.0.0 runs in game on the Steam Deck and on Windows 11 (Ashita, and VanaCore's beta). 1.1.0 was tested offline before review.
 - `/pchat` opens a window with the bridge's status, the QR code, New phone link and settings. `/pchat help` lists the commands. `/phonechat` works too.
 - The bridge window says what it is (a local relay over your home Wi-Fi), shows your link, and notes when the game or a phone connects.
 - The bridge closes itself about 100 seconds after the game is gone. It says so first, in its window and on the phone, and cancels if the game comes back. The addon writes a small local file every 2 seconds for this.

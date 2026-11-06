@@ -3,7 +3,7 @@
 > [!NOTE]
 > v1.0.0 was reviewed by CatsEyeXI staff and sanctioned (T1, October 2026). Their condition: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
 >
-> **v1.1.0 is with CatsEyeXI staff for review.** Don't use it in game until it's a full release. See the [changelog](CHANGELOG.md).
+> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). This is the version to use. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -73,7 +73,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
   <img src="docs/screenshots/debug-info.png" width="180" alt="Debug info for a bug report">
 </p>
 
-### New in 1.1.0 (not reviewed yet)
+### New in 1.1.0
 
 - Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (off by default), the LS message of the day, say lines that are just `!`, `!!` or `!?`, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
 - Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>`, full-width lookalikes and text the game's chat box can't type are all blocked. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
@@ -94,7 +94,7 @@ The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>
 
 ## Install
 
-Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). There's no 1.1.0 release until staff have reviewed it.
+Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases).
 
 ### Steam Deck
 
