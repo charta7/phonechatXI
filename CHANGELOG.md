@@ -44,6 +44,7 @@ Ventures: 1.0.0 sent any line mentioning "venture" in mode 9 or the plain system
 - The bridge closes itself about 100 seconds after the game is gone. It says so first, in its window and on the phone, and cancels if the game comes back. The addon writes a small local file every 2 seconds for this.
 - `/pchat debug` also logs lines other addons print (never sent to the phone). The debug log tops out at 2 MB and never holds your phone link; neither does the Deck's `bridge.log`.
 - The bridge ignores requests sent to it under any other web address, so a website you visit can't use your browser to reach it.
+- Settings files are checked before use. The addon only puts a folder path made of plain path characters into the command that starts the bridge, and ignores a `dir.txt` that has anything else. The phone checks every value in a saved or imported settings file and falls back to the default for anything unexpected.
 - Desktop Mode launcher on the Deck. Test tools and a zip builder in `tools/` (not in the addon zip). GitHub issue templates.
 - The Decky plugin is retired; the in-game window replaces it.
 

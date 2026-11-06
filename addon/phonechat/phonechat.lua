@@ -170,6 +170,12 @@ local function unix_path(win)
     return (p:gsub('\\', '/'))
 end
 
+-- The folder ends up in the command that starts the bridge, so it may only contain plain path
+-- characters. Anything else (" & | % ; ` $ and so on) is refused rather than put in a command.
+local function safe_dir(p)
+    return type(p) == 'string' and p:find('^[%w %._%-%(%)\\/:]+$') ~= nil
+end
+
 -- Shared folder: dir.txt next to the addon, else <home>/phonechat on Linux (Wine), else
 -- <Ashita>\config\addons\phonechat\ on Windows.
 local function resolve_dir()
@@ -178,7 +184,7 @@ local function resolve_dir()
     local txt = here ~= '' and read_file(here .. 'dir.txt') or nil
     if txt then
         txt = txt:gsub('^\239\187\191', ''):match('^%s*(.-)%s*$')
-        if txt ~= '' then return with_sep(txt) end
+        if txt ~= '' and safe_dir(txt) then return with_sep(txt) end   -- an unsafe dir.txt is ignored
     end
     -- Under Wine/Proton the Unix HOME is passed through; Windows never has a /-style HOME.
     local home = os.getenv('HOME')
@@ -477,6 +483,11 @@ local function start_bridge(quiet)
         return
     end
     local up = unix_path(S.dir)
+    if not safe_dir(S.dir) or (up and not up:find('^[%w%._%-/]+$')) then
+        S.start_error = 'The phonechat folder path has characters the addon won\'t put in a command. Start the bridge yourself, or use a folder without them.'
+        if not quiet then note(S.start_error) end
+        return
+    end
     local cmd
     if up then
         -- Proton/Wine runs the Linux script directly; it works inside Steam's game container.

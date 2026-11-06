@@ -586,9 +586,58 @@ function merged(s) {
     for (var k in out) if (s[k] !== undefined) out[k] = s[k];
     out.master = Object.assign({}, DEFAULTS.master, s.master || {});
   }
-  if (!Array.isArray(out.views) || !out.views.length || out.views[0].id !== "all") out.views = DEFAULTS.views;
-  if (out.views[0].ch && out.views[0].ch.finder === undefined) out.views[0].ch.finder = true;
-  return out;
+  return cleanPrefs(out);
+}
+// Settings can come from a file someone shared (Import) or the bridge's saved copy, so every value is
+// checked before it's used: anything of the wrong type or not on the allowed list falls back to the
+// default, ids and names are limited to plain characters, and free text is length-capped.
+function cleanPrefs(o) {
+  var D = JSON.parse(JSON.stringify(DEFAULTS));
+  function pick(v, list, d) { return list.indexOf(v) >= 0 ? v : d; }
+  function bool(v, d) { return typeof v === "boolean" ? v : d; }
+  function text(v, max, re) { return typeof v === "string" && v.length <= max && (!re || re.test(v)); }
+  function chans(m, d) {
+    var r = {};
+    CHAT_CH.forEach(function (c) { r[c] = m && typeof m === "object" && typeof m[c] === "boolean" ? m[c] : !!(d && d[c]); });
+    return r;
+  }
+  function list(v, max, ok) { return Array.isArray(v) ? v.filter(ok).slice(0, max) : []; }
+  var ID = /^[A-Za-z0-9_-]{1,24}$/;
+  o.density = pick(o.density, ["comfortable", "compact"], D.density);
+  o.size = pick(o.size, ["S", "M", "L"], D.size);
+  o.calls = pick(o.calls, ["off", "highlight", "badge"], D.calls);
+  o.clock = pick(o.clock, ["12", "24"], D.clock);
+  o.cmdMode = pick(o.cmdMode, ["all", "ace", "cw", "wew"], D.cmdMode);
+  o.cseg = pick(o.cseg, ["emote", "server"], D.cseg);
+  o.skin = pick(o.skin, ["midnight", "classic", "onyx"], D.skin);
+  o.font = pick(o.font, ["readable", "classic"], D.font);
+  o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
+  o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
+  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
+  if (!text(o.watch, 200)) o.watch = D.watch;
+  o.hidden = list(o.hidden, 300, function (x) { return text(x, 100) || (typeof x === "number" && isFinite(x)); });
+  var read = {};
+  if (o.read && typeof o.read === "object") Object.keys(o.read).slice(0, 500).forEach(function (k) {
+    if (/^[a-z]{1,15}$/.test(k) && typeof o.read[k] === "number" && isFinite(o.read[k])) read[k] = o.read[k];
+  });
+  o.read = read;
+  o.master = chans(o.master, D.master);
+  var views = list(o.views, 20, function (v) { return v && typeof v === "object" && text(v.id, 24, ID) && typeof v.name === "string"; })
+    .map(function (v) { return {id: v.id, name: v.name.slice(0, 30), ch: chans(v.ch, v.id === "all" ? D.views[0].ch : null)}; });
+  if (!views.length || views[0].id !== "all") views = D.views;
+  o.views = views;
+  if (!text(o.view, 24, ID)) o.view = "all";
+  var t = o.target && typeof o.target === "object" ? o.target : {};
+  o.target = {ch: pick(t.ch, SENDABLE, "ls1"), peer: text(t.peer, 15, /^[A-Za-z]*$/) ? t.peer : ""};
+  o.favs = list(o.favs, 50, function (f) { return text(f, 31, /^![A-Za-z0-9]+$/); });   // command names only, like !mog
+  var colors = {};
+  if (o.colors && typeof o.colors === "object") CHAT_CH.forEach(function (c) {
+    if (text(o.colors[c], 7, /^#[0-9A-Fa-f]{6}$/)) colors[c] = o.colors[c];
+  });
+  o.colors = colors;
+  o.recentEmotes = list(o.recentEmotes, 8, function (r) { return text(r, 30, /^\/[A-Za-z]+( [A-Za-z0-9]+)?$/); });
+  return o;
 }
 var saveTimer = null, pushTimer = null, prefsReady = false;
 function save() {
@@ -1093,7 +1142,7 @@ document.addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 function renderViews() {
   $("viewseg").innerHTML = S.views.map(function (v) {
-    return '<button data-view="' + v.id + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
+    return '<button data-view="' + esc(v.id) + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
   }).join("");
   var v = curView();
   var recentCall = {};
