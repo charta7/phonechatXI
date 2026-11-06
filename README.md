@@ -1,8 +1,6 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> v1.0.0 was reviewed by CatsEyeXI staff and sanctioned (T1, October 2026). Their condition: *"If the addon gets any major changes (new features, automation, or anything that changes what it sends or reads), please resubmit it for review before using the updated version."*
->
 > **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). This is the version to use. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
