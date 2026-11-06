@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -31,6 +32,7 @@
 }
 body.size-S{--fs:14px} body.size-L{--fs:17.5px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 input{font:inherit}
@@ -166,7 +168,7 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .emob{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--edge2);color:var(--soft);font:700 13px var(--mono)}
 .emob.on{border-color:var(--gold);color:var(--gold)}
 .emostrip{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:146px;overflow-y:auto;padding:8px 54px 8px 12px;background:var(--bg);border-top:1px solid var(--line);-webkit-overflow-scrolling:touch}
-.emostrip .emox{position:absolute;top:8px;right:10px;width:38px;padding:7px 0;color:var(--mute);font:600 16px var(--sans)}
+.emostrip .emox{position:absolute;top:8px;right:10px;width:38px;padding:7px 0;color:var(--bad);border-color:var(--badedge);font:600 16px var(--sans)}
 .emostrip[hidden]{display:none}
 .emostrip button{flex:none;padding:9px 4px;border:1px solid var(--edge2);border-radius:999px;color:var(--text);font:600 14px var(--mono)}
 .comp.chat{position:relative;padding-top:22px}
@@ -1831,9 +1833,9 @@ function renderSettings() {
     '<div class="sect">TYPING</div>' +
     srow("Capitalize first letter", "Off by default, since most people type lowercase in game.", tog(S.caps, "caps")) +
     srow("Autocorrect", "Off by default, so game words like Jeuno or Windurst aren't changed.", tog(S.autocorrect, "autocorrect")) +
-    '<div class="srow col"><div class="m"><div>Your emoticons</div><small>The ones in the :) row, in this order. Up to 20, separated by commas, plain keyboard characters only. Leave empty for the defaults.</small></div>' +
-    '<input class="field" id="emoin" placeholder="' + esc(EMO_DEFAULT.join(", ")) + '" maxlength="400" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(S.emoticons || "") + '">' +
-    '<small id="emonote" style="color:var(--mute)">Showing: ' + esc(emoList().join("  ")) + "</small></div>" +
+    '<div class="srow col"><div class="m"><div>Your emoticons</div><small>The ones in the :) row, in this order. Add or remove any. Up to 20, separated by commas, plain keyboard characters only.</small></div>' +
+    '<input class="field" id="emoin" placeholder="' + esc(EMO_DEFAULT.join(", ")) + '" maxlength="400" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(S.emoticons || EMO_DEFAULT.join(", ")) + '">' +
+    '<div style="display:flex;align-items:center;gap:10px"><small id="emonote" style="color:var(--mute);flex:1">Showing: ' + esc(emoList().join("  ")) + '</small><button class="linkbtn" data-act="emoreset">Reset to defaults</button></div></div>' +
     '<div class="sect">PRIVACY</div>' +
     srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
@@ -1852,14 +1854,12 @@ function renderSettings() {
     '<input type="file" id="importin" accept="application/json,.json" hidden>' +
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta. Reviewed and approved by CatsEyeXI staff.", "") +
-    srow("What it sends", "Only what you tap: chat, emotes and CatsEye ! commands, one line per tap. No game actions, and nothing on its own.", "") +
-    srow("On iPhone", "No tell notifications. The page pauses when your phone locks and catches up when you come back.", "") +
-    srow("Your data", "Stays on your home network. Only item links leave it, to BG-Wiki.", "") +
+    srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';
   $("settings").innerHTML = h;
   if (showQr && window.qrcode) {
-    try { var q = qrcode(0, "M"); q.addData(link); q.make(); $("qrbox").innerHTML = q.createSvgTag({cellSize: 5, margin: 2, scalable: true}); } catch (e) {}
+    try { var q = qrcode(0, "M"); q.addData(link); q.make(); $("qrbox").innerHTML = '<img alt="QR code for your phone link" style="display:block;width:100%;height:auto;image-rendering:pixelated" src="' + q.createDataURL(6, 2) + '">'; } catch (e) {}
   }
 }
 function loadQr(cb) {
@@ -1914,6 +1914,7 @@ $("settings").addEventListener("click", function (e) {
   }
   var a = e.target.closest("[data-act]");
   if (!a) return;
+  if (a.dataset.act === "emoreset") { S.emoticons = ""; save(); refreshEmo(); render(); return; }
   if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
   if (a.dataset.act === "export") { exportPrefs(); return; }
   if (a.dataset.act === "debug") { showDebug(); return; }

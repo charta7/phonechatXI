@@ -12,8 +12,9 @@ Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day 
 - The name field in Settings shows a made-up example (faded, in italics) instead of a real name, so it no longer looks already filled in.
 - The Party Finder filter is now "PF", with a "looking for members" icon instead of a magnifying glass.
 - About in Settings is shorter and up to date.
+- The QR code in Settings stays black on white even if your browser has a night mode, so it can be scanned.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
-- The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The defaults are ^^, ^_^, :), ;), :D, :P, XD and <3. They open as a grid that grows to fit, with a × to close.
+- The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The field starts with the defaults (^^, ^_^, :), ;), :D, :P, XD and <3), so you can add to them, and "Reset to defaults" brings them back. They open as a grid that grows to fit, with a red × to close.
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
 - The `/pchat debug` log keeps the previous 2 MB as `debug-<Name>.old.log` when it fills up, instead of starting over, so the lines just before a problem aren't lost.
 - A settings change made just before closing the page is no longer lost. The phone's newer copy now wins over an older one on the bridge.
