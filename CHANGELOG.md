@@ -13,6 +13,8 @@ Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day 
 - The Party Finder filter is now "PF", with a "looking for members" icon instead of a magnifying glass.
 - About in Settings is shorter and up to date.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
+- The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The defaults are ^^, ^_^, :), ;), :D, :P, XD and <3. They open as a grid that grows to fit, with a × to close.
+- A settings change made just before closing the page is no longer lost. The phone's newer copy now wins over an older one on the bridge.
 - A failed tell or party line no longer shows the game's error twice. It's on the failed line only, not repeated as its own chat line.
 
 ## 1.1.0 (November 2026)

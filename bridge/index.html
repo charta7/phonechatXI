@@ -165,9 +165,10 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .tabico{height:22px;display:flex;align-items:center}
 .emob{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--edge2);color:var(--soft);font:700 13px var(--mono)}
 .emob.on{border-color:var(--gold);color:var(--gold)}
-.emostrip{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 2px;background:var(--bg);border-top:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.emostrip{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:146px;overflow-y:auto;padding:8px 54px 8px 12px;background:var(--bg);border-top:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.emostrip .emox{position:absolute;top:8px;right:10px;width:38px;padding:7px 0;color:var(--mute);font:600 16px var(--sans)}
 .emostrip[hidden]{display:none}
-.emostrip button{flex:none;padding:7px 12px;border:1px solid var(--edge2);border-radius:999px;color:var(--text);font:600 14px var(--mono)}
+.emostrip button{flex:none;padding:9px 4px;border:1px solid var(--edge2);border-radius:999px;color:var(--text);font:600 14px var(--mono)}
 .comp.chat{position:relative;padding-top:22px}
 .left{position:absolute;top:4px;right:64px;font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;letter-spacing:.3px}
 .left.near{color:var(--gold)}
@@ -326,7 +327,7 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 .opt b{font-size:16px;display:block}
 .opt small{font-size:12px;color:var(--mute)}
 .sfield{display:block;font-size:11px;color:var(--mute);padding:0 2px}
-#watchin::placeholder,.sinput::placeholder{font-style:italic;opacity:.5}
+#watchin::placeholder,#emoin::placeholder,.sinput::placeholder{font-style:italic;opacity:.5}
 .sinput{width:100%;margin:4px 0 8px;padding:10px 14px;border:1px solid var(--edge);border-radius:10px;background:var(--pane);color:var(--text);font-size:16px;outline:none}
 .sbtns{display:flex;gap:10px;justify-content:flex-end;padding-top:10px}
 .sbtns button{padding:9px 16px;border-radius:999px;font-weight:700;font-size:14px}
@@ -562,7 +563,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -588,6 +589,8 @@ function merged(s) {
   if (s && typeof s === "object") {
     for (var k in out) if (s[k] !== undefined) out[k] = s[k];
     out.master = Object.assign({}, DEFAULTS.master, s.master || {});
+    // Keep when these settings were last changed, so a fresh change here beats an older copy on the bridge.
+    if (typeof s.savedAt === "number" && isFinite(s.savedAt)) out.savedAt = s.savedAt;
   }
   return cleanPrefs(out);
 }
@@ -619,6 +622,7 @@ function cleanPrefs(o) {
   ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
+  if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
   o.hidden = list(o.hidden, 300, function (x) { return text(x, 100) || (typeof x === "number" && isFinite(x)); });
   var read = {};
   if (o.read && typeof o.read === "object") Object.keys(o.read).slice(0, 500).forEach(function (k) {
@@ -1426,19 +1430,34 @@ function emoSwap(inp) {
   inp.value = w;
   try { inp.setSelectionRange(pos, pos); } catch (e) {}
 }
-// A row of text emoticons above the box. Tapping one puts it in the box; you still hit send.
-var EMO_PICK = ["^^", "^_^", ":)", ";)", "=)", ":D", ";D", "=D", ":P", ";P", ":(", "XD", "<_<", ">_>", ">_<", "T_T", "-_-", "o_o", "O_O", "<3"];
+// Text emoticons above the box. Tapping one puts it in the box; you still hit send. The list is yours
+// to set in Settings (comma-separated); plain keyboard characters only, since the game can't show emoji.
+var EMO_DEFAULT = ["^^", "^_^", ":)", ";)", ":D", ":P", "XD", "<3"];
+function emoList() {
+  var out = [];
+  String(S.emoticons || "").split(",").forEach(function (t) {
+    t = t.trim();
+    if (/^[\x21-\x7E]{1,8}$/.test(t) && out.indexOf(t) < 0 && out.length < 20) out.push(t);
+  });
+  return out.length ? out : EMO_DEFAULT;
+}
+function emoButtons() {
+  return emoList().map(function (t) { return '<button type="button" data-emo="' + esc(t) + '">' + esc(t) + "</button>"; }).join("") +
+    '<button type="button" class="emox" data-emo-close aria-label="Close">&times;</button>';
+}
+function refreshEmo() { document.querySelectorAll(".emostrip").forEach(function (st) { st.innerHTML = emoButtons(); }); }
 function setupEmoStrip(el, inp) {
   var old = el.previousElementSibling;
   if (old && old.classList.contains("emostrip")) old.remove();
   var strip = document.createElement("div");
   strip.className = "emostrip"; strip.hidden = true;
-  strip.innerHTML = EMO_PICK.map(function (t) { return '<button type="button" data-emo="' + esc(t) + '">' + esc(t) + "</button>"; }).join("");
+  strip.innerHTML = emoButtons();
   el.parentNode.insertBefore(strip, el);
   var eb = el.querySelector(".emob");
   [eb, strip].forEach(function (n) { n.addEventListener("pointerdown", function (e) { e.preventDefault(); }); });   // keep the keyboard up
   eb.addEventListener("click", function () { strip.hidden = !strip.hidden; eb.classList.toggle("on", !strip.hidden); });
   strip.addEventListener("click", function (e) {
+    if (e.target.closest("[data-emo-close]")) { strip.hidden = true; eb.classList.remove("on"); return; }
     var b = e.target.closest("[data-emo]");
     if (!b) return;
     var t = b.dataset.emo, v = inp.value, a = inp.selectionStart == null ? v.length : inp.selectionStart, z = inp.selectionEnd == null ? a : inp.selectionEnd;
@@ -1780,7 +1799,7 @@ function srow(title, sub, right) { return '<div class="srow"><div class="m"><div
 var showQr = false;
 function renderSettings() {
   var ae = document.activeElement;
-  if (ae && ae.id === "watchin") return;          // don't redraw under the reader's thumb
+  if (ae && (ae.id === "watchin" || ae.id === "emoin")) return;          // don't redraw under the reader's thumb
   var link = location.origin + "/?t=" + encodeURIComponent(TOKEN);
   var h = '<div class="sect">CONNECTION</div>' +
     srow("Bridge", connected ? "Connected" + (status.version ? " &middot; " + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
@@ -1799,6 +1818,9 @@ function renderSettings() {
     '<div class="sect">TYPING</div>' +
     srow("Capitalize first letter", "Off by default, since most people type lowercase in game.", tog(S.caps, "caps")) +
     srow("Autocorrect", "Off by default, so game words like Jeuno or Windurst aren't changed.", tog(S.autocorrect, "autocorrect")) +
+    '<div class="srow col"><div class="m"><div>Your emoticons</div><small>The ones in the :) row, in this order. Up to 20, separated by commas, plain keyboard characters only. Leave empty for the defaults.</small></div>' +
+    '<input class="field" id="emoin" placeholder="' + esc(EMO_DEFAULT.join(", ")) + '" maxlength="400" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(S.emoticons || "") + '">' +
+    '<small id="emonote" style="color:var(--mute)">Showing: ' + esc(emoList().join("  ")) + "</small></div>" +
     '<div class="sect">PRIVACY</div>' +
     srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
@@ -1833,15 +1855,21 @@ function loadQr(cb) {
 }
 $("settings").addEventListener("change", function (e) {
   if (e.target.id === "importin") { if (e.target.files[0]) importPrefs(e.target.files[0]); return; }
+  if (e.target.id === "emoin") { S.emoticons = e.target.value; save(); refreshEmo(); e.target.blur(); render(); return; }
   if (e.target.id !== "watchin") return;
   S.watch = e.target.value; save(); setWatch(); e.target.blur(); render();
 });
 $("settings").addEventListener("keydown", function (e) {
-  if (e.target.id === "watchin" && e.key === "Enter") e.target.blur();
+  if ((e.target.id === "watchin" || e.target.id === "emoin") && e.key === "Enter") e.target.blur();
 });
 $("settings").addEventListener("input", function (e) {
   // Save the watch words as you type: iOS doesn't fire "change" when you leave the box by tapping Back.
   if (e.target.id === "watchin") { S.watch = e.target.value; save(); setWatch(); schedule(); return; }
+  if (e.target.id === "emoin") {
+    S.emoticons = e.target.value; save(); refreshEmo();
+    var en = $("emonote"); if (en) en.textContent = "Showing: " + emoList().join("  ");
+    return;
+  }
   var c = e.target.closest("[data-color]");
   if (!c) return;
   S.colors = S.colors || {};
