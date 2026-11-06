@@ -1,6 +1,14 @@
 # Changelog
 
-Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first. Nothing is released until staff sign off.
+Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first; it isn't released until they sign off.
+
+## 1.1.1 (November 2026)
+
+Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day is sorted changed.
+
+- The LS1 message of the day now shows in full. LS1's comes in as a server message, and 1.1.0 pinned its first line ("LS name: set by") instead, with the message itself under server notices.
+- The pinned message of the day has an × to hide it. A linkshell with no message of the day prints nothing when you switch to it, so the old one stayed up. A hidden one stays hidden until it changes.
+- When a linkshell's message of the day comes in, its old one is cleared first.
 
 ## 1.1.0 (November 2026)
 

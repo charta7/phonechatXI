@@ -1,5 +1,5 @@
 --[[
-    phonechat v1.1.0 (phonechatXI)
+    phonechat v1.1.1 (phonechatXI)
 
     Mirrors chat to a feed file that the phonechatXI bridge serves to your phone,
     and types the replies you send from the phone, one line at a time.
@@ -33,7 +33,7 @@
 
 addon.name    = 'phonechat'
 addon.author  = 'Charta'
-addon.version = '1.1.0'
+addon.version = '1.1.1'
 addon.desc    = 'phonechatXI: mirrors chat to your phone and types the replies you send from it.'
 addon.link    = ''
 

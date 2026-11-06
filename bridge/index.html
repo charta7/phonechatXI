@@ -57,6 +57,7 @@ mark.mw{background:none;color:var(--gold);font-weight:700}
 .motd b{color:var(--c);flex:none}
 .motd .x{margin-left:auto;color:var(--mute);flex:none;padding:0 2px}
 .motd.min span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.motd .x+.x{margin-left:6px}
 /* new lines ease in */
 @keyframes fresh{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .fresh{animation:fresh .16s ease-out}
@@ -1742,10 +1743,14 @@ function renderAlerts() {
   if (curTab === "alerts") S.seenAlerts = nowSec();
 }
 function noticeKey(m) { return String(m.id || (m.ts + ":" + (m.body || "").slice(0, 40))); }
+// A linkshell with no MOTD prints nothing when you switch to it, so the old one would stay pinned.
+// The x hides that MOTD (remembered on the phone); the same MOTD re-sent after zoning stays hidden,
+// and a different one shows again.
+function motdKey(c) { return "motd:" + c + ":" + String(lsMotd[c] || "").slice(0, 80); }
 function renderMotd() {
   function strip(chs) {
-    return chs.filter(function (c) { return lsMotd[c]; }).map(function (c) {
-      return '<div class="motd' + (S.motdMin ? " min" : "") + '" style="--c:' + CH[c].c + '"><b>' + CH[c].label + '</b><span>' + fmt(lsMotd[c]) + '</span><button class="x" data-motd aria-label="' + (S.motdMin ? "Show all" : "Shrink") + '">' + (S.motdMin ? "&#9662;" : "&#9652;") + "</button></div>";
+    return chs.filter(function (c) { return lsMotd[c] && (S.hidden || []).indexOf(motdKey(c)) < 0; }).map(function (c) {
+      return '<div class="motd' + (S.motdMin ? " min" : "") + '" style="--c:' + CH[c].c + '"><b>' + CH[c].label + '</b><span>' + fmt(lsMotd[c]) + '</span><button class="x" data-motd aria-label="' + (S.motdMin ? "Show all" : "Shrink") + '">' + (S.motdMin ? "&#9662;" : "&#9652;") + '</button><button class="x" data-motd-hide="' + c + '" aria-label="Hide this message of the day">&times;</button></div>';
     }).join("");
   }
   var v = curView();
@@ -1754,6 +1759,8 @@ function renderMotd() {
 }
 document.addEventListener("click", function (e) {
   if (e.target.closest("[data-motd]")) { S.motdMin = !S.motdMin; save(); render(); }
+  var mh = e.target.closest("[data-motd-hide]");
+  if (mh) { S.hidden = (S.hidden || []).concat([motdKey(mh.dataset.motdHide)]).slice(-300); save(); render(); }
   var dz = e.target.closest("[data-dismiss]");
   if (dz) {
     var keys = dz.dataset.dismiss === "*" ? msgs.filter(function (m) { return m.ch === "server" || m.ch === "system"; }).map(noticeKey) : dz.dataset.dismiss.split(";;");
