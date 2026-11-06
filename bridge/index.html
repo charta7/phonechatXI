@@ -172,6 +172,7 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .comp.chat{position:relative;padding-top:22px}
 .left{position:absolute;top:4px;right:64px;font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;letter-spacing:.3px}
 .left.near{color:var(--gold)}
+.nogame{position:absolute;top:4px;left:16px;max-width:calc(100% - 160px);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:11.5px;color:var(--gold)}
 .left.over{color:var(--bad);font-weight:700}
 .send.blocked{background:#3a3f5c;opacity:.5}
 
@@ -1236,7 +1237,7 @@ function placeholder(t) {
 function buildComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp;
-    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' + (ctx === "cmd" ? ' class="mono"' : "") + ' maxlength="400"><span class="left" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
+    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' + (ctx === "cmd" ? ' class="mono"' : "") + ' maxlength="400"><span class="left" hidden></span><span class="nogame" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
     var inp = el.querySelector("input"), btn = el.querySelector(".send");
     if (ctx !== "cmd") setupEmoStrip(el, inp);
     inp.addEventListener("input", function () { if (ctx !== "cmd") emoSwap(inp); btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); });
@@ -1270,10 +1271,22 @@ function lineRoom(t) {
   var pre = CH[t.ch].send + " " + (t.ch === "tell" ? (t.peer || "") + " " : "");
   return LINE_BYTES - sjisLen(pre);
 }
+// Emoji left in the box after the swap can't show in game (the bridge drops them), so say so.
+var NOGAME_RE;
+try { NOGAME_RE = new RegExp("\\p{Extended_Pictographic}", "gu"); } catch (e) { NOGAME_RE = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g; }
+function noGame(el, text) {
+  var hint = el.querySelector(".nogame");
+  if (!hint) return;
+  var seen = [];
+  (text.match(NOGAME_RE) || []).forEach(function (c) { if (seen.indexOf(c) < 0) seen.push(c); });
+  hint.hidden = !seen.length;
+  hint.textContent = seen.length ? '"' + seen.join(" ") + '" not valid, won\'t appear in game' : "";
+}
 function updateLeft(el) {
   var ctx = el.dataset.comp, inp = el.querySelector("input"), left = el.querySelector(".left"), btn = el.querySelector(".send");
   if (!left || ctx === "cmd") return;
   var room = lineRoom(compTarget(ctx)), used = sjisLen((inp.value || "").trim()), rem = room - used;
+  noGame(el, inp.value || "");
   el.classList.add("chat");
   left.hidden = false;
   left.textContent = used + " / " + room;
