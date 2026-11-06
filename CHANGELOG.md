@@ -15,6 +15,7 @@ Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day 
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
 - The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The defaults are ^^, ^_^, :), ;), :D, :P, XD and <3. They open as a grid that grows to fit, with a × to close.
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
+- The `/pchat debug` log keeps the previous 2 MB as `debug-<Name>.old.log` when it fills up, instead of starting over, so the lines just before a problem aren't lost.
 - A settings change made just before closing the page is no longer lost. The phone's newer copy now wins over an older one on the bridge.
 - A failed tell or party line no longer shows the game's error twice. It's on the failed line only, not repeated as its own chat line.
 

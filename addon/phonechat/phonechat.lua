@@ -299,7 +299,11 @@ local function debug_log(raw_mode, mode, message, injected)
     local line = ('%s\t%d\t%d\t%s%s\n'):format(os.date('%H:%M:%S'), raw_mode, mode,
         injected and '[addon] ' or '', esc(text))
     if S.debug_bytes + #line > DEBUG_MAX then
-        write_file(path, '')          -- start over instead of growing forever
+        -- Keep the previous 2 MB as debug-<Name>.old.log, so the lines just before a bug survive.
+        -- If renaming isn't possible, start the file over as before. At most 4 MB on disk.
+        local old = path:gsub('%.log$', '.old.log')
+        os.remove(old)
+        if not os.rename(path, old) then write_file(path, '') end
         S.debug_bytes = 0
     end
     S.debug_bytes = S.debug_bytes + #line

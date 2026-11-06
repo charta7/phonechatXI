@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). This is the version to use. See the [changelog](CHANGELOG.md).
+> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 is a fixes-only update on top of it and is the version to use. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -83,11 +83,11 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 - Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>` and text the game's chat box can't type are blocked, and wide Japanese-keyboard versions of these symbols get the same checks. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
 - Starts and stops the bridge on the Steam Deck too (1.0.0 only could on Windows), so the Decky plugin is no longer needed. The in-game window shows the QR code, and the bridge closes itself about 100 seconds after the game is gone.
 
-The full list is in the [changelog](CHANGELOG.md).
+1.1.1 adds your own emoticon list and fixes the LS1 message of the day. The full list is in the [changelog](CHANGELOG.md).
 
 ## Install
 
-Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). It's under Assets; the "Source code" downloads are the whole repo, not the addon.
+Download the latest `phonechatXI-v1.1.x.zip` from [Releases](../../releases). It's under Assets; the "Source code" downloads are the whole repo, not the addon.
 
 ### Steam Deck
 
@@ -133,7 +133,7 @@ If an older bridge is still running (for example, started from Desktop Mode), th
 | `/pchat start`, `/pchat stop` | Starts or stops the bridge. |
 | `/pchat url` | Prints the phone link. |
 | `/pchat newlink` | Makes a new phone link. The old one stops working. |
-| `/pchat debug` | Turns the debug log on or off. It records every line the game shows, with its mode number, in `debug-<Name>.log` in the phonechat folder (2 MB at most). That includes other players' chat and combat lines, so don't post it publicly. Your phone link is left out. |
+| `/pchat debug` | Turns the debug log on or off. It records every line the game shows, with its mode number, in `debug-<Name>.log` in the phonechat folder. At 2 MB the previous log is kept as `debug-<Name>.old.log`, so it never takes more than 4 MB. That includes other players' chat and combat lines, so don't post it publicly. Your phone link is left out. |
 
 `/pcxi` and `/phonechat` work too.
 
