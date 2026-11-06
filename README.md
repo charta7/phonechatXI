@@ -41,7 +41,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends, starred ones too.
 - An Alerts tab: Populox's VNM alert with a 10 minute countdown, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
-- A `:)` button with a row of text emoticons, and emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
+- A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
 
@@ -159,6 +159,7 @@ The bridge also closes itself when the game is gone. If the game closes or freez
 - The screen sleeps on its normal timer. Raise Auto-Lock in iPhone Settings to keep it on longer.
 - If your router gives your Deck or PC a new address, the saved link breaks. Scan the QR code again, or reserve an address for it in your router (a DHCP reservation).
 - One character at a time. If two characters are logged in and both have chat, sending pauses so a line can't come from the wrong one. It resumes about 5 minutes after only one has chat. If you dual-box, unload it on your other character with `/addon unload phonechat`.
+- No emoji in game. A few common ones turn into text as you type; any others get a note above the box and are left out.
 - Home Wi-Fi only. The link and chat aren't encrypted, so on public Wi-Fi anyone on the network could see them, and anyone with your link could read and send.
 
 ## Troubleshooting
