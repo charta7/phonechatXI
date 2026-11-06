@@ -75,9 +75,9 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 
 ### New in 1.1.0
 
-- Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (off by default), the LS message of the day, say lines that are just `!`, `!!` or `!?`, and replies to `!` commands you send from the phone (for 10 seconds, Server tab only).
-- Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>`, full-width lookalikes and text the game's chat box can't type are all blocked. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
-- Starts and stops the bridge when you ask, shows the QR code in an in-game window, and closes the bridge by itself about 100 seconds after the game is gone.
+- Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (shown only if you turn them on), the LS message of the day, say lines starting with `!` that aren't commands (like `!` or `!?`), and the server's reply to a `!` command you send from the phone (read for 10 seconds after sending, shown in the Server tab).
+- Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>` and text the game's chat box can't type are blocked, and wide Japanese-keyboard versions of these symbols get the same checks. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
+- Starts and stops the bridge on the Steam Deck too (1.0.0 only could on Windows), so the Decky plugin is no longer needed. The in-game window shows the QR code, and the bridge closes itself about 100 seconds after the game is gone.
 
 ## How it works
 
@@ -88,18 +88,18 @@ phone ->  bridge ->  outbox file  ->  addon   ->  chat (one line per tap)
 
 The addon writes chat lines to a feed file, and the bridge streams them to the phone. Lines you send go into an outbox file. The addon reads it and types each line through Ashita's command queue, the same as typing it yourself. No packet injection.
 
-When the bridge runs, a small window called "phonechatXI bridge" sits next to the game (minimized on Windows). That's the local relay: it says what it is, shows your phone link, and notes when the game or a phone connects. Leave it open while you use phonechatXI. `/pchat stop` or closing the window turns phone chat off. If the game closes or freezes (or the addon is unloaded), the window and the phone say so; after 10 seconds without the game it gives you 90 seconds to close it, wait for the game to come back, or let it close by itself. A bridge started without the game (Desktop Mode, the test tools) stays open.
+When the bridge runs, a small window called "phonechatXI bridge" sits next to the game (minimized on Windows). That's the local relay: it says what it is, shows your phone link, and notes when the game or a phone connects. Leave it open while you use phonechatXI. `/pchat stop` or closing the window turns phone chat off. If the game closes or freezes (or the addon is unloaded), the window and the phone say so; after 10 seconds without the game it gives you 90 seconds to close it, wait for the game to come back, or let it close by itself. A bridge that hasn't seen the game (started from Desktop Mode, for example) stays open.
 
 The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows (`<VanaCore>\config\addons\phonechat\` on VanaCore). On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
 
 ## Install
 
-Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases).
+Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). It's under Assets; the "Source code" downloads are the whole repo, not the addon.
 
 ### Steam Deck
 
 1. In the CatsEye launcher, use Add New Addon, pick the zip and turn it on.
-2. Start the game. The phonechatXI window opens the first time. Click **Start**, and tick **Start with the game** to skip this next time.
+2. Start the game and type `/pchat`. Click **Start** in the phonechatXI window, and tick **Start with the game** to skip this next time.
 3. Scan the QR code with your phone's camera and open the link. In Safari, tap Share, then Add to Home Screen.
 
 The bridge is copied to `/home/deck/phonechat/` the first time it starts. To run it from Desktop Mode, use the phonechatXI Bridge launcher in that folder.
@@ -113,7 +113,7 @@ The bridge is copied to `/home/deck/phonechat/` the first time it starts. To run
 
 The addon puts the bridge in `<Ashita>\config\addons\phonechat\` (on VanaCore, `<VanaCore>\config\addons\phonechat\`), so you never move files by hand. Ashita and VanaCore each keep their own copy and phone link.
 
-Tested on Windows 11 with Python 3.15, on Ashita and on VanaCore's beta: chat, tells, sending from the phone, and starting and stopping the bridge from the game. The in-game part was tested with the approved 1.0.0; 1.1's own setup steps were tested off the game until 1.1 is approved.
+Tested on Windows 11 with Python 3.15, on Ashita and on VanaCore's beta: chat, tells, sending from the phone, and starting and stopping the bridge from the game. The in-game part was tested with 1.0.0, and 1.1.0 was tested offline before review.
 
 ### Updating
 
@@ -206,5 +206,5 @@ To test without the game, see [`tools/`](tools): a fake chat session, and a repl
 - Built by Charta with Claude.
 - `bridge/qrcode.js` is [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT).
 - The in-game QR code uses [luaqrcode](https://github.com/speedata/luaqrcode) by speedata (BSD-3), in `addon/phonechat/qrencode.lua`.
-- Fonts: Cinzel, Atkinson Hyperlegible, JetBrains Mono and Cormorant SC (logo), all under the SIL Open Font License. License files are in `bridge/fonts/`.
+- Fonts: Cinzel, Atkinson Hyperlegible and JetBrains Mono on the phone page, and Cormorant SC in the logo image, all under the SIL Open Font License. License files for the bundled fonts are in `bridge/fonts/`.
 - The server command list and the game mode icons come from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki (as of October 2026).
