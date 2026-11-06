@@ -410,7 +410,7 @@ class Sender(threading.Thread):
         elif "no party members" in low:
             ch = "party"
         else:
-            return
+            return False
         now = time.time()
         with self.lock:
             hits = [pid for pid, p in self.pending.items()
@@ -426,6 +426,7 @@ class Sender(threading.Thread):
                 self.pending[pid]["state"] = "failed"
         for pid in hits:
             ack(pid, "failed", reason)
+        return bool(hits)
 
     def run(self):
         while True:
@@ -523,8 +524,8 @@ class Tailer(threading.Thread):
             pid = self.sender.match_echo(ch, msg["name"], body)
             if pid:
                 msg["pid"] = pid
-        if ch == "system":
-            self.sender.match_failure(body)
+        if ch == "system" and self.sender.match_failure(body):
+            return                               # shown on the failed line itself, so not again as its own line
 
         if ch == "venture":
             self.handle_venture(char, msg)

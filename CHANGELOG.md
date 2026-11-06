@@ -9,6 +9,11 @@ Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day 
 - The LS1 message of the day now shows in full. LS1's comes in as a server message, and 1.1.0 pinned its first line ("LS name: set by") instead, with the message itself under server notices.
 - The pinned message of the day has an × to hide it. A linkshell with no message of the day prints nothing when you switch to it, so the old one stayed up. A hidden one stays hidden until it changes.
 - When a linkshell's message of the day comes in, its old one is cleared first.
+- The name field in Settings shows a made-up example (faded, in italics) instead of a real name, so it no longer looks already filled in.
+- The Party Finder filter is now "PF", with a "looking for members" icon instead of a magnifying glass.
+- About in Settings is shorter and up to date.
+- The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
+- A failed tell or party line no longer shows the game's error twice. It's on the failed line only, not repeated as its own chat line.
 
 ## 1.1.0 (November 2026)
 
