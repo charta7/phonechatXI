@@ -7,15 +7,21 @@
 
 A second chat window for FFXI on CatsEyeXI, on your phone.
 
-Typing with a controller is slow, and the chat log is hard to read on a Steam Deck. phonechatXI shows your chat on your phone and lets you reply with the phone's keyboard while you keep playing. The phone and the game have to be on the same Wi-Fi.
+Typing with a controller is slow, and the chat log is hard to read on a Steam Deck. phonechatXI shows your chat on your phone and lets you reply with the phone's keyboard while you keep playing.
 
 There are three parts:
 
 - `phonechat`, an Ashita v4 addon. It writes chat to a file and types the lines you send.
-- The bridge, a small Python program on the same machine as the game. It serves the phone page, comes in the addon zip, and the addon starts it.
+- The bridge, a small Python program that runs on the same machine as the game and serves the phone page. It comes in the addon zip, and the addon starts it for you.
 - The phone page. Add it to your Home Screen and it opens like an app.
 
-Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too on Windows, not tested on the Steam Deck yet), Python 3.7 or newer (already on the Steam Deck), and a phone on the same Wi-Fi. Tested on a Steam Deck and on Windows 11, with an iPhone.
+**You need:**
+
+- The CatsEye launcher (Ashita v4). VanaCore's beta works too on Windows.
+- Python 3.7 or newer. The Steam Deck already has it; on Windows, see Install.
+- A phone on the same Wi-Fi as the game.
+
+Tested on a Steam Deck and on Windows 11, with an iPhone.
 
 <p>
   <img src="docs/screenshots/chat.png" width="220" alt="Chat feed with linkshell, party, tells, say and shout">
@@ -31,12 +37,12 @@ Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too on Windows, not
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
 - Linked items (`{{Suppanomimi}}`) open a BG-Wiki search. Web addresses in chat show as plain text.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
-- The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - The LS message of the day is pinned above chat.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends, starred ones too.
 - An Alerts tab: Populox's VNM alert with a 10 minute countdown, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
-- An emoticon button. Emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
+- A `:)` button with a row of text emoticons, and emoji turn into text as you type (😀 becomes `:D`, 👀 becomes `<_<`), since the game can't show them.
+- The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - Three skins (Midnight, Classic, Onyx), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
 
 <p>
@@ -52,6 +58,13 @@ Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too on Windows, not
   <img src="docs/screenshots/ventures.png" width="180" alt="VNM alert with countdown">
 </p>
 
+<p>
+  <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
+  <img src="docs/screenshots/command-confirm.png" width="180" alt="Confirm step before a command is sent">
+  <img src="docs/screenshots/settings.png" width="180" alt="Settings">
+  <img src="docs/screenshots/debug-info.png" width="180" alt="Debug info for a bug report">
+</p>
+
 ## What it won't do
 
 - Automate anything. Every line, emote or command is one tap from you. No auto-replies, timers, repeats or macros, and nothing reacts to chat. Mentions only highlight.
@@ -64,31 +77,13 @@ Needs Ashita v4 (the CatsEye launcher; VanaCore's beta works too on Windows, not
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again against the same list right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
-<p>
-  <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
-  <img src="docs/screenshots/command-confirm.png" width="180" alt="Confirm step before a command is sent">
-  <img src="docs/screenshots/settings.png" width="180" alt="Settings">
-  <img src="docs/screenshots/debug-info.png" width="180" alt="Debug info for a bug report">
-</p>
-
-### New in 1.1.0
+## New in 1.1.0
 
 - Reads "X examines you", other players' emotes, your own shouts, Party Finder ads, bazaar visits (shown only if you turn them on), the LS message of the day, say lines starting with `!` that aren't commands (like `!` or `!?`), and the server's reply to a `!` command you send from the phone (read for 10 seconds after sending, shown in the Server tab).
 - Sends the same list as 1.0.0, with stricter checks: a `;` followed by a command, target tokens like `<st>` and text the game's chat box can't type are blocked, and wide Japanese-keyboard versions of these symbols get the same checks. A lone `/` (a wave) and `!`, `!!` or `!?` (reactions) can now be sent.
 - Starts and stops the bridge on the Steam Deck too (1.0.0 only could on Windows), so the Decky plugin is no longer needed. The in-game window shows the QR code, and the bridge closes itself about 100 seconds after the game is gone.
 
-## How it works
-
-```
-game  ->  addon  ->  feed file    ->  bridge  ->  phone
-phone ->  bridge ->  outbox file  ->  addon   ->  chat (one line per tap)
-```
-
-The addon writes chat lines to a feed file, and the bridge streams them to the phone. Lines you send go into an outbox file. The addon reads it and types each line through Ashita's command queue, the same as typing it yourself. No packet injection.
-
-When the bridge runs, a small window called "phonechatXI bridge" sits next to the game (minimized on Windows). That's the local relay: it says what it is, shows your phone link, and notes when the game or a phone connects. Leave it open while you use phonechatXI. `/pchat stop` or closing the window turns phone chat off. If the game closes or freezes (or the addon is unloaded), the window and the phone say so; after 10 seconds without the game it gives you 90 seconds to close it, wait for the game to come back, or let it close by itself. A bridge that hasn't seen the game (started from Desktop Mode, for example) stays open.
-
-The bridge lives outside the addon folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows (`<VanaCore>\config\addons\phonechat\` on VanaCore). On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
+The full list is in the [changelog](CHANGELOG.md).
 
 ## Install
 
@@ -100,14 +95,14 @@ Download `phonechatXI-v1.1.0.zip` from [Releases](../../releases). It's under As
 2. Start the game and type `/pchat`. Click **Start** in the phonechatXI window, and tick **Start with the game** to skip this next time.
 3. Scan the QR code with your phone's camera and open the link. In Safari, tap Share, then Add to Home Screen.
 
-The bridge is copied to `/home/deck/phonechat/` the first time it starts. To run it from Desktop Mode, use the phonechatXI Bridge launcher in that folder.
+The bridge runs in the background; the `/pchat` window shows whether it's on. It's copied to `~/phonechat/` (`/home/deck/phonechat/`) the first time it starts. To run it from Desktop Mode, use the phonechatXI Bridge launcher in that folder.
 
 ### Windows
 
 1. Install Python 3 from [python.org](https://www.python.org/downloads/) (any version from 3.7 up). Say yes when it offers to add Python to your PATH. Then close and reopen the CatsEye launcher, so the game sees Python.
-2. Add the zip with the launcher's Add New Addon and turn it on.
-3. In game, type `/pchat` and click **Start**. A small "phonechatXI bridge" window opens minimized next to the game: that's the local relay. If Windows asks about the firewall, allow private networks.
-4. Scan the QR code in the phonechatXI window.
+2. In the CatsEye launcher, use Add New Addon, pick the zip and turn it on.
+3. In game, type `/pchat` and click **Start**. A small "phonechatXI bridge" window opens minimized next to the game. That's the bridge; leave it open. If Windows asks about the firewall, allow private networks.
+4. Scan the QR code in the phonechatXI window with your phone's camera, then add the page to your Home Screen.
 
 The addon puts the bridge in `<Ashita>\config\addons\phonechat\` (on VanaCore, `<VanaCore>\config\addons\phonechat\`), so you never move files by hand. Ashita and VanaCore each keep their own copy and phone link.
 
@@ -119,14 +114,14 @@ Tested on Windows 11 with Python 3.15, on Ashita and on VanaCore's beta: chat, t
 2. In the CatsEye launcher, remove phonechat, then use Add New Addon and pick the new zip.
 3. Start the game and the bridge as usual. The bridge updates itself.
 
-Removing the addon doesn't lose anything. The phone page updates itself, and your link, settings and saved tells live in `~/phonechat/` (on Windows, `<Ashita>\config\addons\phonechat\`, or VanaCore's), outside the addon folder. For a new Home Screen icon, remove the shortcut and add it again.
+Removing the addon doesn't lose anything. Your link, settings and saved tells live in the phonechat folder (`~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` or VanaCore's on Windows), outside the addon folder. The phone page updates itself. For a new Home Screen icon, remove the shortcut and add it again.
 
-If the bridge was running from Desktop Mode during the update, the addon tells you an update is ready. Run `/pchat stop`, then `/pchat start`.
+If an older bridge is still running (for example, started from Desktop Mode), the addon tells you a newer one came with the update. Run `/pchat stop`, then `/pchat start`.
 
 ### Uninstall
 
-1. `/pchat stop`, then remove the addon in the launcher.
-2. Delete `/home/deck/phonechat/` (Deck) or `<Ashita>\config\addons\phonechat\` (Windows; `<VanaCore>\config\addons\phonechat\` on VanaCore).
+1. In game, `/pchat stop`. Then remove the addon in the launcher.
+2. Delete the phonechat folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows (`<VanaCore>\config\addons\phonechat\` on VanaCore).
 3. Remove the shortcut from your Home Screen.
 
 ## In-game commands
@@ -134,13 +129,28 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 | Command | |
 |---|---|
 | `/pchat` | Opens the phonechatXI window: start and stop, QR code, new phone link, settings. Same as `/pchat config`. |
-| `/pchat help` | Prints bridge status, your phone link and these commands |
-| `/pchat start`, `/pchat stop` | Starts or stops the bridge |
-| `/pchat url` | Prints the phone link |
+| `/pchat help` | Prints bridge status, your phone link and these commands. |
+| `/pchat start`, `/pchat stop` | Starts or stops the bridge. |
+| `/pchat url` | Prints the phone link. |
 | `/pchat newlink` | Makes a new phone link. The old one stops working. |
-| `/pchat debug` | Logs every line the game shows, with its mode number, for troubleshooting. That includes other players' chat and combat lines, so don't post the log publicly. Your phone link is left out. |
+| `/pchat debug` | Turns the debug log on or off. It records every line the game shows, with its mode number, in `debug-<Name>.log` in the phonechat folder (2 MB at most). That includes other players' chat and combat lines, so don't post it publicly. Your phone link is left out. |
 
 `/pcxi` and `/phonechat` work too.
+
+## How it works
+
+```
+game  ->  addon  ->  feed file    ->  bridge  ->  phone
+phone ->  bridge ->  outbox file  ->  addon   ->  chat (one line per tap)
+```
+
+The addon writes chat lines to a feed file, and the bridge streams them to the phone. Lines you send go into an outbox file. The addon reads it and types each line through Ashita's command queue, the same as typing it yourself. No packet injection.
+
+The bridge lives outside the addon folder, in the phonechat folder. On the Deck it's a Linux program, so it can't run from inside the game's folders, and keeping it separate means addon updates don't reset your phone link.
+
+On Windows the bridge has its own small window, minimized next to the game. It shows your phone link and notes when the game or a phone connects. On the Deck it runs in the background and writes to `~/phonechat/bridge.log`. `/pchat stop` turns it off, and on Windows closing its window does too.
+
+The bridge also closes itself when the game is gone. If the game closes or freezes, or the addon is unloaded, the bridge window and the phone say so after 10 seconds. The bridge then closes itself 90 seconds later, unless the game comes back. A bridge that hasn't seen the game (started from Desktop Mode, for example) stays open.
 
 ## Limits
 
@@ -171,9 +181,9 @@ If the bridge was running from Desktop Mode during the update, the addon tells y
 
 ## Privacy
 
-- Chat is held in the bridge's memory and is gone when it stops. On its way to the bridge it goes through a feed file, and lines you send go through an outbox file, both in the phonechat folder. They stay there after you stop until the bridge next starts, which empties them. The addon also empties its feed file when it loads.
-- Tells are saved only if you turn on Remember tells: the last 50 lines per person, deleted with Clear saved tells. No other chat is saved.
-- Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. Your mention names, who you've had tells with, and the alert cards you've dismissed stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again. No chat goes in that file.
+- Chat is held in the bridge's memory and is gone when it stops. On the way, it passes through a feed file, and lines you send pass through an outbox file, both in the phonechat folder. They're emptied the next time the bridge starts, and the addon also empties the feed file when it loads.
+- Tells are saved only if you turn on Remember tells: the last 50 lines per person, on the bridge, deleted with Clear saved tells. No other chat is saved.
+- Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. No chat goes in that file. Your mention names, which tells you've read, who you last sent a tell to and the alerts you've cleared stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself. If you'd like to refresh it, make a new link with `/pchat newlink` and the old one stops working.
 
 ## About the code
@@ -184,7 +194,7 @@ I built this with Claude. I designed it and tested every feature myself, and I'v
 
 You're welcome to. Please:
 
-- **Test off the live server.** [`tools/`](tools) runs the addon without the game.
+- **Test off the live server.** [`tools/`](tools) has a fake chat session and a replay of real `/pchat debug` logs, so you can run the addon and bridge without the game.
 - **Get new features reviewed.** If your version reads or sends anything new, or does anything on its own, it's a new addon. Give it its own name and submit it to CatsEyeXI staff through a GM ticket before using it in game.
 - **Approval doesn't carry over.** It covers the versions staff reviewed from this repo, not changed copies.
 
@@ -196,8 +206,6 @@ phonechatXI is for chat: reading it on your phone and typing messages without fi
 
 - Bugs: open a [bug report](../../issues/new/choose) or post in the phonechatXI thread on the CatsEyeXI Discord, and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
 - Requests are read, but most of my time goes to fixing bugs, so I can't promise a timeline. Anything that changes what it reads from the game or sends to it needs CatsEyeXI staff review first.
-
-To test without the game, see [`tools/`](tools): a fake chat session, and a replay of real `/pchat debug` logs through the addon.
 
 ## Credits
 
