@@ -810,6 +810,28 @@ local function system_line(text)
     return false
 end
 
+-- Linkshell message of the day. The header ("[1]< LS name: set by >") clears that linkshell's
+-- MOTD on the phone, so switching to a linkshell with no MOTD doesn't leave the old one up.
+-- The next line is the message. As a server message it must end with the game's date stamp,
+-- "(2026, Aug. 3 2:21:09)", so an unrelated server line can't be pinned by mistake.
+local MOTD_STAMP = '%s*%(%d%d%d%d, [^%)]*%)%s*$'
+local function motd_head(text)
+    local n = text:match('^%[([12])%]<.*>$')
+    if not n then return false end
+    S.motd_for = { n = n, at = os.clock() }
+    emit('motd', 'in', 'ls' .. n, '')
+    return true
+end
+local function motd_body(text, need_stamp)
+    local f = S.motd_for
+    if not f or os.clock() - f.at > 5 then return false end
+    S.motd_for = nil
+    if need_stamp and not text:find(MOTD_STAMP) then return false end
+    local msg = (text:gsub(MOTD_STAMP, ''))
+    if msg ~= '' then emit('motd', 'in', 'ls' .. f.n, msg) end
+    return true
+end
+
 local function handle_line(raw_mode, message)
     local mode = bit.band(raw_mode, 0xFF)
     debug_log(raw_mode, mode, message, false)
@@ -835,15 +857,9 @@ local function handle_line(raw_mode, message)
     end
 
     -- Linkshell message of the day: a "[n]< LS name: set by >" line, then the message itself.
+    -- LS2's comes in mode 217; LS1's comes as a server message (handled further down).
     if mode == MOTD_MODE then
-        local n = text:match('^%[(%d)%]<.*>$')
-        if n == '1' or n == '2' then
-            S.motd_for = { n = n, at = os.clock() }
-        elseif S.motd_for and os.clock() - S.motd_for.at <= 5 then
-            local msg = (text:gsub('%s*%(%d%d%d%d, [^%)]*%)%s*$', ''))   -- drop the "(2026, Jul. 21 23:18:24)" stamp
-            if msg ~= '' then emit('motd', 'in', 'ls' .. S.motd_for.n, msg) end
-            S.motd_for = nil
-        end
+        if not motd_head(text) then motd_body(text, false) end
         return
     end
 
@@ -863,13 +879,8 @@ local function handle_line(raw_mode, message)
     if channel == 'server' then
         text = (text:gsub('^%-+=*%s*SystemMessage%s*=*%-+%s*', ''))
         if text == '' then return end
+        if motd_head(text) or motd_body(text, true) then return end
         if system_line(text) then return end
-        -- Linkshell message of the day: "[1]< text >"
-        local n, motd = text:match('^%[(%d)%]<%s*(.-)%s*>$')
-        if n == '1' or n == '2' then
-            emit('motd', 'in', 'ls' .. n, motd)
-            return
-        end
         emit(channel, dir, '', text)
         return
     end
