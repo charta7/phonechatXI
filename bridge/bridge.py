@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 """
-phonechatXI bridge v1.0.0
+phonechatXI bridge v1.1.0
 
 Tails feed-<Character>.log files written by the phonechat addon, keeps recent
 history in memory, serves the phone page on your home network, and passes
 replies and server commands from the phone back to the addon.
 
-    python3 bridge.py [--dir /home/deck/phonechat] [--port 8765] [--host 0.0.0.0]
+    python3 bridge.py [--dir /home/deck/phonechat] [--port 8765] [--host 0.0.0.0] [--open]
+
+The addon copies this folder into its shared folder (<shared>/bridge) and starts it from
+there, so the shared folder is normally just the folder above this one.
+Needs Python 3.7 or newer (Steam's game container ships 3.7).
 
 Rules this file enforces (see the spec):
   * Nothing is sent unless the phone asked for that one message. The bridge never
@@ -32,12 +36,13 @@ import signal
 import socket
 import sys
 import threading
+import unicodedata
 import time
 from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Max messages kept in memory per channel, so shout/yell spam can't push out LS or tells.
@@ -45,13 +50,16 @@ CAPS = {
     "ls1": 500, "ls2": 500, "party": 500, "tell": 600,
     "unity": 300, "say": 300, "shout": 300, "yell": 300, "emote": 200,
     "venture": 200, "server": 100, "system": 150, "zone": 100, "echo": 50,
-    "_ack": 300,
+    "_ack": 300, "_game": 5, "finder": 300, "bazaar": 100, "motd": 10,
 }
+SCROLLBACK = (1, 2, 4)          # Settings > Scrollback multiplies the chat caps above
 DEFAULT_CAP = 200
 
 FEED_ROTATE_BYTES = 5 * 1024 * 1024
 POLL_SECONDS = 0.5
 STATUS_SECONDS = 3
+GAME_QUIET_SECONDS = 10         # no "game still here" note from the addon this long = the game may be gone
+AUTO_CLOSE_SECONDS = 90         # ...and after that much longer, the bridge closes itself
 TEASER_HOLD_SECONDS = 3.0
 
 SEND_GAP_SECONDS = 1.0          # one line into the game per second at most
@@ -59,13 +67,17 @@ SEND_QUEUE_MAX = 8              # lines waiting; more than this is refused
 CONFIRM_SECONDS = 8.0          # no echo from the game after this = "unconfirmed"
 FAIL_LINK_SECONDS = 5.0        # a mode 123 line this soon after a send = that send failed
 LINE_BYTES = 130                # FFXI's chat line limit; counted on the whole typed line, prefix included
-MAX_PARTS = 4
+LIVE_SECONDS = 300              # a character with chat in this window counts as logged in
 TELLS_KEEP = 50                 # saved lines per person
 
 TARGETS = {"ls1": "/l", "ls2": "/l2", "party": "/p", "tell": "/t", "say": "/s", "shout": "/sh"}
 NAME_RE = re.compile(r"^[A-Za-z]{3,15}$")
 ARGS_RE = re.compile(r"^[A-Za-z0-9 _\-]{0,40}$")
+# Chat lines that may start with / or !: a wave and three reactions. None can name a command.
+REACTIONS = ("/", "!", "!!", "!?")
 CALL_RE = re.compile(r"<\s*call\s*(\d{1,2})\s*>", re.I)
+# Sub-target tokens make the game open target selection. Never sent from the phone.
+SUBTARGET_RE = re.compile(r"<\s*(?:st|stpc|stnpc|stpt|stal|lastst)\s*>", re.I)
 ZONE_RE = re.compile(r"^\s*(.+?)\s*\(([A-Z]-\d+)\)\s*$")
 YELL_RE = re.compile(r"^(.+?)\[(.*)\]$")
 
@@ -101,6 +113,7 @@ class Store:
         self.next_id = 1
         self.by_ch = {}
         self.boot = int(time.time() * 1000)
+        self.mult = 1
 
     def add(self, msg):
         with self.cond:
@@ -108,7 +121,7 @@ class Store:
             self.next_id += 1
             dq = self.by_ch.setdefault(msg["ch"], deque())
             dq.append(msg)
-            cap = CAPS.get(msg["ch"], DEFAULT_CAP)
+            cap = CAPS.get(msg["ch"], DEFAULT_CAP) * self.mult
             while len(dq) > cap:
                 dq.popleft()
             self.cond.notify_all()
@@ -158,7 +171,7 @@ class Tells:
             return
         peer = msg.get("name") or ""
         char = msg.get("char") or ""
-        if not NAME_RE.match(peer) or not re.match(r"^[\w\-]+$", char):
+        if not NAME_RE.fullmatch(peer) or not re.fullmatch(r"[A-Za-z0-9_\-]+", char):
             return
         row = {k: msg[k] for k in ("ts", "dir", "name", "body")}
         path = self._path(char, peer)
@@ -219,39 +232,17 @@ class SendError(Exception):
 
 def clean_text(text):
     text = "".join(CURLY.get(c, c) for c in (text or ""))
-    text = re.sub(r"[\x00-\x1f\x7f]", " ", text)          # control characters and newlines
+    text = re.sub(r"[\x00-\x1f\x7f-\x9f]", " ", text)     # control characters and newlines
     out = []
     for c in text:
+        if "\ue000" <= c <= "\uf8ff":
+            continue    # private use: cp932 turns some of these into raw 0xFD-0xFF bytes (0xFD = auto-translate)
         try:
             c.encode("cp932")
         except UnicodeEncodeError:
             continue                                        # emoji and anything the game can't show
         out.append(c)
     return " ".join("".join(out).split())
-
-
-def split_parts(text, limit):
-    """Split on word boundaries so each part is at most `limit` bytes in Shift-JIS."""
-    PART_BYTES = limit
-    words = text.split(" ")
-    parts, cur = [], ""
-    for w in words:
-        cand = w if not cur else cur + " " + w
-        if len(cand.encode("cp932")) <= PART_BYTES:
-            cur = cand
-            continue
-        if cur:
-            parts.append(cur)
-        while len(w.encode("cp932")) > PART_BYTES:            # one very long word
-            cut = PART_BYTES
-            while len(w[:cut].encode("cp932")) > PART_BYTES:
-                cut -= 1
-            parts.append(w[:cut])
-            w = w[cut:]
-        cur = w
-    if cur:
-        parts.append(cur)
-    return parts
 
 
 class Commands:
@@ -262,9 +253,17 @@ class Commands:
         self.action = dict(data.get("action", {}))
         self.emotes = set(data.get("emotes", []))
         self.jobs = set(j.upper() for j in data.get("jobs", []))
+        self.modes_asof = str(data.get("_modes_asof", ""))
+        # Which game modes a command works in, for commands that aren't in every mode. Label and filter only.
+        MODES = ("ace", "cw", "wew")
+        self.modes = {}
+        for n, ms in data.get("modes", {}).items():
+            keep = [m for m in MODES if isinstance(ms, list) and m in ms]
+            if (n in self.info or n in self.action) and 0 < len(keep) < len(MODES):   # all three = no label
+                self.modes[n] = keep
 
     def public(self):
-        return {"info": self.info, "action": self.action,
+        return {"info": self.info, "action": self.action, "modes": self.modes, "modes_asof": self.modes_asof,
                 "emotes": sorted(self.emotes), "jobs": sorted(self.jobs)}
 
     def emote(self, text):
@@ -295,7 +294,7 @@ class Commands:
         name, args = m.group(1).lower(), (m.group(2) or "").strip()
         if name not in self.info and name not in self.action:
             raise SendError("Blocked: not an allowed command.")
-        if not ARGS_RE.match(args):
+        if not ARGS_RE.fullmatch(args):
             raise SendError("Blocked: arguments can only use letters, numbers, spaces, _ and -.")
         if name in self.action and not confirmed:
             raise SendError("needs_confirm")
@@ -311,10 +310,24 @@ class Sender(threading.Thread):
         self.pending = {}              # pid -> info, for chat lines waiting on the game's echo
         self.last_cmd = 0.0            # when the last command went out (for showing replies)
         self.char = None               # character the outbox belongs to
+        self.heard = {}                # character -> when their feed last had new lines
+
+    def check_one_char(self):
+        """Refuse to send while more than one character has had chat recently, so a line
+        can never be typed by a different character than the one you're reading."""
+        now = time.time()
+        live = sorted(c for c, t in list(self.heard.items()) if now - t < LIVE_SECONDS)
+        if len(live) > 1:
+            if live != getattr(self, "paused_for", None):
+                self.paused_for = live
+                say("Sending paused: %s are both logged in." % " and ".join(live))
+            raise SendError("Sending is paused: two of your characters are logged in. It resumes about %d minutes "
+                            "after only one has chat." % (LIVE_SECONDS // 60))
 
     def outbox(self):
         if not self.char:
             raise SendError("The game is not connected yet (no character seen).")
+        self.check_one_char()
         return os.path.join(self.folder, "outbox-%s.log" % self.char)
 
     def enqueue(self, items):
@@ -328,15 +341,22 @@ class Sender(threading.Thread):
     def chat(self, target, peer, text):
         if target not in TARGETS:
             raise SendError("That channel can't be sent to.")
-        raw = (text or "").strip()
-        if raw.startswith("/") or raw.startswith("!"):
-            raise SendError("Commands go through Game command, not chat.")
-        text = clean_text(raw)
+        text = clean_text(text)
         if not text:
             raise SendError("Nothing to send after cleaning the text.")
+        # Checked after cleaning, so a hidden character can't sneak a command past this.
+        # Checked on a copy with full-width lookalikes folded to ASCII (／ ！ ； ＜ｓｔ＞ ...); the text sent is unchanged.
+        chk = unicodedata.normalize("NFKC", text)
+        # A lone "/" is a wave, and "!", "!!" or "!?" a reaction: neither can name a command.
+        if chk[:1] in ("/", "!") and chk not in REACTIONS:
+            raise SendError("Use the Emotes or Server tab for those, not chat.")
+        if re.search(r";\s*[/!]", chk):
+            raise SendError("Blocked: a ; followed by a command.")
+        if SUBTARGET_RE.search(chk):
+            raise SendError("Blocked: target tokens like <st> can't be sent from the phone.")
         prefix = TARGETS[target]
         if target == "tell":
-            if not NAME_RE.match(peer or ""):
+            if not NAME_RE.fullmatch(peer or ""):
                 raise SendError("Tell needs a character name (letters only).")
             prefix = "/t " + peer
         room = LINE_BYTES - len((prefix + " ").encode("cp932"))
@@ -344,15 +364,10 @@ class Sender(threading.Thread):
         if size > room:
             # One tap = one line. Never split a message into several sends.
             raise SendError("Too long for one chat line: %d over the %d limit." % (size - room, room))
-        parts = [text]
-        sid = secrets.token_hex(4)
-        items = []
-        for i, p in enumerate(parts):
-            pid = "%s-%d" % (sid, i)
-            items.append({"pid": pid, "kind": "chat", "ch": target, "peer": peer if target == "tell" else "",
-                          "text": p, "line": prefix + " " + p})
-        self.enqueue(items)
-        return [{"pid": it["pid"], "text": it["text"]} for it in items]
+        item = {"pid": secrets.token_hex(4) + "-0", "kind": "chat", "ch": target, "peer": peer if target == "tell" else "",
+                "text": text, "line": prefix + " " + text}
+        self.enqueue([item])
+        return [{"pid": item["pid"], "text": text}]      # a list for the page; always exactly one line
 
     def command(self, line):
         pid = "c" + secrets.token_hex(4)
@@ -383,22 +398,34 @@ class Sender(threading.Thread):
         return best
 
     def match_failure(self, body):
+        # Only the game's own failure lines mark a send as failed (seen in CatsEye captures, mode 123):
+        #   tell:  "Your tell was not received. The recipient is either offline or changing areas."
+        #   party: "There are no party members."
+        # The game shows the line as sent first and the failure right after, so a failure can turn a
+        # "sent" line into "failed" for a few seconds. Any other system line is ignored, so a line is
+        # never shown as failed by mistake (which would invite a second send).
+        low = (body or "").lower()
+        if "not received" in low:
+            ch = "tell"
+        elif "no party members" in low:
+            ch = "party"
+        else:
+            return
         now = time.time()
         with self.lock:
-            hit = None
-            for pid, p in sorted(self.pending.items(), key=lambda kv: -kv[1]["at"]):
-                if p["state"] == "sending" and now - p["at"] <= FAIL_LINK_SECONDS and p["ch"] in ("tell", "party"):
-                    hit = pid
-                    break
-            hits = []
-            if hit:
-                sid = hit.split("-")[0]
-                for pid, p in self.pending.items():          # every part of a split message
-                    if pid.split("-")[0] == sid and p["state"] in ("sending", "unconfirmed"):
-                        p["state"] = "failed"
-                        hits.append(pid)
+            hits = [pid for pid, p in self.pending.items()
+                    if p["ch"] == ch and p["state"] in ("sending", "sent", "unconfirmed") and now - p["at"] <= FAIL_LINK_SECONDS]
+            if len({self.pending[pid]["peer"].lower() for pid in hits}) > 1:
+                # Tells to more than one person in the last few seconds, and the game doesn't say which one
+                # failed: say so on each instead of guessing (a wrong guess hides the real failure).
+                reason = "One of your last tells wasn't received, and the game doesn't say which. Check in game."
+            else:
+                hits = sorted(hits, key=lambda pid: -self.pending[pid]["at"])[:1]
+                reason = body
+            for pid in hits:
+                self.pending[pid]["state"] = "failed"
         for pid in hits:
-            ack(pid, "failed", body)
+            ack(pid, "failed", reason)
 
     def run(self):
         while True:
@@ -443,6 +470,12 @@ class Sender(threading.Thread):
             ack(pid, "unconfirmed")
 
 
+def game_state(state, closes_at=0):
+    """Tells open phone pages whether the game has gone quiet, so they say what the window says."""
+    store.add({"ts": int(time.time()), "char": "", "ch": "_game", "dir": "", "name": "", "body": "",
+               "state": state, "closes_at": int(closes_at)})
+
+
 def ack(pid, state, reason=""):
     store.add({"ts": int(time.time()), "char": "", "ch": "_ack", "dir": "", "name": "", "body": "",
                "pid": pid, "state": state, "reason": reason})
@@ -468,6 +501,8 @@ class Tailer(threading.Thread):
         if len(parts) != 5:
             return
         ts, ch, direction, name, body = parts
+        if ch.startswith("_"):
+            return                               # _ack and _game come only from the bridge itself
         try:
             ts = int(ts)
         except ValueError:
@@ -555,6 +590,8 @@ class Tailer(threading.Thread):
             except OSError:
                 return
             st["off"] += len(data)
+            if data.strip():
+                self.sender.heard[char] = time.time()
             data = st["buf"] + data
             lines = data.split(b"\n")
             st["buf"] = lines.pop()
@@ -563,11 +600,22 @@ class Tailer(threading.Thread):
                     self.handle_line(char, line)
 
         if st["off"] > FEED_ROTATE_BYTES:
+            # Move the file aside, read anything the addon appended in the meantime, then drop
+            # it. The addon opens the feed for each line, so its next line starts a new file.
+            old = path + ".old"
             try:
-                os.truncate(path, 0)
-                st["off"], st["buf"] = 0, b""
+                os.replace(path, old)
+                with open(old, "rb") as f:
+                    f.seek(st["off"])
+                    rest = f.read()
+                os.remove(old)
             except OSError:
-                pass
+                rest = b""
+            data = st["buf"] + rest
+            st["off"], st["buf"] = 0, b""
+            for line in data.split(b"\n"):
+                if line:
+                    self.handle_line(char, line)
 
     def run(self):
         while True:
@@ -608,6 +656,146 @@ def save_config(cfg):
         print("could not save config:", exc, file=sys.stderr)
 
 
+LINK = {"cfg": None, "port": 0, "folder": ""}
+
+
+# --------------------------------------------------------------------------------------------
+# The bridge window: plain words, plain ASCII (the Deck's Python 3.7 may print to an ASCII log)
+# --------------------------------------------------------------------------------------------
+
+def say(*lines):
+    """One event in the window: the time, then its lines lined up under each other."""
+    stamp = time.strftime("%H:%M")
+    for i, line in enumerate(lines):
+        print(("  %s  " % stamp if i == 0 else "         ") + line)
+    sys.stdout.flush()
+
+
+def shown_link(url):
+    """The phone link for the window. In a log file (bridge.log on the Deck) the token is left out, so it
+    can't end up pasted into a bug report; the in-game /pchat window has the QR."""
+    if sys.stdout.isatty():
+        return url
+    return re.sub(r"([?&]t=)[^&\s]+", r"\1(hidden in the log: see /pchat in game)", url)
+
+
+def banner(url, port, folder):
+    rule = "  " + "-" * 64
+    print("")
+    print(rule)
+    print("   phonechatXI bridge %s" % VERSION)
+    print(rule)
+    print("   This window is phonechatXI's local relay. It passes chat between")
+    print("   the game and your phone over your home Wi-Fi only. Nothing here")
+    print("   goes to the internet. Leave it open while you use phonechatXI.")
+    print("")
+    print("   Phone link   %s" % shown_link(url))
+    print("   QR code      http://localhost:%d/setup   (open on this computer)" % port)
+    print("   Folder       %s" % folder)
+    print("")
+    print("   To stop it: /pchat stop in game, or close this window.")
+    print("   It also closes by itself a little while after the game closes.")
+    print(rule)
+    print("")
+    sys.stdout.flush()
+
+
+class GameWatch:
+    """Reads game.heartbeat, which the addon rewrites every 2 seconds ("time name").
+    Says in the window when the game goes quiet, and decides when to close.
+    It only acts once it has seen the game since the bridge started, so a bridge started without
+    the game (Desktop Mode, the test tools) never closes by itself."""
+
+    def __init__(self, folder):
+        self.path = os.path.join(folder, "game.heartbeat")
+        self.seen = False
+        self.quiet_at = None          # when the game was last heard from, while it's quiet
+        self.warned = set()           # countdown lines already printed
+
+    def read(self):
+        try:
+            with open(self.path, "r", encoding="utf-8", errors="replace") as f:
+                parts = f.read().split()
+            return int(parts[0]), (parts[1] if len(parts) > 1 else "")
+        except (OSError, ValueError, IndexError):
+            return None, ""
+
+    def step(self, now):
+        """Returns "close" when it's time to close, else None. Prints what's happening."""
+        beat, name = self.read()
+        alive = beat is not None and now - beat < GAME_QUIET_SECONDS
+        if alive:
+            if not self.seen:
+                self.seen = True
+                say("Game connected%s." % ((" (" + name + ")") if name else ""))
+            if self.quiet_at is not None:
+                self.quiet_at = None
+                self.warned = set()
+                say("The game is back. Carrying on.")
+                game_state("ok")
+            return None
+        if not self.seen:
+            return None
+        if self.quiet_at is None:
+            self.quiet_at = beat if beat is not None else now - GAME_QUIET_SECONDS
+            say("No response from the game for %d seconds." % GAME_QUIET_SECONDS,
+                "The game may have closed or frozen, or the addon was unloaded. You can:",
+                "  - close this window now,",
+                "  - wait: it carries on by itself if the game comes back,",
+                "  - or leave it: it closes by itself in %d seconds." % AUTO_CLOSE_SECONDS)
+            game_state("quiet", self.quiet_at + GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS)
+        left = int(self.quiet_at + GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS - now)
+        for mark in (60, 30, 10):
+            if left <= mark and mark not in self.warned and left > 0:
+                self.warned.add(mark)
+                say("Closing in %d seconds." % mark)
+        if left <= 0:
+            say("Closing now: no response from the game for %d seconds." % (GAME_QUIET_SECONDS + AUTO_CLOSE_SECONDS),
+                "Start it again from the game with /pchat start.")
+            return "close"
+        return None
+
+
+def new_link():
+    """Replace the phone link token. Old links stop working right away."""
+    cfg = LINK["cfg"]
+    cfg["token"] = secrets.token_urlsafe(12)
+    save_config(cfg)
+    Handler.token = cfg["token"]
+    Handler.url = "http://%s:%d/?t=%s" % (lan_ip(), LINK["port"], cfg["token"])
+    Handler.gen += 1
+    with store.cond:
+        store.cond.notify_all()
+    write_status(LINK["folder"], Handler.url, True)
+    say("New phone link made. The old one no longer works.", "Phone link   " + shown_link(Handler.url))
+
+
+PREFS_MAX = 64 * 1024
+# Phone settings that stay on the phone: mention names, tell history, last tell target.
+PHONE_ONLY = ("watch", "read", "target", "hidden")
+
+
+def strip_private(prefs):
+    return {k: v for k, v in prefs.items() if k not in PHONE_ONLY}
+
+
+def load_prefs(folder):
+    try:
+        with open(os.path.join(folder, "phone-settings.json"), "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return strip_private(data) if isinstance(data, dict) else None
+    except (OSError, ValueError):
+        return None
+
+
+def save_prefs(folder, prefs):
+    path = os.path.join(folder, "phone-settings.json")
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(strip_private(prefs), f)
+    os.replace(tmp, path)
+
+
 def lan_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -646,10 +834,11 @@ def start_fresh(folder):
                 os.truncate(p, 0)
             except OSError:
                 pass
-    try:
-        os.remove(os.path.join(folder, "stop.request"))
-    except OSError:
-        pass
+    for name in ("stop.request", "game.heartbeat"):
+        try:
+            os.remove(os.path.join(folder, name))
+        except OSError:
+            pass
 
 
 # --------------------------------------------------------------------------------------------
@@ -671,14 +860,26 @@ def host_ok(host):
         return False
 
 
+# Icons are public (iOS fetches the home-screen icon without the token). Nothing private in them.
+ICONS = ("apple-touch-icon.png", "icon-512.png", "favicon-32.png", "pearl-48.png", "pearl-96.png", "wordmark.png",
+         "mode-ace.png", "mode-cw.png", "mode-wew.png")   # CatsEye game mode icons, from the BG-Wiki commands page
+# Fonts ship with the bridge so the phone page never calls out to Google Fonts. Also public.
+FONTS = ("cinzel-latin-600-normal.woff2", "cinzel-latin-700-normal.woff2",
+         "atkinson-hyperlegible-latin-400-normal.woff2", "atkinson-hyperlegible-latin-700-normal.woff2",
+         "atkinson-hyperlegible-latin-400-italic.woff2",
+         "jetbrains-mono-latin-400-normal.woff2", "jetbrains-mono-latin-700-normal.woff2")
+
 SETUP_PAGE = """<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>phonechatXI setup</title><script src="/qr.js"></script>
+<title>phonechatXI setup</title><script src="/qr.js"></script><link rel="icon" href="/icons/favicon-32.png">
 <style>body{margin:0;background:#0b1020;color:#e8ecf6;font:16px system-ui,sans-serif;display:flex;justify-content:center}
 main{max-width:420px;padding:32px 20px;text-align:center}h1{color:#d9b45a;font-weight:700;letter-spacing:.5px}
 #qr{background:#fff;border-radius:12px;padding:10px;width:240px;margin:20px auto}a{color:#7fb2ff;word-break:break-all}
-p{color:#c9d2ec;line-height:1.5}</style></head><body><main><h1>phonechatXI</h1>
+p{color:#c9d2ec;line-height:1.5}</style></head><body><main><h1><img src="/icons/wordmark.png" alt="phonechatXI" style="width:100%%;max-width:380px"></h1>
 <p>Scan with your phone's camera. Your phone has to be on the same Wi-Fi.</p><div id="qr"></div>
-<p><a href="%(url)s">%(url)s</a></p><p>Bridge %(version)s is running. Watching %(folder)s</p></main>
+<p><a href="%(url)s">%(url)s</a></p><p>Bridge %(version)s is running. Watching %(folder)s</p>
+<form method="post" action="/setup/newlink" onsubmit="return confirm('Make a new phone link? The old link stops working and you will need to scan the new QR.')">
+<button style="font:inherit;color:#e8ecf6;background:#1d2850;border:1px solid #3a4a80;border-radius:10px;padding:10px 16px">Make a new link</button></form>
+<p style="font-size:13px;color:#8e9ac0">Use this if someone else saw your link or QR. Your phone will need to scan again.</p></main>
 <script>var q=qrcode(0,"M");q.addData("%(url)s");q.make();document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true});</script>
 </body></html>"""
 
@@ -688,6 +889,7 @@ class Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     token = ""
     url = ""
+    gen = 0          # bumps when the link changes; open streams on the old link close
     folder = ""
     sender = None
     tells = None
@@ -710,9 +912,12 @@ class Handler(BaseHTTPRequestHandler):
     def send_json(self, code, obj):
         self.send_body(code, json.dumps(obj, ensure_ascii=False), "application/json; charset=utf-8")
 
+    def token_ok(self, given):
+        # Compared as bytes: compare_digest raises on non-ASCII str.
+        return bool(given) and secrets.compare_digest(given.encode("utf-8"), self.token.encode("utf-8"))
+
     def authed(self, q):
-        given = self.headers.get("X-Token") or (q.get("t") or [""])[0]
-        return bool(given) and secrets.compare_digest(given, self.token)
+        return self.token_ok(self.headers.get("X-Token") or (q.get("t") or [""])[0])
 
     def static(self, name, ctype):
         try:
@@ -724,8 +929,19 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         u = urlparse(self.path)
         q = parse_qs(u.query)
+        # Same Host check as POST, on every page: stops a web page that points its own name at
+        # this machine (DNS rebinding) from reading /setup, the link or the chat stream.
+        if not host_ok(self.headers.get("Host")):
+            self.send_body(403, "bad host")
+            return
         if u.path == "/favicon.ico":
-            self.send_body(204, "")
+            self.static("icons/favicon-32.png", "image/png")
+            return
+        if u.path.startswith("/icons/") and u.path[7:] in ICONS:
+            self.static("icons/" + u.path[7:], "image/png")
+            return
+        if u.path.startswith("/fonts/") and u.path[7:] in FONTS:
+            self.static("fonts/" + u.path[7:], "font/woff2")
             return
         if u.path == "/qr.js":
             self.static("qrcode.js", "application/javascript; charset=utf-8")
@@ -746,7 +962,10 @@ class Handler(BaseHTTPRequestHandler):
             self.stream()
         elif u.path == "/api/status":
             self.send_json(200, {"version": VERSION, "url": self.url, "boot": store.boot,
-                                 "char": self.sender.char, "save_tells": self.tells.enabled})
+                                 "char": self.sender.char, "save_tells": self.tells.enabled,
+                                 "scrollback": store.mult})
+        elif u.path == "/api/prefs":
+            self.send_json(200, {"prefs": load_prefs(self.folder)})
         elif u.path == "/api/commands":
             self.send_json(200, self.commands.public())
         else:
@@ -757,7 +976,20 @@ class Handler(BaseHTTPRequestHandler):
         if not host_ok(self.headers.get("Host")):
             self.send_body(403, "bad host")
             return
-        if not self.headers.get("X-Token") or not secrets.compare_digest(self.headers.get("X-Token"), self.token):
+        if u.path == "/setup/newlink":
+            # Only from the computer running the bridge, and only from its own /setup page.
+            origin = self.headers.get("Origin") or ""
+            local = ("http://localhost:%d" % self.server.server_port, "http://127.0.0.1:%d" % self.server.server_port)
+            if self.client_address[0] not in ("127.0.0.1", "::1") or (origin and origin not in local):
+                self.send_body(403, "forbidden")
+                return
+            new_link()
+            self.send_response(303)
+            self.send_header("Location", "/setup")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if not self.token_ok(self.headers.get("X-Token") or ""):
             self.send_body(403, "forbidden")
             return
         if not (self.headers.get("Content-Type") or "").startswith("application/json"):
@@ -765,7 +997,7 @@ class Handler(BaseHTTPRequestHandler):
             return
         try:
             n = int(self.headers.get("Content-Length") or 0)
-            if n > 4096:
+            if n < 0 or n > (PREFS_MAX if u.path == "/api/prefs" else 4096):
                 raise ValueError
             body = json.loads(self.rfile.read(n) or b"{}")
             if not isinstance(body, dict):
@@ -785,9 +1017,21 @@ class Handler(BaseHTTPRequestHandler):
             elif u.path == "/api/settings":
                 if "save_tells" in body:
                     self.tells.set_enabled(bool(body["save_tells"]))
-                self.send_json(200, {"ok": True, "save_tells": self.tells.enabled})
+                if body.get("scrollback") in SCROLLBACK:
+                    store.mult = int(body["scrollback"])
+                    self.tells.cfg["scrollback"] = store.mult
+                    self.tells.save_cfg()
+                self.send_json(200, {"ok": True, "save_tells": self.tells.enabled, "scrollback": store.mult})
             elif u.path == "/api/tells/clear":
                 self.tells.clear()
+                self.send_json(200, {"ok": True})
+            elif u.path == "/api/prefs":
+                # Phone page settings (views, colors, favorites...), kept so a new Home Screen
+                # shortcut or a second phone picks them up. Never holds the link token.
+                prefs = body.get("prefs")
+                if not isinstance(prefs, dict):
+                    raise SendError("Settings must be an object.")
+                save_prefs(self.folder, prefs)
                 self.send_json(200, {"ok": True})
             else:
                 self.send_body(404, "not found")
@@ -798,7 +1042,16 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 self.send_json(400, {"ok": False, "error": msg})
 
+    phones = set()
+    phones_lock = threading.Lock()
+
     def stream(self):
+        ip = self.client_address[0]
+        with Handler.phones_lock:
+            new_phone = ip not in Handler.phones
+            Handler.phones.add(ip)
+        if new_phone:
+            say("Phone connected from %s." % ip)
         try:
             last = int(self.headers.get("Last-Event-ID") or 0)
         except ValueError:
@@ -810,8 +1063,11 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.close_connection = True
         my_boot = None
+        my_gen = Handler.gen
         try:
             while True:
+                if Handler.gen != my_gen:
+                    return                       # the link was replaced
                 with store.cond:
                     if my_boot == store.boot:
                         items = store._since(last)
@@ -840,11 +1096,35 @@ class Handler(BaseHTTPRequestHandler):
             return
 
 
+class Server(ThreadingHTTPServer):
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        # A phone that locks or switches apps drops its connection: normal, not worth a traceback in the window.
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, ConnectionAbortedError, BrokenPipeError, TimeoutError)):
+            return
+        print("request from %s failed: %r" % (client_address[0], exc), file=sys.stderr)
+
+
+def dir_from_txt(addon_dir):
+    """When run from inside the addon folder: use the addon's dir.txt (a Z:\\ path on Linux)."""
+    try:
+        with open(os.path.join(addon_dir, "dir.txt"), "r", encoding="utf-8-sig") as f:
+            txt = f.read().strip()
+    except OSError:
+        return ""
+    if re.match(r"^[Zz]:\\", txt):
+        txt = txt[2:].replace("\\", "/")
+    return txt.rstrip("/\\") if txt else ""
+
+
 def main():
     ap = argparse.ArgumentParser(description="phonechatXI bridge")
     ap.add_argument("--dir", default="", help="shared folder with the addon's feed files (remembered)")
     ap.add_argument("--port", type=int, default=0, help="web port (remembered, default 8765)")
     ap.add_argument("--host", default="0.0.0.0", help="address to listen on")
+    ap.add_argument("--open", action="store_true", help="open the setup page (QR) in a browser")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -852,16 +1132,36 @@ def main():
         cfg["dir"] = os.path.abspath(os.path.expanduser(args.dir))
     if args.port:
         cfg["port"] = args.port
+    if "dir" not in cfg and os.path.exists(os.path.join(os.path.dirname(HERE), "phonechat.lua")):
+        guess = dir_from_txt(os.path.dirname(HERE))       # running from the addon folder
+        if guess:
+            cfg["dir"] = guess
     cfg.setdefault("dir", os.path.dirname(HERE))
     cfg.setdefault("port", 8765)
     cfg.setdefault("save_tells", False)
+    if cfg.get("scrollback") in SCROLLBACK:
+        store.mult = int(cfg["scrollback"])
     if not cfg.get("token"):
         cfg["token"] = secrets.token_urlsafe(12)
     save_config(cfg)
 
     folder = cfg["dir"]
     os.makedirs(folder, exist_ok=True)
+    newlink_file = os.path.join(folder, "newlink.request")
+    if os.path.exists(newlink_file):            # asked for a new link while the bridge was off
+        cfg["token"] = secrets.token_urlsafe(12)
+        save_config(cfg)
+        try:
+            os.remove(newlink_file)
+        except OSError:
+            pass
     start_fresh(folder)
+    old_prefs = load_prefs(folder)
+    if old_prefs is not None:
+        try:
+            save_prefs(folder, old_prefs)      # rewrites an older file without names in it
+        except OSError:
+            pass
     port = int(cfg["port"])
     url = "http://%s:%d/?t=%s" % (lan_ip(), port, cfg["token"])
 
@@ -871,6 +1171,7 @@ def main():
 
     Handler.token = cfg["token"]
     Handler.url = url
+    LINK.update(cfg=cfg, port=port, folder=folder)
     Handler.folder = folder
     Handler.sender = sender
     Handler.tells = tells
@@ -879,34 +1180,61 @@ def main():
     sender.start()
     Tailer(folder, sender, tells).start()
 
+    def close(*lines):
+        # Exit with code 0. os.kill(SIGTERM) on Windows ends the process with code 15, which made
+        # start-bridge.bat think Python had failed and leave its window open on "Press any key".
+        if lines:
+            say(*lines)
+        clear_status(folder)
+        sys.stdout.flush()
+        os._exit(0)
+
     def status_loop():
         stop_file = os.path.join(folder, "stop.request")
+        watch = GameWatch(folder)
+        next_status = 0
         while True:
             if os.path.exists(stop_file):          # /pchat stop from inside the game
                 try:
                     os.remove(stop_file)
                 except OSError:
                     pass
-                print("stop requested from the game")
-                os.kill(os.getpid(), signal.SIGTERM)
-                return
-            write_status(folder, url, True)
-            time.sleep(STATUS_SECONDS)
+                close("Stopped from the game (/pchat stop). Closing.")
+            if os.path.exists(newlink_file):      # "New phone link" from the in-game window
+                try:
+                    os.remove(newlink_file)
+                except OSError:
+                    pass
+                new_link()
+            if watch.step(time.time()) == "close":
+                close()
+            if time.time() >= next_status:
+                write_status(folder, Handler.url, True)
+                next_status = time.time() + STATUS_SECONDS
+            time.sleep(1)
 
     atexit.register(clear_status, folder)
     signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))
 
     try:
-        httpd = ThreadingHTTPServer((args.host, port), Handler)
+        httpd = Server((args.host, port), Handler)
     except OSError as exc:
-        print("Could not use port %d (%s). Try: start.sh --port 8780" % (port, exc))
+        say("Can't start: port %d is already in use (%s)." % (port, exc),
+            "Another phonechatXI bridge may already be running. Close it and try again,",
+            "or start this one on another port: start.sh --port 8780 (start-bridge.bat --port 8780).")
         sys.exit(1)
     httpd.daemon_threads = True
     threading.Thread(target=status_loop, daemon=True).start()
-    print("phonechatXI bridge %s" % VERSION)
-    print("watching:", folder)
-    print("open on your phone:", url)
-    print("on this computer: http://localhost:%d/setup" % port)
+    banner(url, port, folder)
+    say("Bridge started. Waiting for the game...")
+    if args.open:
+        def open_setup():
+            try:
+                import webbrowser
+                webbrowser.open("http://localhost:%d/setup" % port)
+            except Exception:
+                pass
+        threading.Timer(1.0, open_setup).start()
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

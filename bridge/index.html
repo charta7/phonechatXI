@@ -9,14 +9,22 @@
 <meta name="apple-mobile-web-app-title" content="phonechatXI">
 <meta name="theme-color" content="#0b1020">
 <title>phonechatXI</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icons/favicon-32.png">
 <style>
+/* Fonts ship with the bridge (OFL). Nothing is loaded from outside your network. */
+@font-face{font-family:'Cinzel';font-weight:600;font-display:swap;src:url(/fonts/cinzel-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Cinzel';font-weight:700;font-display:swap;src:url(/fonts/cinzel-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:400;font-display:swap;src:url(/fonts/atkinson-hyperlegible-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:700;font-display:swap;src:url(/fonts/atkinson-hyperlegible-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Atkinson Hyperlegible';font-weight:400;font-style:italic;font-display:swap;src:url(/fonts/atkinson-hyperlegible-latin-400-italic.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:400;font-display:swap;src:url(/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:700;font-display:swap;src:url(/fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2')}
 :root{
   --bg:#0b1020; --pane:#0e1530; --raise:#12182f; --chip:#171f40; --line:#1d2850; --edge:#2c3a6e; --edge2:#3a4a80;
   --text:#e8ecf6; --soft:#c9d2ec; --mute:#8e9ac0; --gold:#d9b45a; --ink:#1a1405;
   --ls1:#7ee08f; --ls2:#4fd6c8; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
-  --emote:#b9a6ff; --say:#dfe5f5; --vent:#f0b24d; --sys:#8e9ac0; --bad:#ff9a9a; --badbg:#2a1418; --badedge:#5a2a2a; --ok:#7ee08f;
+  --emote:#b9a6ff; --finder:#8fd0ff; --say:#dfe5f5; --vent:#f0b24d; --sys:#8e9ac0; --bad:#ff9a9a; --badbg:#2a1418; --badedge:#5a2a2a; --ok:#7ee08f;
   --fs:15.5px; --serif:'Cinzel',Georgia,serif; --sans:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
   --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
@@ -26,7 +34,7 @@ body.size-S{--fs:14px} body.size-L{--fs:17.5px}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 input{font:inherit}
-#app{position:fixed;left:0;right:0;top:0;height:100%;display:flex;flex-direction:column;overflow:hidden}
+#app{position:fixed;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;overflow:hidden}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);padding-top:var(--safe-t)}
 .overlay{transform:translateX(100%);transition:transform .22s ease;z-index:5}
 #main{bottom:var(--tabh,0px)}
@@ -34,6 +42,25 @@ input{font:inherit}
 .overlay.open{transform:none}
 .tab{display:none;flex:1;min-height:0;flex-direction:column}
 .tab.on{display:flex}
+.cpanel{flex:1;min-height:0;display:flex;flex-direction:column}
+.cpanel[hidden]{display:none}
+/* your own lines: a faint wash so they're easy to spot */
+.run.out,.cl.out{background:color-mix(in srgb,var(--c) 8%,transparent);border-radius:8px}
+.run.out{margin:0 -6px;padding:2px 6px}
+/* mentions */
+.mention{background:color-mix(in srgb,var(--gold) 9%,transparent);border-radius:8px}
+mark.mw{background:none;color:var(--gold);font-weight:700}
+/* auto-translate phrases (not links) */
+.at{color:#9fe3a6;color:color-mix(in srgb,var(--ok) 75%,var(--text))}
+/* LS message of the day, pinned */
+.motd{margin:6px 10px 0;padding:7px 10px;border:1px solid var(--edge);border-radius:10px;background:var(--raise);font-size:13.5px;color:var(--soft);display:flex;gap:8px;align-items:flex-start}
+.motd b{color:var(--c);flex:none}
+.motd .x{margin-left:auto;color:var(--mute);flex:none;padding:0 2px}
+.motd.min span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* new lines ease in */
+@keyframes fresh{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fresh{animation:fresh .16s ease-out}
+@media (prefers-reduced-motion:reduce){.fresh,.picked,.tgt.bump{animation:none}}
 .top{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px}
 .big{font-family:var(--serif);font-weight:700;font-size:28px}
 .row{display:flex;align-items:center;gap:10px}
@@ -74,14 +101,14 @@ body.compact .pane .inner{gap:5px}
 .div:before,.div:after{content:"";flex:1;height:1px;background:var(--line)}
 .run{display:flex;gap:10px}
 .rail{flex:none;width:3px;border-radius:2px;background:var(--c)}
-.run.out .rail{opacity:.55}
-.run.call .rail{background:var(--vent)!important;opacity:1}
 .rbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 .rhead{display:flex;align-items:center;gap:6px;font-size:14px;flex-wrap:wrap}
 .rhead b{color:var(--c)}
 .rhead .t{font-size:12px;color:var(--mute)}
 .ln{font-size:var(--fs);line-height:1.4;overflow-wrap:anywhere;white-space:pre-wrap}
 .ln.emote{font-style:italic;color:var(--soft)}
+.pfn{color:var(--finder)}
+.pf{color:var(--soft)}
 .tellc .ln{color:#ffa8dc;color:color-mix(in srgb,var(--tell) 72%,#fff)}
 .tellc .ln .st{color:var(--mute)}
 .ln .st{font-size:12px;color:var(--mute);margin-left:6px;white-space:nowrap}
@@ -92,15 +119,26 @@ body.compact .pane .inner{gap:5px}
 .callp{display:inline-flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--vent);background:#2b2210;border:1px solid #5a4620;border-radius:6px;padding:0 6px;height:18px;margin:0 3px 2px 0;vertical-align:1px;white-space:nowrap}
 .burst{display:flex;flex-wrap:wrap;align-items:center;margin-top:2px}
 .burst .lbl{font-size:12px;color:var(--mute);margin-right:6px}
-a.url{color:#7fb2ff;background:#18254d;border-radius:6px;padding:0 6px;text-decoration:none;white-space:nowrap}
+.top .big::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.3em;vertical-align:-.08em;background:url(/icons/pearl-96.png) center/contain no-repeat}
+a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+[data-who],[data-reply],[data-focus]{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rhead .chico{display:flex;align-items:center;padding:4px 4px 4px 0;margin:-4px 0}
+.rhead .who{display:flex;align-items:center}
+@keyframes picked{0%{background:color-mix(in srgb,var(--c) 26%,transparent)}100%{background:transparent}}
+.picked{animation:picked .7s ease-out}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(1)}}
+.tgt.bump{animation:bump .35s ease-out}
 /* compact */
 .cl{display:flex;gap:8px;align-items:flex-start}
 .cl .rail{align-self:stretch}
-.cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px}
+.cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px;white-space:nowrap}
+.clock-12 .cl .t{width:46px}
+.ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
+.t,.vt{white-space:nowrap}
 .cl .ln{flex:1}
 .cl .ln b{color:var(--c)}
-.cl.out .rail{opacity:.55}
 .cl svg.i{vertical-align:-1px;margin-right:5px}
+.cl .emo-tag{margin-right:5px}
 /* thread */
 .run.mine{justify-content:flex-end}
 .run.mine .rbody{max-width:84%;align-items:flex-end;flex:none}
@@ -121,6 +159,13 @@ a.url{color:#7fb2ff;background:#18254d;border-radius:6px;padding:0 6px;text-deco
 .send{flex:none;width:40px;height:40px;border-radius:50%;background:#3a3f5c;display:flex;align-items:center;justify-content:center}
 .send.on{background:var(--gold)}
 .comp.dis{opacity:.5;pointer-events:none}
+.emo-tag{display:inline-flex;align-items:center;padding:.15em .38em;border-radius:.42em;background:#2a2450;background:color-mix(in srgb,var(--emote) 20%,transparent);color:var(--emote);font-family:var(--mono);font-weight:700;line-height:1.05;white-space:nowrap;width:auto!important;height:auto!important;vertical-align:1px}
+.tabico{height:22px;display:flex;align-items:center}
+.emob{flex:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--edge2);color:var(--soft);font:700 13px var(--mono)}
+.emob.on{border-color:var(--gold);color:var(--gold)}
+.emostrip{display:flex;gap:6px;overflow-x:auto;padding:8px 12px 2px;background:var(--bg);border-top:1px solid var(--line);-webkit-overflow-scrolling:touch}
+.emostrip[hidden]{display:none}
+.emostrip button{flex:none;padding:7px 12px;border:1px solid var(--edge2);border-radius:999px;color:var(--text);font:600 14px var(--mono)}
 .comp.chat{position:relative;padding-top:22px}
 .left{position:absolute;top:4px;right:64px;font-size:11.5px;color:var(--mute);font-variant-numeric:tabular-nums;letter-spacing:.3px}
 .left.near{color:var(--gold)}
@@ -140,6 +185,7 @@ body.typing .tabbar{display:none}
 .banner.bad{background:var(--badbg);border:1px solid var(--badedge);color:#ffd0d0}
 .banner.info{background:#14193a;border:1px solid var(--edge);color:var(--soft)}
 .banner b{display:block;margin-bottom:2px}
+.banner .cdown{font-weight:700;font-variant-numeric:tabular-nums}
 .code{font-family:var(--mono);color:var(--gold)}
 .list{flex:1;min-height:0;overflow-y:auto;padding:0 18px 12px}
 .sect{padding:16px 0 6px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:1.2px;color:var(--gold)}
@@ -161,15 +207,28 @@ body.typing .tabbar{display:none}
 .vteaser{font-size:15px;color:var(--soft);line-height:1.4;font-style:italic}
 .vzone{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#241f3d}
 .vgrid{flex:none;width:52px;height:52px;border-radius:12px;background:var(--vent);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
-.vold{border-radius:14px;background:var(--raise);padding:12px 14px;display:flex;flex-direction:column;gap:4px;opacity:.88;margin-bottom:8px}
-.vold .h{display:flex;justify-content:space-between;font-size:13px;color:var(--mute)}
-.vstatus{padding:10px 14px;border-radius:12px;background:#14193a;display:flex;gap:10px;align-items:center;font-size:14px;color:var(--soft);margin-top:10px}
+.vrow{display:flex;gap:10px;align-items:baseline;font-size:14.5px;padding:3px 0}
+.vrow .vm{flex:1;min-width:0}
+.vt{flex:none;font-size:12.5px;color:var(--mute);font-weight:400}
+.acard{border-radius:14px;background:var(--raise);padding:11px 14px 12px;display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.ah{display:flex;align-items:center;gap:8px;min-height:20px}
+.ah .al{flex:1;min-width:0;display:flex;align-items:center;gap:7px;font-size:14px;color:var(--c)}
+.ah .al b{font-weight:700;letter-spacing:.2px}
+.ax{flex:none;color:var(--mute);font-size:20px;line-height:1;padding:0 2px 0 8px;margin:-4px -4px -4px 0}
+.abody{font-size:15px}
+.vgrid.sm{width:auto;height:auto;padding:1px 6px;font-size:12px}
+.empty.sm{padding:6px 2px 10px;font-size:13.5px;text-align:left}
+#alerts .sect{margin-top:6px}
+.vcard{margin-bottom:10px}
 
 /* settings */
 .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
 .srow .m{flex:1;min-width:0}
 .srow .m div{font-size:15.5px}
 .srow .m small{display:block;font-size:12.5px;color:var(--mute);margin-top:1px;line-height:1.35}
+.srow.col{flex-direction:column;align-items:stretch;gap:10px;padding-bottom:14px}
+.field{box-sizing:border-box;width:100%;padding:12px 16px;border:1px solid var(--edge);border-radius:12px;background:var(--pane);color:var(--text);font-size:16px;font-family:inherit;outline:none}
+.field:focus{border-color:var(--gold)}
 .tog{flex:none;width:46px;height:28px;border-radius:14px;background:var(--edge);position:relative;transition:background .15s}
 .tog:after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
 .tog.on{background:#2b8a46}
@@ -179,23 +238,60 @@ body.typing .tabbar{display:none}
 .segs button.on{background:var(--gold);color:var(--ink);font-weight:700}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;background:var(--c)}
 .fixed{font-size:13px;color:var(--mute)}
-.linkbtn{color:var(--gold);font-size:13.5px}
-.dangerbtn{color:var(--bad);font-size:13.5px}
+/* tap-to-act text buttons get an oval outline so they don't read as links */
+.linkbtn,.dangerbtn{font-size:13px;font-weight:600;line-height:1;padding:7px 13px;border:1px solid;border-radius:999px;white-space:nowrap;vertical-align:middle}
+.linkbtn{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 65%,transparent)}
+.dangerbtn{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 65%,transparent)}
+.banner.dis{display:flex;align-items:center;gap:10px}
+.banner.dis .bt{flex:1;min-width:0}
+.banner.dis .ax{margin:0;padding:2px 4px 2px 8px}
+.banner .linkbtn{margin-left:6px}
+.cd{flex:none;margin-left:8px;padding:2px 9px;border:1px solid color-mix(in srgb,var(--vent) 60%,transparent);border-radius:999px;color:var(--vent);font:700 12px var(--mono);white-space:nowrap}
+.vm .cd{font-size:11px;padding:1px 7px;margin-left:6px;vertical-align:1px}
 /* colors */
 .swatch{flex:none;width:44px;height:30px;border-radius:8px;border:1px solid var(--edge2);padding:0;background:none;overflow:hidden;-webkit-appearance:none;appearance:none}
 .swatch::-webkit-color-swatch-wrapper{padding:0}
 .swatch::-webkit-color-swatch{border:0;border-radius:7px}
 .swatch::-moz-color-swatch{border:0;border-radius:7px}
 /* emotes */
-.emgrid{display:flex;flex-wrap:wrap;gap:8px;padding:4px 0 6px}
-.emgrid button{padding:9px 13px;border:1px solid var(--edge);border-radius:999px;font-size:14.5px;background:var(--chip);color:var(--text)}
-.emgrid button.job{font-family:var(--mono);font-size:13.5px;color:var(--emote);border-color:#4a3f80}
-.emgrid button:active{border-color:var(--emote);background:#231d44}
+.emhead{display:flex;align-items:center;gap:10px;padding:18px 0 8px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:1.4px;color:var(--gold)}
+.emhead::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+.emhead i{width:8px;height:8px;border-radius:50%;background:var(--cc);box-shadow:0 0 8px var(--cc)}
+.emtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.emtiles.jobs{grid-template-columns:repeat(6,1fr);gap:6px}
+.emtiles button{position:relative;height:46px;padding:0 8px 0 12px;text-align:left;border-radius:12px;border:1px solid var(--edge);
+  background:linear-gradient(180deg,#1a2352,#111839);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);font-size:15px;color:var(--text);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;transition:transform .08s}
+.emtiles button::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--cc)}
+.emtiles button:active{transform:scale(.96);border-color:var(--cc)}
+.emtiles.jobs button{height:40px;padding:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--cc);border-radius:10px}
+.emtiles.jobs button::before{display:none}
+.emtiles button.sent{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok),0 0 14px rgba(126,224,143,.35);color:var(--ok)}
+.emrecent{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none}
+.emrecent::-webkit-scrollbar{display:none}
+.emrecent button{flex:none;height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--edge2);background:var(--chip);font-size:14.5px;color:var(--text)}
+.emrecent button.sent{border-color:var(--ok);color:var(--ok)}
+body.skin-classic .emtiles button,body.skin-classic .emrecent button{border-radius:6px;border:1px solid rgba(232,238,255,.7);
+  background:linear-gradient(180deg,rgba(64,88,178,.95),rgba(24,36,100,.97));box-shadow:inset 0 0 0 1px rgba(8,12,40,.9),inset 0 1px 0 rgba(255,255,255,.3);text-shadow:1px 1px 0 #000}
+body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shadow:none}
 .emseg{margin:8px 18px 2px}
 #qrbox{background:#fff;border-radius:12px;padding:8px;width:220px;margin:10px auto}
+.subsect{padding:14px 0 2px;font-size:13px;color:var(--mute);letter-spacing:.3px}
 .foot{font-size:12px;color:var(--mute);text-align:center;padding:18px 0 30px}
 
 /* command */
+.srvlist{padding:0 12px 4px}
+.cmdlog{flex:none;max-height:92px;overflow-y:auto;margin:0 12px;padding:6px 2px;border-top:1px solid var(--line)}
+.cmdlog .inner{display:flex;flex-direction:column;gap:4px}
+.cmdlog .empty{padding:2px 0;font-size:12.5px;text-align:left}
+.c1{display:flex;align-items:center;gap:4px;border-bottom:1px solid var(--line)}
+.c1 .starb{width:34px;height:40px}
+.c1 .m{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;padding:10px 0;text-align:left;white-space:nowrap;overflow:hidden}
+.c1 .m b{flex:none;font-family:var(--mono);font-size:15px;font-weight:400;color:var(--gold)}
+.c1 .m span.d{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--mute)}
+.c1 .ctag{flex:none;margin-left:0;vertical-align:0}
+.modeic{width:16px;height:16px;flex:none;image-rendering:auto}
+.c1 .mds{flex:none;display:flex;gap:2px}
+#modeseg button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
 .cmdlog .cl2{display:flex;gap:8px;font-family:var(--mono);font-size:13px;line-height:1.4}
 .cmdlog .cl2 .t{flex:none;color:var(--mute)}
 .cmdlog .cl2.sent span:last-child{color:var(--soft)}
@@ -235,6 +331,58 @@ body.typing .tabbar{display:none}
 .sbtns .sec{border:1px solid var(--edge2);color:var(--soft)}
 .sbtns .del{color:var(--bad);margin-right:auto}
 .sfoot{padding:10px 6px 0;font-size:12.5px;color:var(--mute);line-height:1.45}
+
+/* ============ Skins (look only; nothing here changes what is read or sent) ============ */
+/* Fonts */
+body.font-classic{--sans:'Trebuchet MS','Verdana','Segoe UI',system-ui,sans-serif}
+
+/* Classic: the blue game-window look. Original CSS, no game art. */
+body.skin-classic{--bg:#060a1c;--pane:#16225a;--raise:#141f55;--chip:#22327a;--line:#2b3c86;--edge:#6676b8;--edge2:#c9d3f5;
+  --text:#f6f8ff;--soft:#e2e8ff;--mute:#aab6de;--gold:#f3e6a6;--ink:#0d1336;--serif:var(--sans)}
+body.skin-classic .win,
+body.skin-classic .pane,
+body.skin-classic #sheet,
+body.skin-classic .vcard,
+body.skin-classic .acard,
+body.skin-classic .banner.info{
+  background:linear-gradient(180deg,rgba(64,88,178,.94) 0%,rgba(30,44,118,.95) 38%,rgba(17,26,78,.97) 100%);
+  border:1.5px solid rgba(236,240,255,.85);border-radius:11px;
+  box-shadow:inset 0 0 0 1.5px rgba(6,10,36,.95),inset 0 0 0 2.5px rgba(150,170,235,.35),inset 0 2px 0 rgba(255,255,255,.25),0 3px 10px rgba(0,0,0,.55)}
+body.skin-classic #sheet{border-radius:14px 14px 0 0;background:linear-gradient(180deg,#4058b2 0%,#1e2c76 38%,#111a4e 100%)}
+body.skin-classic .top,body.skin-classic .bar{margin:8px 8px 4px;padding:8px 12px;border-radius:10px;border:1.5px solid #e9d996;
+  background:linear-gradient(180deg,#3a4fa6 0%,#1d2a72 55%,#121a52 100%);
+  box-shadow:inset 0 0 0 1.5px rgba(6,10,36,.95),inset 0 2px 0 rgba(255,255,255,.22),0 2px 8px rgba(0,0,0,.5)}
+body.skin-classic .top .big{font-size:22px;color:var(--gold);text-shadow:1px 1px 0 #000,0 0 6px rgba(243,230,166,.25)}
+body.skin-classic .bar .mid b,body.skin-classic .bar .back{color:var(--gold)}
+body.skin-classic .bar .mid small{color:var(--soft)}
+#cursor{position:fixed;z-index:999;width:0;height:0;border-left:11px solid var(--gold);border-top:7px solid transparent;border-bottom:7px solid transparent;
+  filter:drop-shadow(1px 1px 0 #000) drop-shadow(0 0 2px rgba(0,0,0,.8));pointer-events:none;opacity:0;transition:opacity .25s}
+#cursor.show{opacity:1;transition:none}
+body.skin-classic .ln,body.skin-classic .rhead,body.skin-classic .cl,body.skin-classic .big,body.skin-classic .bar,
+body.skin-classic .lrow,body.skin-classic .srow,body.skin-classic .opt,body.skin-classic .vcard,body.skin-classic .acard{text-shadow:1px 1px 0 rgba(0,0,0,.9)}
+body.skin-classic .big{font-weight:700;letter-spacing:.3px}
+body.skin-classic .sect{letter-spacing:1.5px;color:var(--gold)}
+body.skin-classic .rail{width:2px}
+body.skin-classic .comp input{border-radius:4px;background:linear-gradient(180deg,#0c1440,#152062);border-color:rgba(220,228,255,.6)}
+body.skin-classic .tgt,body.skin-classic .chipb,body.skin-classic .seg,body.skin-classic .segs,body.skin-classic .pencil{border-radius:4px}
+body.skin-classic .chipb.on,body.skin-classic .opt.sel{background:linear-gradient(180deg,#3b55b8,#22327a);border-color:rgba(240,244,255,.85)}
+body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#f6ecbd,#d9c47a);color:#1b1a0e}
+body.skin-classic .opt.sel::before{content:"";width:0;height:0;border-left:7px solid #fff;border-top:5px solid transparent;border-bottom:5px solid transparent;margin-right:2px;filter:drop-shadow(1px 1px 0 #000)}
+body.skin-classic .tabbar{background:linear-gradient(180deg,#1f2d72,#0b1236);border-top:1px solid rgba(232,238,255,.6)}
+body.skin-classic .send.on{background:linear-gradient(180deg,#f6ecbd,#d9c47a)}
+body.skin-classic .pill-on{border-radius:4px}
+
+/* Onyx: plain black like the in-game log, more lines on screen. */
+body.skin-onyx{--bg:#000;--pane:#000;--raise:#0b0b0f;--chip:#141418;--line:#1c1c22;--edge:#2c2c36;--edge2:#3a3a46;
+  --text:#f2f2f2;--soft:#d6d6d6;--mute:#8a8a96;--gold:#e9d27a;--ink:#111;--serif:var(--sans)}
+body.skin-onyx .pane{border-radius:0;border-color:#26262e;box-shadow:none}
+body.skin-onyx .rail{display:none}
+body.skin-onyx .run,body.skin-onyx .cl{gap:6px}
+body.skin-onyx .pane .inner{gap:7px}
+body.skin-onyx.compact .pane .inner{gap:2px}
+body.skin-onyx .ln{text-shadow:1px 1px 0 #000}
+body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
+
 #toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 </style>
@@ -249,12 +397,15 @@ body.typing .tabbar{display:none}
 <symbol id="i-party" viewBox="0 0 20 20"><circle cx="10" cy="5.5" r="3" style="fill:var(--party)"/><path d="M4.5 18c0-3.4 2.4-5.2 5.5-5.2s5.5 1.8 5.5 5.2z" style="fill:var(--party)"/><circle cx="3.8" cy="9" r="2" style="fill:var(--party)" opacity=".7"/><circle cx="16.2" cy="9" r="2" style="fill:var(--party)" opacity=".7"/></symbol>
 <symbol id="i-tell" viewBox="0 0 20 20"><path d="M3 4h14a1 1 0 011 1v8a1 1 0 01-1 1H9l-4 3v-3H3a1 1 0 01-1-1V5a1 1 0 011-1z" style="fill:var(--tell)"/></symbol>
 <symbol id="i-say" viewBox="0 0 20 20"><path d="M10 3c4.4 0 8 2.7 8 6s-3.6 6-8 6c-.9 0-1.8-.1-2.6-.3L3.5 17l1-3.3C3 12.6 2 11 2 9c0-3.3 3.6-6 8-6z" style="fill:var(--say)"/></symbol>
+<symbol id="i-emote" viewBox="0 0 20 20"><circle cx="8" cy="5.5" r="3" style="fill:var(--emote)"/><path d="M2.5 18c0-3.4 2.4-5.2 5.5-5.2s5.5 1.8 5.5 5.2z" style="fill:var(--emote)"/><path d="M12.6 12.2l3.6-5.4" fill="none" style="stroke:var(--emote)" stroke-width="2.2" stroke-linecap="round"/><path d="M16.6 2.8a3.4 3.4 0 011.9 2.6M14.9 3.4a1.8 1.8 0 01.9 1.2" fill="none" style="stroke:var(--emote)" stroke-width="1.2" stroke-linecap="round" opacity=".8"/></symbol>
 <symbol id="i-unity" viewBox="0 0 20 20"><path d="M10 1.5l2.2 6.3 6.3 2.2-6.3 2.2L10 18.5l-2.2-6.3L1.5 10l6.3-2.2z" style="fill:var(--unity)"/></symbol>
 <symbol id="i-vent" viewBox="0 0 20 20"><path d="M10 1.5l7 8.5-7 8.5L3 10z" fill="#f0b24d"/></symbol>
 <symbol id="i-shout" viewBox="0 0 20 20"><path d="M3 8v4h3l6 4V4L6 8z" style="fill:var(--shout)"/><path d="M14.5 7a4 4 0 010 6" fill="none" style="stroke:var(--shout)" stroke-width="1.6" stroke-linecap="round"/></symbol>
 <symbol id="i-yell" viewBox="0 0 20 20"><path d="M2.5 8v4h3l6 4V4l-6 4z" style="fill:var(--yell)"/><path d="M13.5 7a4 4 0 010 6M15.8 5a7 7 0 010 10" fill="none" style="stroke:var(--yell)" stroke-width="1.5" stroke-linecap="round"/></symbol>
-<symbol id="i-emote" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" style="stroke:var(--emote)" stroke-width="1.6"/><circle cx="7.3" cy="8" r="1.2" style="fill:var(--emote)"/><circle cx="12.7" cy="8" r="1.2" style="fill:var(--emote)"/><path d="M6.5 11.8a4 4 0 007 0" fill="none" style="stroke:var(--emote)" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-finder" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.2" fill="none" style="stroke:var(--finder)" stroke-width="2"/><path d="M12.4 12.4l4.6 4.6" style="stroke:var(--finder)" stroke-width="2.2" stroke-linecap="round"/></symbol>
+<symbol id="i-bazaar" viewBox="0 0 20 20"><path d="M6.5 7V5.5a3.5 3.5 0 017 0V7" fill="none" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/><path d="M4 7h12l-1 10H5z" fill="var(--gold)" opacity=".9"/></symbol>
 <symbol id="i-bell" viewBox="0 0 20 20"><path d="M10 2.5a5 5 0 00-5 5V11l-1.5 3h13L15 11V7.5a5 5 0 00-5-5zM8 16a2 2 0 004 0z" fill="#8e9ac0"/></symbol>
+<symbol id="i-bang" viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="4" fill="#2a3466"/><path d="M10 5.6v5.6" stroke="#d9b45a" stroke-width="2.2" stroke-linecap="round"/><circle cx="10" cy="14.4" r="1.3" fill="#d9b45a"/></symbol>
 <symbol id="i-cmd" viewBox="0 0 20 20"><rect x="1.5" y="3" width="17" height="14" rx="3" fill="#2a3466"/><path d="M5 7.5l3.5 2.5L5 12.5M10.5 13h4.5" fill="none" stroke="#d9b45a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" fill="#8e9ac0" transform="translate(0 -1)"/></symbol>
 <symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="#d9b45a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -270,6 +421,7 @@ body.typing .tabbar{display:none}
       <div class="views"><div class="seg" id="viewseg"></div><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
       <div class="pills" id="pills"></div>
       <div id="ban-chat"></div>
+      <div id="motd-chat"></div>
       <div class="panewrap"><div class="pane" id="pane-chat"><div class="inner"></div></div><button class="jump" data-jump="pane-chat"></button></div>
       <div class="comp" data-comp="chat"></div>
     </section>
@@ -279,13 +431,24 @@ body.typing .tabbar{display:none}
       <div class="list" id="tells-list"></div>
       <div class="center"><button class="btnline" id="newtell">+ New tell</button></div>
     </section>
-    <section class="tab" id="tab-vent">
-      <div class="top"><div class="big">Ventures</div><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div></div>
-      <div class="list" id="vent"></div>
+    <section class="tab" id="tab-cmds">
+      <div class="top"><div class="big" id="cmdtitle">Emotes</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div class="cpanel" id="cp-emote">
+        <div class="emseg" id="emseg"></div>
+        <div class="list" id="emotes"></div>
+      </div>
+      <div class="cpanel" id="cp-server" hidden>
+        <input class="search" id="cmdsearch" placeholder="Search ! commands" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        <div class="emseg" id="modeseg" hidden></div>
+        <div class="list srvlist" id="cmdlist"></div>
+        <div class="cmdlog" id="pane-cmd"><div class="inner"></div></div>
+        <div class="chips" id="cmdchips"></div>
+        <div class="comp" data-comp="cmd" style="border-top:0"></div>
+      </div>
     </section>
-    <section class="tab" id="tab-notices">
-      <div class="top"><div class="big">Notices</div><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div></div>
-      <div class="list" id="notices"></div>
+    <section class="tab" id="tab-alerts">
+      <div class="top"><div class="big">Alerts</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div class="list" id="alerts"><div id="vent"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
     </section>
   </div>
 
@@ -293,40 +456,19 @@ body.typing .tabbar{display:none}
   <div class="screen overlay tabs" id="scr-focus">
     <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px" id="focus-title"></div><small id="focus-sub"></small></div><div class="end"><span class="pill-on off" data-bridge style="border:0;padding:0"><i></i><span>OFF</span></span></div></div>
     <div class="pills" id="focus-filters"></div>
+    <div id="motd-focus"></div>
     <div class="panewrap"><div class="pane" id="pane-focus"><div class="inner"></div></div><button class="jump" data-jump="pane-focus"></button></div>
     <div class="comp" data-comp="focus"></div>
   </div>
 
   <!-- tell thread -->
   <div class="screen overlay" id="scr-thread">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Tells</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell thread</small></div><div class="end"></div></div>
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Tells</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell</small></div><div class="end"></div></div>
     <div class="panewrap" style="margin-top:10px"><div class="pane" id="pane-thread"><div class="inner"></div></div><button class="jump" data-jump="pane-thread"></button></div>
     <div class="comp" data-comp="thread"></div>
   </div>
 
-  <!-- game command -->
-  <div class="screen overlay tabs" id="scr-cmd">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-cmd"/></svg><b>Game command</b></div><small>Sent as if typed in game</small></div><div class="end"></div></div>
-    <div class="banner info" style="background:#241f3d;border-color:#5a4620">Only CatsEye server <b style="display:inline">!</b> commands work here (emotes have their own screen). One command per tap. No game actions, no macros.</div>
-    <div class="panewrap" style="margin-top:6px"><div class="pane cmdlog" id="pane-cmd"><div class="inner" style="gap:6px"></div></div></div>
-    <div class="chips" id="cmdchips"></div>
-    <div class="comp" data-comp="cmd" style="border-top:0"></div>
-  </div>
-
-  <!-- emotes -->
-  <div class="screen overlay tabs" id="scr-emote">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-emote"/></svg><b>Emotes</b></div><small>One tap sends it</small></div><div class="end"></div></div>
-    <div class="emseg" id="emseg"></div>
-    <div class="list" id="emotes"></div>
-  </div>
-
   <!-- command list -->
-  <div class="screen overlay" id="scr-cmdlist">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Command</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Commands</b></div><div class="end"></div></div>
-    <input class="search" id="cmdsearch" placeholder="Search commands" autocomplete="off" autocapitalize="off" spellcheck="false">
-    <div class="list" id="cmdlist"></div>
-  </div>
-
   <!-- settings -->
   <div class="screen overlay" id="scr-settings">
     <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Back</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Settings</b></div><div class="end"></div></div>
@@ -336,8 +478,9 @@ body.typing .tabbar{display:none}
   <nav class="tabbar" id="tabbar">
     <button data-tab="chat" class="on"><svg class="i" width="22" height="22"><use href="#i-ls1"/></svg>Chat</button>
     <button data-tab="tells"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg>Tells<span class="bdg" id="bdg-tells" hidden></span></button>
-    <button data-tab="vent"><svg class="i" width="22" height="22"><use href="#i-vent"/></svg>Ventures<span class="bdg" id="bdg-vent" hidden></span></button>
-    <button data-tab="notices"><svg class="i" width="22" height="22"><use href="#i-bell"/></svg>Notices<span class="bdg" id="bdg-notices" hidden></span></button>
+    <button data-tab="cmds" data-cs="emote"><span class="tabico"><span class="i emo-tag" style="font-size:12px">/bow</span></span>Emotes</button>
+    <button data-tab="cmds" data-cs="server"><svg class="i" width="22" height="22"><use href="#i-bang"/></svg>Server</button>
+    <button data-tab="alerts"><svg class="i" width="22" height="22"><use href="#i-bell"/></svg>Alerts<span class="bdg" id="bdg-alerts" hidden></span></button>
   </nav>
 
   <div id="scrim"></div>
@@ -362,9 +505,10 @@ var CH = {
   shout: {label: "Shout",  full: "Shout",       icon: "shout", c: "var(--shout)", send: "/sh", sub: "Local area"},
   unity: {label: "Unity",  full: "Unity",       icon: "unity", c: "var(--unity)"},
   yell:  {label: "Yell",   full: "Yell",        icon: "yell",  c: "var(--yell)",  sub: "Trade spam. Read only."},
-  emote: {label: "Emotes", full: "Emotes",      icon: "emote", c: "var(--emote)"}
+  emote: {label: "Emotes", full: "Emotes",      icon: "emote", c: "var(--emote)"},
+  finder:{label: "Finder", full: "Party Finder", icon: "finder", c: "var(--finder)", sub: "Party Finder ads. Read only."}
 };
-var CHAT_CH = ["ls1", "ls2", "party", "tell", "say", "shout", "unity", "yell", "emote"];
+var CHAT_CH = ["ls1", "ls2", "party", "tell", "say", "shout", "unity", "yell", "emote", "finder"];
 var SENDABLE = ["ls1", "ls2", "party", "tell", "say", "shout"];
 var MAX_VIEWS = 5;
 
@@ -375,11 +519,14 @@ function esc(s) {
 }
 function $(id) { return document.getElementById(id); }
 function ico(name, size, style) {
+  // The Emotes tab and the send picker use a "/bow" tag ("the slash actions live here"); chat uses the waving figure.
+  if (name === "emote-tag") return '<span class="i emo-tag" style="font-size:' + Math.max(9, Math.round((size || 14) * 0.55)) + 'px' + (style ? ";" + style : "") + '">/bow</span>';
   return '<svg class="i" width="' + (size || 14) + '" height="' + (size || 14) + '"' + (style ? ' style="' + style + '"' : "") + '><use href="#i-' + name + '"/></svg>';
 }
 function hhmm(ts) {
-  var d = new Date(ts * 1000);
-  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  var d = new Date(ts * 1000), h = d.getHours(), mm = String(d.getMinutes()).padStart(2, "0");
+  if (S.clock === "24") return String(h).padStart(2, "0") + ":" + mm;
+  return ((h + 11) % 12 + 1) + ":" + mm + '<small class="ap">' + (h < 12 ? "AM" : "PM") + "</small>";
 }
 function dayLabel(ts) {
   var d = new Date(ts * 1000), now = new Date();
@@ -389,8 +536,17 @@ function dayLabel(ts) {
   return d.toLocaleDateString(undefined, {month: "short", day: "numeric"}) + " " + hhmm(ts);
 }
 function nowSec() { return Math.floor(Date.now() / 1000); }
+// Recent problems, kept in memory only, for "Copy debug info". Never holds the link or chat.
+var errLog = [];
+function logErr(text) {
+  errLog.push(new Date().toTimeString().slice(0, 8) + " " + String(text).slice(0, 160));
+  if (errLog.length > 20) errLog.shift();
+}
+window.addEventListener("error", function (e) { logErr("page error: " + (e.message || "unknown") + (e.lineno ? " (line " + e.lineno + ")" : "")); });
+window.addEventListener("unhandledrejection", function (e) { logErr("page error: " + ((e.reason && e.reason.message) || e.reason || "unknown")); });
 var toastTimer = null;
 function toast(text) {
+  logErr("toast: " + text);
   var t = $("toast");
   t.textContent = text;
   t.classList.add("on");
@@ -402,46 +558,183 @@ function toast(text) {
 // Settings (per device). Storage can be blocked, so everything is wrapped.
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
-  density: "comfortable", size: "M", calls: "highlight", groupCalls: true,
-  master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true},
+  density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, seenAlerts: 0, scrollback: 1,
+  master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
-    {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true}},
+    {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
     {id: "v1", name: "Linkshells", ch: {ls1: true, ls2: true}},
     {id: "v2", name: "Party & tells", ch: {party: true, tell: true}}
   ],
   view: "all",
   target: {ch: "ls1", peer: ""},
   favs: ["!mog", "!points", "!dailies"],
-  colors: {}, emoteMode: "", recentEmotes: [],
-  read: {}, seenVent: 0, seenNotice: 0
+  colors: {}, emoteMode: "", recentEmotes: [], skin: "midnight", font: "readable",
+  read: {}
 };
+var freshLocal = false;
 var S = load();
 function load() {
   var s = null;
   try { s = JSON.parse(localStorage.getItem("pcxi") || "null"); } catch (e) { s = null; }
+  freshLocal = !s;
+  return merged(s);
+}
+function merged(s) {
   var out = JSON.parse(JSON.stringify(DEFAULTS));
   if (s && typeof s === "object") {
     for (var k in out) if (s[k] !== undefined) out[k] = s[k];
     out.master = Object.assign({}, DEFAULTS.master, s.master || {});
   }
-  if (!Array.isArray(out.views) || !out.views.length || out.views[0].id !== "all") out.views = DEFAULTS.views;
-  return out;
+  return cleanPrefs(out);
 }
-var saveTimer = null;
+// Settings can come from a file someone shared (Import) or the bridge's saved copy, so every value is
+// checked before it's used: anything of the wrong type or not on the allowed list falls back to the
+// default, ids and names are limited to plain characters, and free text is length-capped.
+function cleanPrefs(o) {
+  var D = JSON.parse(JSON.stringify(DEFAULTS));
+  function pick(v, list, d) { return list.indexOf(v) >= 0 ? v : d; }
+  function bool(v, d) { return typeof v === "boolean" ? v : d; }
+  function text(v, max, re) { return typeof v === "string" && v.length <= max && (!re || re.test(v)); }
+  function chans(m, d) {
+    var r = {};
+    CHAT_CH.forEach(function (c) { r[c] = m && typeof m === "object" && typeof m[c] === "boolean" ? m[c] : !!(d && d[c]); });
+    return r;
+  }
+  function list(v, max, ok) { return Array.isArray(v) ? v.filter(ok).slice(0, max) : []; }
+  var ID = /^[A-Za-z0-9_-]{1,24}$/;
+  o.density = pick(o.density, ["comfortable", "compact"], D.density);
+  o.size = pick(o.size, ["S", "M", "L"], D.size);
+  o.calls = pick(o.calls, ["off", "highlight", "badge"], D.calls);
+  o.clock = pick(o.clock, ["12", "24"], D.clock);
+  o.cmdMode = pick(o.cmdMode, ["all", "ace", "cw", "wew"], D.cmdMode);
+  o.cseg = pick(o.cseg, ["emote", "server"], D.cseg);
+  o.skin = pick(o.skin, ["midnight", "classic", "onyx"], D.skin);
+  o.font = pick(o.font, ["readable", "classic"], D.font);
+  o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
+  o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
+  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
+  if (!text(o.watch, 200)) o.watch = D.watch;
+  o.hidden = list(o.hidden, 300, function (x) { return text(x, 100) || (typeof x === "number" && isFinite(x)); });
+  var read = {};
+  if (o.read && typeof o.read === "object") Object.keys(o.read).slice(0, 500).forEach(function (k) {
+    if (/^[a-z]{1,15}$/.test(k) && typeof o.read[k] === "number" && isFinite(o.read[k])) read[k] = o.read[k];
+  });
+  o.read = read;
+  o.master = chans(o.master, D.master);
+  var views = list(o.views, 20, function (v) { return v && typeof v === "object" && text(v.id, 24, ID) && typeof v.name === "string"; })
+    .map(function (v) { return {id: v.id, name: v.name.slice(0, 30), ch: chans(v.ch, v.id === "all" ? D.views[0].ch : null)}; });
+  if (!views.length || views[0].id !== "all") views = D.views;
+  o.views = views;
+  if (!text(o.view, 24, ID)) o.view = "all";
+  var t = o.target && typeof o.target === "object" ? o.target : {};
+  o.target = {ch: pick(t.ch, SENDABLE, "ls1"), peer: text(t.peer, 15, /^[A-Za-z]*$/) ? t.peer : ""};
+  o.favs = list(o.favs, 50, function (f) { return text(f, 31, /^![A-Za-z0-9]+$/); });   // command names only, like !mog
+  var colors = {};
+  if (o.colors && typeof o.colors === "object") CHAT_CH.forEach(function (c) {
+    if (text(o.colors[c], 7, /^#[0-9A-Fa-f]{6}$/)) colors[c] = o.colors[c];
+  });
+  o.colors = colors;
+  o.recentEmotes = list(o.recentEmotes, 8, function (r) { return text(r, 30, /^\/[A-Za-z]+( [A-Za-z0-9]+)?$/); });
+  return o;
+}
+var saveTimer = null, pushTimer = null, prefsReady = false;
 function save() {
+  S.savedAt = Date.now();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
     try { localStorage.setItem("pcxi", JSON.stringify(S)); } catch (e) { /* storage blocked: settings last until reload */ }
   }, 150);
+  // Keep a copy on the bridge, so a new Home Screen shortcut or another phone gets them back.
+  if (!prefsReady) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(function () { api("/api/prefs", {prefs: shareable(S)}).catch(function () {}); }, 2500);
 }
-var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#4fd6c8", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff"};
+// Names stay on this phone: your mention names, who you've had tells with, and the last tell
+// target are never sent to the bridge or put in an export file.
+var PHONE_ONLY = ["watch", "read", "target", "hidden"];
+function shareable(s) {
+  var out = JSON.parse(JSON.stringify(s));
+  PHONE_ONLY.forEach(function (k) { delete out[k]; });
+  return out;
+}
+function adopt(obj) {
+  var keep = {};
+  PHONE_ONLY.forEach(function (k) { keep[k] = S[k]; });
+  obj = shareable(obj || {});
+  PHONE_ONLY.forEach(function (k) { if (keep[k] !== undefined) obj[k] = keep[k]; });
+  S = merged(obj);
+  try { localStorage.setItem("pcxi", JSON.stringify(S)); } catch (e) {}
+  applyLook(); setWatch(); buildComposers(); seenCount = {}; render();
+}
+function syncPrefs() {
+  getJSON("/api/prefs").then(function (j) {
+    var b = j && j.prefs;
+    prefsReady = true;
+    // A phone with nothing saved yet always takes the bridge copy.
+    if (b && (freshLocal || (b.savedAt || 0) > (S.savedAt || 0))) adopt(b);
+    else if (!b || (S.savedAt || 0) > (b.savedAt || 0)) save();
+  }).catch(function () { prefsReady = true; });
+}
+function exportPrefs() {
+  var blob = new Blob([JSON.stringify(shareable(S), null, 1)], {type: "application/json"});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "phonechatXI-settings.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+}
+function importPrefs(file) {
+  var r = new FileReader();
+  r.onload = function () {
+    try {
+      var obj = JSON.parse(r.result);
+      if (!obj || typeof obj !== "object" || !obj.views) throw new Error("bad");
+      obj.savedAt = Date.now();
+      adopt(obj); save(); toast("Settings imported.");
+    } catch (e) { toast("That file isn't a phonechatXI settings file."); }
+  };
+  r.readAsText(file);
+}
+var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#4fd6c8", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 function colorOf(c) { return (S.colors && S.colors[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
 }
+var cursorEl = null, cursorT = 0;
+function cursorAt(el) {
+  if (!document.body.classList.contains("skin-classic")) return;
+  if (!cursorEl) { cursorEl = document.createElement("div"); cursorEl.id = "cursor"; document.body.appendChild(cursorEl); }
+  cursorFor = el;
+  var r = el.getBoundingClientRect();
+  cursorEl.style.left = Math.max(1, r.left - 13) + "px";
+  cursorEl.style.top = (r.top + r.height / 2 - 7) + "px";
+  cursorEl.classList.add("show");
+  clearTimeout(cursorT);
+  cursorT = setTimeout(function () { cursorEl.classList.remove("show"); }, 1200);
+}
+function cursorHide() { if (cursorEl) cursorEl.classList.remove("show"); }
+var cursorFor = null;
+document.addEventListener("click", function () {
+  setTimeout(function () {
+    if (!cursorFor || !cursorEl || !cursorEl.classList.contains("show")) return;
+    var r = cursorFor.getBoundingClientRect(), hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+    if (!r.width || !hit || !cursorFor.contains(hit)) cursorHide();
+  }, 80);
+}, true);
+document.addEventListener("pointerdown", function (e) {
+  var b = e.target.closest && e.target.closest("button,.chipb,.tgt,.lrow,.opt,a,[data-who]");
+  if (b && !b.closest(".tabbar") && !b.classList.contains("opt")) cursorAt(b);
+}, true);
+document.addEventListener("scroll", cursorHide, true);
 function applyLook() {
   applyColors();
+  ["skin-midnight", "skin-classic", "skin-onyx", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
+  if (S.font !== "classic") S.font = "readable";
+  document.body.classList.add("skin-" + (S.skin || "midnight"), "font-" + S.font);
   document.body.classList.toggle("compact", S.density === "compact");
+  document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-S", "size-M", "size-L");
   document.body.classList.add("size-" + S.size);
 }
@@ -456,7 +749,7 @@ var pendOrder = [];
 var cmdLog = [];
 var lastCmdAt = 0;
 var status = {char: "", save_tells: false, url: ""};
-var connected = false, everConnected = false, lastBoot = null, offlineSince = Date.now();
+var connected = false, everConnected = false, lastBoot = null, offlineSince = Date.now(), linkDead = false;
 var commands = {info: {}, action: {}};
 
 function api(path, body) {
@@ -476,21 +769,50 @@ function refreshStatus() {
   getJSON("/api/status").then(function (j) { status = j; render(); }).catch(function () {});
 }
 
-var lsName = {};
+var lsName = {}, lsMotd = {};
+// Mentions: your name or nicknames from Settings. Whole words, any case. Kept to 3 name-like
+// words (letters only, 2 to 15) so it stays a "someone said my name" feature, not a tracker.
+var WATCH_MAX = 3;
+var watchRe = null, watchReG = null, watchWords = [];
+function watchList(text) {
+  return (text || "").split(",").map(function (w) { return w.trim(); })
+    .filter(function (w) { return /^[A-Za-z]{2,15}$/.test(w); }).slice(0, WATCH_MAX);
+}
+function setWatch() {
+  var words = watchWords = watchList(S.watch);
+  var note = $("watchnote");
+  if (note) note.textContent = words.length ? "Watching: " + words.join(", ") : "Not watching anything yet.";
+  var src = words.map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }).join("|");
+  watchRe = words.length ? new RegExp("(^|[^A-Za-z0-9])(" + src + ")(?![A-Za-z0-9])", "i") : null;
+  watchReG = words.length ? new RegExp("(^|[^A-Za-z0-9])(" + src + ")(?![A-Za-z0-9])", "gi") : null;
+  msgs.forEach(function (m) { m._men = isMention(m); });
+}
+function isMention(m) {
+  return !!watchRe && m.dir !== "out" && !m.pending && CHAT_CH.indexOf(m.ch) >= 0 && m.ch !== "finder" && m.ch !== "yell" && m.ch !== "emote" && watchRe.test(m.body || "");
+}
+function markWatch(h) {
+  return h.split(/(<[^>]+>)/).map(function (part, i) {
+    return i % 2 ? part : part.replace(watchReG, '$1<mark class="mw">$2</mark>');
+  }).join("");
+}
 function onMsg(m) {
   if (m.ch === "_ack") { onAck(m); return; }
-  if (m.ch === "server") {
-    var ln = /^\[(\d)\]<\s*([^>]+?)\s*>/.exec(m.body || "");
-    if (ln) lsName["ls" + ln[1]] = ln[2];
+  if (m.ch === "_game") { gameQuiet = m.state === "quiet" ? m.closes_at : 0; schedule(); return; }
+  if (m.ch === "motd") {
+    lsMotd[m.name] = m.body;
+    lsName[m.name] = m.body;
+    schedule();
+    return;
   }
   if (byId[m.id]) return;
   byId[m.id] = m;
+  m._men = isMention(m);
   msgs.push(m);
   if (m.pid && pend[m.pid]) { delete pend[m.pid]; }
   if (lastCmdAt && Date.now() - lastCmdAt < 8000 && (m.ch === "system" || m.ch === "echo" || m.ch === "server")) {
     cmdLog.push({ts: m.ts, text: m.body, kind: "reply"});
   }
-  if (msgs.length > 4000) {
+  if (msgs.length > 4000 * (S.scrollback || 1)) {
     var drop = msgs.splice(0, 500);
     drop.forEach(function (d) { delete byId[d.id]; });
   }
@@ -503,7 +825,14 @@ function onAck(a) {
     schedule();
     return;
   }
-  if (!p) return;
+  if (!p) {
+    // The game showed the line (so it's in chat already), then refused it: mark that chat line failed.
+    if (a.state === "failed") {
+      msgs.forEach(function (m) { if (m.pid === a.pid) { m.failed = true; m.reason = a.reason || ""; } });
+      schedule();
+    }
+    return;
+  }
   if (a.state === "sent") { p.state = "sent"; setTimeout(function () { if (pend[a.pid]) { delete pend[a.pid]; schedule(); } }, 4000); }
   else { p.state = a.state; p.reason = a.reason || ""; }
   schedule();
@@ -516,7 +845,7 @@ function connect() {
   es.addEventListener("hello", function (ev) {
     var j = {};
     try { j = JSON.parse(ev.data); } catch (e) {}
-    if (lastBoot !== null && j.boot !== lastBoot) { msgs = []; byId = {}; }
+    if (lastBoot !== null && j.boot !== lastBoot) { msgs = []; byId = {}; gameQuiet = 0; }
     lastBoot = j.boot;
     setConnected(true);
     refreshStatus();
@@ -527,18 +856,23 @@ function connect() {
   es.onopen = function () { setConnected(true); };
   es.onerror = function () {
     setConnected(false);
-    if (es.readyState === 2) setTimeout(connect, 3000);
+    if (es.readyState !== 2) return;
+    // A closed stream is either the bridge being off or this link being replaced. Ask which.
+    fetch("/api/status?t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}}).then(function (r) {
+      if (r.status === 403) { linkDead = true; logErr("link was replaced"); render(); return; }
+      setTimeout(connect, 3000);
+    }).catch(function () { setTimeout(connect, 3000); });
   };
 }
 function setConnected(on) {
   if (on === connected) return;
   connected = on;
-  if (on) everConnected = true; else offlineSince = Date.now();
+  if (on) everConnected = true; else { offlineSince = Date.now(); logErr("lost connection to the bridge"); }
   render();
   if (!on) setTimeout(render, 3500);
 }
 document.addEventListener("visibilitychange", function () {
-  if (document.visibilityState === "visible" && (!es || es.readyState !== 1)) connect();
+  if (document.visibilityState === "visible" && !linkDead && (!es || es.readyState !== 1)) connect();
 });
 
 // ------------------------------------------------------------------------------------------
@@ -551,12 +885,15 @@ function fmt(body) {
   if (S.calls !== "off") {
     h = h.replace(CALL_RE, function (all, n) { n = +n; return n >= 1 && n <= 25 ? '<span class="callp">CALL ' + n + "</span>" : all; });
   }
-  h = h.replace(URL_RE, function (u) {
-    var raw = u.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"');
-    var href = /^https?:/i.test(raw) ? raw : "https://" + raw;
-    var dom = href.replace(/^https?:\/\//i, "").split(/[\/?#]/)[0];
-    return '<a class="url" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + esc(dom) + " &#8599;</a>";
+  // Web addresses stay plain text: the only outside page the phone opens is a BG-Wiki item search.
+  // {{Item}} = an auto-translated item: link it. {Phrase} = auto-translate phrase or zone: style only.
+  h = h.replace(/\{\{([^{}<>\n]{1,40})\}\}/g, function (all, name) {
+    var q = name.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
+    if (!q) return all;
+    return '<a class="item" href="https://www.bg-wiki.com/ffxi/Special:Search?search=' + encodeURIComponent(q) + '" target="_blank" rel="noopener noreferrer">{' + name + "}</a>";
   });
+  h = h.replace(/\{([^{}<>\n]{1,60})\}/g, '<span class="at">{$1}</span>');
+  if (watchRe) h = markWatch(h);
   return h;
 }
 function hasLink(m) { URL_RE.lastIndex = 0; return URL_RE.test(m.body || ""); }
@@ -620,25 +957,34 @@ function stateHtml(m) {
   return "";
 }
 function failHtml(m) {
+  if (!m.pending && m.failed) return '<div class="failbox"><span>' + esc(m.reason || "Not delivered") + "</span></div>";
   if (!m.pending || (m.state !== "failed" && m.state !== "unconfirmed")) return "";
-  var why = m.state === "failed" ? (m.reason || "Not delivered") : "The game didn't confirm this one";
-  return '<div class="failbox"><span>' + esc(why) + '</span><button data-retry="' + esc(m.pid) + '">Retry</button></div>';
+  // Unconfirmed may well have gone through: no Retry, so it isn't sent twice by accident.
+  if (m.state === "unconfirmed") return '<div class="failbox"><span>The game didn\'t confirm this one. Check in game before sending it again.</span></div>';
+  return '<div class="failbox"><span>' + esc(m.reason || "Not delivered") + '</span><button data-retry="' + esc(m.pid) + '">Retry</button></div>';
 }
+// Party Finder ads read like the game's: the poster's name stands out, the rest is italic.
+function fmtFinder(body) {
+  var mm = /^(\S+) (is looking for (?:members|a party)):?\s*([\s\S]*)$/.exec(body || "");
+  if (!mm) return '<i class="pf">' + fmt(body) + "</i>";
+  return '<b class="pfn">' + esc(mm[1]) + '</b> <i class="pf">' + esc(mm[2]) + ":</i> " + fmt(mm[3]);
+}
+function bodyHtml(m) { return m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); }
 function bodyLine(m, ctx) {
-  var b = fmt(m.body);
+  var b = bodyHtml(m);
   if (m.ch === "tell" && ctx !== "thread") {
     b = m.dir === "in" ? "&gt;&gt; " + b : "&gt;&gt;" + esc(m.pending ? m.peer : m.name) + " : " + b;
   }
   return '<div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + b + stateHtml(m) + "</div>" + failHtml(m);
 }
-function isCallOnly(m) { return S.calls !== "off" && S.groupCalls && m.callonly && !m.pending; }
+function isCallOnly(m) { return false; }   // roll-call folding removed in 1.1
 
 function blocks(items, ctx) {
   items = items.slice().sort(function (a, b) { return (a.ts - b.ts) || ((a.id || 1e12) - (b.id || 1e12)); });
   var out = [], last = null, prevTs = 0;
   for (var i = 0; i < items.length; i++) {
     var m = items[i];
-    if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", text: dayLabel(m.ts)});
+    if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", html: dayLabel(m.ts)});
     prevTs = m.ts;
     if (m.ch === "zone") { out.push({type: "div", text: m.body}); last = null; continue; }
     if (m.ch === "system") { out.push({type: "note", m: m}); last = null; continue; }
@@ -662,11 +1008,16 @@ function runHead(b, ctx) {
   if (b.dir === "out") extra += " &middot; you";
   if (m.zone) extra += " &middot; " + esc(m.zone);
   if (m.saved && ctx === "thread") extra += " &middot; saved";
-  var nameTap = ' data-who="' + esc(b.ch === "tell" ? (m.pending ? m.peer : m.name) : "") + '" data-ch="' + b.ch + '"';
+  var whoName = b.ch === "tell" ? (m.pending ? m.peer : m.name) : (b.dir === "out" || b.ch === "emote" ? "" : (m.name || ""));
+  var nameTap = ' data-who="' + esc(whoName) + '" data-ch="' + b.ch + '"';
   if (ctx === "thread" && b.dir === "out") {
     return '<div class="rhead"><span class="t">' + extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
-  return '<div class="rhead"><button class="row" style="gap:6px"' + nameTap + ">" + ico(c.icon) + "<b>" + esc(b.who || CH[b.ch].full) + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
+  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + esc(b.who || CH[b.ch].full) + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
+}
+function replyAttr(m) {
+  var peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";
+  return ' data-reply="' + m.ch + '"' + (peer ? ' data-peer="' + esc(peer) + '"' : "") + ' data-k="' + esc(m.id || m.pid || "") + '"';
 }
 function compactPrefix(m) {
   var who = esc(senderOf(m));
@@ -675,14 +1026,14 @@ function compactPrefix(m) {
     case "party": return "(" + who + ")";
     case "unity": return "{" + who + "}";
     case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
-    case "emote": return "";
+    case "emote": case "finder": return "";
     default: return who + ":";
   }
 }
 function renderBlocks(list, ctx) {
   var html = [];
   list.forEach(function (b) {
-    if (b.type === "div") { html.push('<div class="div">' + esc(b.text) + "</div>"); return; }
+    if (b.type === "div") { html.push('<div class="div">' + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
     if (b.type === "burst") {
@@ -698,7 +1049,8 @@ function renderBlocks(list, ctx) {
     if (ctx === "compact") {
       b.ms.forEach(function (m) {
         var pre = compactPrefix(m);
-        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? "<b>" + pre + "</b> " : "") + fmt(m.body) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+        var cw = m.ch === "tell" ? (m.pending ? m.peer : m.name) : (m.dir === "out" || m.pending || m.ch === "emote" ? "" : (m.name || ""));
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + '><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
       });
       return;
     }
@@ -707,7 +1059,7 @@ function renderBlocks(list, ctx) {
     if (mine) {
       html.push('<div class="run mine' + (b.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rbody">' + runHead(b, ctx) + lines + '</div><div class="rail" style="background:#7a4a96"></div></div>');
     } else {
-      html.push('<div class="run' + (b.dir === "out" ? " out" : "") + (b.call ? " call" : "") + (b.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + runHead(b, ctx) + lines + "</div></div>");
+      html.push('<div class="run' + (b.dir === "out" ? " out" : "") + (b.ms.some(function (x) { return x._men; }) ? " mention" : "") + (b.call ? " call" : "") + (b.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(b.ms[0]) + '><div class="rail"></div><div class="rbody">' + runHead(b, ctx) + lines + "</div></div>");
     }
   });
   return html.join("");
@@ -715,29 +1067,70 @@ function renderBlocks(list, ctx) {
 var seenCount = {};
 function renderPane(id, items, ctx, emptyText) {
   var pane = $(id), inner = pane.firstElementChild;
-  var atBottom = pane.scrollHeight - pane.scrollTop - pane.clientHeight < 60;
-  var shown = items.slice(-350);
+  // "At the bottom" is what the reader last did (set by scroll events), not a fresh measurement:
+  // fonts and banners can change the height after a redraw without the reader moving.
+  var atBottom = pane._stick !== false;
+  var first = pane._count === undefined;
+  if (seenCount[id] === undefined) seenCount[id] = first ? items.length : (pane._count || 0);
+  // Never redraw a pane the reader is holding or flicking, even at the bottom: the redraw
+  // snaps it back down, which is what made the feed shake when you started scrolling up.
+  if (!first && (pane._touch || Date.now() - (pane._scrolled || 0) < 450)) {
+    clearTimeout(pane._later);
+    pane._later = setTimeout(schedule, 500);
+    return;
+  }
+  // Remember which line is at the top so it stays put after the redraw.
+  var anchor = null, anchorOff = 0;
+  if (!first && !atBottom) {
+    var kids = inner.querySelectorAll("[data-k]");
+    for (var i = 0; i < kids.length; i++) {
+      if (kids[i].offsetTop + kids[i].offsetHeight > pane.scrollTop) { anchor = kids[i].dataset.k; anchorOff = kids[i].offsetTop - pane.scrollTop; break; }
+    }
+  }
+  var before = pane._count || 0;
+  var shown = items.slice(-350 * (S.scrollback || 1));
   var mode = ctx === "thread" ? "thread" : (S.density === "compact" ? "compact" : ctx);
-  inner.innerHTML = shown.length ? renderBlocks(blocks(shown, mode), mode) : '<div class="empty">' + emptyText + "</div>";
+  var html = shown.length ? renderBlocks(blocks(shown, mode), mode) : '<div class="empty">' + emptyText + "</div>";
+  if (html === pane._html && !first) { pane._count = items.length; return; }   // nothing changed: leave the DOM (and the scroll) alone
+  pane._html = html;
+  inner.innerHTML = html;
+  pane._count = items.length;
+  if (!first && items.length > before && atBottom) {
+    var all = inner.querySelectorAll("[data-k]"), n = Math.min(items.length - before, 6);
+    for (var j = Math.max(0, all.length - n); j < all.length; j++) all[j].classList.add("fresh");
+  }
   var jump = document.querySelector('[data-jump="' + id + '"]');
-  if (atBottom || seenCount[id] === undefined) {
+  if (atBottom || first) {
     pane.scrollTop = pane.scrollHeight;
     seenCount[id] = items.length;
     if (jump) jump.classList.remove("show");
-  } else if (jump) {
-    var n = items.length - seenCount[id];
-    if (n > 0) { jump.textContent = "Jump to latest (" + n + ")"; jump.classList.add("show"); }
+  } else {
+    if (anchor) {
+      var el = inner.querySelector('[data-k="' + anchor + '"]');
+      if (el) pane.scrollTop = el.offsetTop - anchorOff;
+    }
+    var nn = items.length - seenCount[id];
+    if (jump && nn > 0) { jump.textContent = "Jump to latest (" + nn + ")"; jump.classList.add("show"); }
   }
 }
 document.querySelectorAll(".pane").forEach(function (p) {
+  p.addEventListener("touchstart", function () { p._touch = true; }, {passive: true});
+  p.addEventListener("touchend", function () { p._touch = false; p._scrolled = Date.now(); }, {passive: true});
+  p.addEventListener("touchcancel", function () { p._touch = false; }, {passive: true});
   p.addEventListener("scroll", function () {
-    if (p.scrollHeight - p.scrollTop - p.clientHeight < 60) {
+    p._scrolled = Date.now();
+    p._stick = p.scrollHeight - p.scrollTop - p.clientHeight < 12;
+    if (p._stick) {
+      // Back at the bottom: everything is read. Don't redraw from here (that fought the scroll).
       var j = document.querySelector('[data-jump="' + p.id + '"]');
       if (j) j.classList.remove("show");
-      seenCount[p.id] = undefined;
-      schedule();
+      seenCount[p.id] = p._count || 0;
     }
   }, {passive: true});
+  // Keep a pane that's following the newest line at the bottom when its content changes size.
+  if (window.ResizeObserver) new ResizeObserver(function () {
+    if (p._stick !== false && !p._touch) p.scrollTop = p.scrollHeight;
+  }).observe(p.firstElementChild);
 });
 document.addEventListener("click", function (e) {
   var j = e.target.closest("[data-jump]");
@@ -749,7 +1142,7 @@ document.addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 function renderViews() {
   $("viewseg").innerHTML = S.views.map(function (v) {
-    return '<button data-view="' + v.id + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
+    return '<button data-view="' + esc(v.id) + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
   }).join("");
   var v = curView();
   var recentCall = {};
@@ -836,15 +1229,27 @@ function placeholder(t) {
 function buildComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp;
-    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocorrect="on" spellcheck="true"' + (ctx === "cmd" ? ' class="mono" autocapitalize="off" autocorrect="off" spellcheck="false"' : "") + ' maxlength="400"><span class="left" hidden></span><button class="send" aria-label="Send">' + ico("send", 18) + "</button>" + (ctx === "cmd" ? '<button class="starb" data-favnow aria-label="Save as favorite">' + starSvg(false) + "</button>" : "");
+    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' + (ctx === "cmd" ? ' class="mono"' : "") + ' maxlength="400"><span class="left" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
     var inp = el.querySelector("input"), btn = el.querySelector(".send");
-    inp.addEventListener("input", function () { btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); if (ctx === "cmd") updateFavNow(); });
+    if (ctx !== "cmd") setupEmoStrip(el, inp);
+    inp.addEventListener("input", function () { if (ctx !== "cmd") emoSwap(inp); btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(ctx, inp); } });
     btn.addEventListener("click", function () { submit(ctx, inp); inp.focus(); });
     inp.addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); setTimeout(pinPanes, 320); });
     inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || document.activeElement.tagName !== "INPUT") document.body.classList.remove("typing"); fitViewport(); }, 80); });
   });
+  applyCaps();
   updateComposers();
+}
+// Most FFXI chat is typed lowercase and full of game words (Jeuno, San d'Oria, lvl, pt), so the
+// phone's keyboard doesn't capitalize or autocorrect unless you turn those on in Settings.
+// (An iPhone-wide setting can still override capitalization.)
+function applyCaps() {
+  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) input').forEach(function (i) {
+    i.setAttribute("autocapitalize", S.caps ? "sentences" : "off");
+    i.setAttribute("autocorrect", S.autocorrect ? "on" : "off");
+    i.setAttribute("spellcheck", S.autocorrect ? "true" : "false");
+  });
 }
 // FFXI chat lines are capped at 130 Shift-JIS bytes, prefix included. Shown as a countdown near the end.
 var LINE_BYTES = 130;
@@ -895,14 +1300,14 @@ function openPicker(ctx) {
     opt("say", "/s &middot; nearby") +
     opt("shout", "/sh &middot; local area") +
     '<div style="height:1px;background:var(--line);margin:6px 0"></div>' +
-    '<button class="opt" data-o="emote"><div class="oc" style="--c:var(--emote)">' + ico("emote", 22) + '</div><div style="flex:1"><b>Emote</b><small>/wave, /bow, /cheer and the rest</small></div></button>' +
-    '<button class="opt" data-o="cmd"><div class="oc" style="--c:var(--gold)">' + ico("cmd", 22) + '</div><div style="flex:1"><b>Game command</b><small>CatsEye ! server commands</small></div></button>';
+    '<button class="opt" data-o="emote"><div class="oc" style="--c:var(--emote)">' + ico("emote-tag", 22) + '</div><div style="flex:1"><b>Emote</b><small>/wave, /bow and the rest</small></div></button>' +
+    '<button class="opt" data-o="cmd"><div class="oc" style="--c:var(--gold)">' + ico("cmd", 22) + '</div><div style="flex:1"><b>Server command</b><small>CatsEye ! commands</small></div></button>';
   openSheet(html, function (e) {
     var b = e.target.closest("[data-o]");
     if (!b) return;
     var ch = b.dataset.o;
-    if (ch === "cmd") { closeSheet(); go("cmd"); return; }
-    if (ch === "emote") { closeSheet(); go("emote"); return; }
+    if (ch === "cmd") { closeSheet(); showTab("cmds", "server"); return; }
+    if (ch === "emote") { closeSheet(); showTab("cmds", "emote"); return; }
     if (ch === "tell") { closeSheet(); setTimeout(function () { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); }, 230); return; }
     S.target = {ch: ch, peer: ""};
     if (ctx === "focus") { focus.ch = ch; }
@@ -944,8 +1349,8 @@ function submit(ctx, inp) {
   if (ctx === "cmd") { sendCommand(text, false, inp); return; }
   var t = compTarget(ctx);
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
-  if (/^[\/!]/.test(text)) { toast("Commands go through Game command (tap the channel chip)."); return; }
-  if (sjisLen(text) > lineRoom(t)) { toast("Too long for one chat line. Trim it a little."); return; }
+  if (/^[\/!]/.test(text) && ["/", "!", "!!", "!?"].indexOf(text) < 0) { toast("Emotes and ! commands have their own tabs."); return; }
+  if (sjisLen(text) > lineRoom(t)) { toast("Too long for one line. Trim it a bit."); return; }
   sending = true;
   api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {
     sending = false;
@@ -1000,6 +1405,49 @@ function confirmCommand(text, inp) {
     if (b.dataset.sb === "ok") sendCommand(text, true, inp);
   });
 }
+// Emoji can't show in game (the bridge drops them), so a few common ones turn into the classic
+// text emoticons as you type. You see the result in the box before you send. Phone-side only.
+var EMO = [
+  ["👀", "<_<"], ["🙂", ":)"], ["😊", ":)"], ["😀", ":D"], ["😃", ":D"],
+  ["😄", ":D"], ["😂", "XD"], ["😛", ":P"], ["😜", ";P"], ["😉", ";)"], ["😆", "^^"],
+  ["😁", "^^"], ["😢", "T_T"], ["😭", "T_T"], ["😑", "-_-"], ["😳", "o_o"],
+  ["😮", "O_O"], ["😠", ">_<"], ["😡", ">_<"], ["❤", "<3"]
+];
+function emoSwap(inp) {
+  var v = inp.value;
+  if (!/[❤\uD83D️]/.test(v)) return;
+  var w = v.replace(/️/g, "");
+  EMO.forEach(function (p) { w = w.split(p[0]).join(p[1]); });
+  if (w === v) return;
+  var pos = Math.max(0, (inp.selectionStart == null ? v.length : inp.selectionStart) + (w.length - v.length));
+  inp.value = w;
+  try { inp.setSelectionRange(pos, pos); } catch (e) {}
+}
+// A row of text emoticons above the box. Tapping one puts it in the box; you still hit send.
+var EMO_PICK = ["^^", "^_^", ":)", ";)", "=)", ":D", ";D", "=D", ":P", ";P", ":(", "XD", "<_<", ">_>", ">_<", "T_T", "-_-", "o_o", "O_O", "<3"];
+function setupEmoStrip(el, inp) {
+  var old = el.previousElementSibling;
+  if (old && old.classList.contains("emostrip")) old.remove();
+  var strip = document.createElement("div");
+  strip.className = "emostrip"; strip.hidden = true;
+  strip.innerHTML = EMO_PICK.map(function (t) { return '<button type="button" data-emo="' + esc(t) + '">' + esc(t) + "</button>"; }).join("");
+  el.parentNode.insertBefore(strip, el);
+  var eb = el.querySelector(".emob");
+  [eb, strip].forEach(function (n) { n.addEventListener("pointerdown", function (e) { e.preventDefault(); }); });   // keep the keyboard up
+  eb.addEventListener("click", function () { strip.hidden = !strip.hidden; eb.classList.toggle("on", !strip.hidden); });
+  strip.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-emo]");
+    if (!b) return;
+    var t = b.dataset.emo, v = inp.value, a = inp.selectionStart == null ? v.length : inp.selectionStart, z = inp.selectionEnd == null ? a : inp.selectionEnd;
+    var pre = v.slice(0, a), post = v.slice(z);
+    var ins = (pre && !/\s$/.test(pre) ? " " : "") + t + (post && /^\s/.test(post) ? "" : " ");
+    if ((pre + ins + post).length > 400) return;
+    inp.value = pre + ins + post;
+    var pos = (pre + ins).length;
+    try { inp.setSelectionRange(pos, pos); } catch (x) {}
+    inp.dispatchEvent(new Event("input", {bubbles: true}));
+  });
+}
 function starSvg(on) {
   return '<svg class="i" width="22" height="22" viewBox="0 0 20 20"><path d="M10 2l2.4 5.2 5.6.6-4.2 3.8 1.2 5.6L10 14.4 5 17.2l1.2-5.6L2 7.8l5.6-.6z" fill="' + (on ? "#d9b45a" : "none") + '" stroke="' + (on ? "#d9b45a" : "#3a4a80") + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
 }
@@ -1011,70 +1459,132 @@ function toggleFav(t) {
   save(); renderCmd(); renderCmdList();
 }
 function cmdInput() { return document.querySelector('[data-comp="cmd"] input'); }
-function updateFavNow() {
-  var b = document.querySelector("[data-favnow]"), i = cmdInput();
-  if (b && i) b.innerHTML = starSvg(isFav(i.value.trim()));
-}
-document.addEventListener("click", function (e) {
-  if (e.target.closest("[data-favnow]")) { var i = cmdInput(); if (i.value.trim()) toggleFav(i.value.trim()); updateFavNow(); }
-});
 function renderCmd() {
-  $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("") + '<button class="all" data-go="cmdlist">All commands</button>';
-  var rows = cmdLog.slice(-80).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
+  $("cmdchips").innerHTML = S.favs.map(function (f) { return '<button data-chip="' + esc(f) + '">' + esc(f) + "</button>"; }).join("");
+  $("cmdchips").hidden = !S.favs.length;
+  var rows = cmdLog.slice(-40).map(function (l) { return '<div class="cl2 ' + l.kind + '"><span class="t">' + hhmm(l.ts) + "</span><span>" + esc(l.text) + "</span></div>"; });
   var pane = $("pane-cmd");
-  pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Tap a favorite or type a command like <span class="code">!points</span>.<br>Replies from the server show here.</div>';
+  pane.firstElementChild.innerHTML = rows.length ? rows.join("") : '<div class="empty">Replies show here.</div>';
   pane.scrollTop = pane.scrollHeight;
-  updateFavNow();
 }
 $("cmdchips").addEventListener("click", function (e) {
   var c = e.target.closest("[data-chip]");
   if (!c) return;
-  sendCommand(c.dataset.chip, false, null);
+  var t = c.dataset.chip;
+  if (NEEDS_ARGS.test(t)) {
+    var i = cmdInput(); i.value = t + " "; i.dispatchEvent(new Event("input")); i.focus();
+    return;
+  }
+  askSend(t);    // starred commands ask before sending, same as the list
 });
+// Commands that need something after them (an item, an amount) go in the box so you can finish typing.
+var NEEDS_ARGS = /^!(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/;
+function cmdName(t) { return (t || "").replace(/^!/, "").split(/\s+/)[0].toLowerCase(); }
+// CatsEye game modes. A command missing from commands.modes works in all of them.
+var GAME_MODES = [["ace", "ACE"], ["cw", "CW"], ["wew", "WEW"]];
+function modeIcon(m, size) { return '<img class="modeic" src="/icons/mode-' + m + '.png" alt="' + m.toUpperCase() + '" width="' + (size || 16) + '" height="' + (size || 16) + '">'; }
+function cmdModes(n) { return (commands.modes || {})[n] || null; }
+function hasModes() { return !!commands.modes && Object.keys(commands.modes).length > 0; }
+function inMode(n) { var ms = cmdModes(n); return S.cmdMode === "all" || !hasModes() || !ms || ms.indexOf(S.cmdMode) >= 0; }
+function renderModeSeg() {
+  var el = $("modeseg");
+  el.hidden = !hasModes();
+  if (el.hidden) return;
+  el.innerHTML = '<div class="seg">' + [["all", "All"]].concat(GAME_MODES).map(function (m) {
+    return '<button data-cmode="' + m[0] + '"' + ((S.cmdMode || "all") === m[0] ? ' class="on"' : "") + ">" + (m[0] === "all" ? "" : modeIcon(m[0], 16)) + m[1] + "</button>";
+  }).join("") + "</div>";
+}
+$("modeseg").addEventListener("click", function (e) {
+  var b = e.target.closest("[data-cmode]");
+  if (!b) return;
+  S.cmdMode = b.dataset.cmode; save(); renderModeSeg(); renderCmdList();
+});
+function cmdDesc(n) { return commands.info[n] || commands.action[n] || ""; }
 function renderCmdList() {
   var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
-  function row(name, desc, isAction) {
-    var t = "!" + name;
-    if (q && name.indexOf(q) < 0 && desc.toLowerCase().indexOf(q) < 0) return "";
-    return '<div class="crow"><button class="m" data-fill="' + esc(t) + '"><div>' + esc(t) + (isAction ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(desc) + '</small></button><button class="starb" data-star="' + esc(t) + '">' + starSvg(isFav(t)) + "</button></div>";
+  // The mode filter only hides rows in this list. Favorites always show, and any command can still be typed.
+  function row(t, fav) {
+    var n = cmdName(t), d = cmdDesc(n), ms = cmdModes(n);
+    if (!fav && !inMode(n)) return "";
+    if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
+    return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
+      '<button class="m" data-cmdpick="' + esc(t) + '"><b>' + esc(t) + '</b><span class="d">' + esc(d) + "</span>" +
+      (ms ? '<span class="mds">' + ms.map(function (m) { return modeIcon(m, 16); }).join("") + "</span>" : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
   }
-  var favRows = S.favs.map(function (f) {
-    var n = f.replace(/^!/, "").split(/\s+/)[0].toLowerCase();
-    var d = commands.info[n] || commands.action[n] || "";
-    if (q && f.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
-    return '<div class="crow"><button class="m" data-fill="' + esc(f) + '"><div>' + esc(f) + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</div><small>" + esc(d) + '</small></button><button class="starb" data-star="' + esc(f) + '">' + starSvg(true) + "</button></div>";
-  }).join("");
-  var info = Object.keys(commands.info).sort().map(function (n) { return row(n, commands.info[n], false); }).join("");
-  var act = Object.keys(commands.action).sort().map(function (n) { return row(n, commands.action[n], true); }).join("");
-  $("cmdlist").innerHTML = (favRows ? '<div class="sect">FAVORITES</div>' + favRows : "") +
-    '<div class="sect">INFO</div>' + (info || '<div class="empty">No match</div>') +
-    '<div class="sect">ACTIONS</div>' + (act || '<div class="empty">No match</div>') +
-    '<div class="sfoot">From the CatsEyeXI command list on BG-Wiki. Actions ask before sending. Star a command to pin it as a chip.</div>';
+  var favs = S.favs.map(function (f) { return row(f, true); }).join("");
+  var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
+  var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n); }).join("");
+  $("cmdlist").innerHTML = (favs ? '<div class="sect">FAVORITES</div>' + favs : "") +
+    (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
+    (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes. The filter only tidies this list; you can still type any command." : "") + "</div>");
+}
+// Tapping a command always asks first. One tap on Send = one command.
+function askSend(t) {
+  var n = cmdName(t), act = !!commands.action[n];
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(t) + '</div><div class="sfoot">' + esc(cmdDesc(n) || "CatsEye server command.") + (act ? " This one changes something in the game." : "") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    closeSheet();
+    if (b.dataset.sb === "ok") sendCommand(t, act, null);
+  });
 }
 $("cmdsearch").addEventListener("input", renderCmdList);
 $("cmdlist").addEventListener("click", function (e) {
   var s = e.target.closest("[data-star]");
   if (s) { toggleFav(s.dataset.star); return; }
-  var f = e.target.closest("[data-fill]");
-  if (f) { if (histOK) history.back(); else back(); var i = cmdInput(); i.value = f.dataset.fill + (/(box|chef|lsstats|scroll|summitcalc|wspoints|ventures|config|summit|summitreward)$/.test(f.dataset.fill) ? " " : ""); i.dispatchEvent(new Event("input")); setTimeout(function () { i.focus(); }, 260); }
+  var f = e.target.closest("[data-cmdpick]");
+  if (!f) return;
+  e.stopPropagation();
+  var t = f.dataset.cmdpick;
+  if (NEEDS_ARGS.test(t)) {
+    var i = cmdInput(); i.value = t + " "; i.dispatchEvent(new Event("input")); i.focus();
+    return;
+  }
+  askSend(t);
 });
 
 // ------------------------------------------------------------------------------------------
 // Emotes: one tap sends it. Plays on your current in-game target if you have one.
 // ------------------------------------------------------------------------------------------
 var EMOTE_MODES = [["", "Text + motion"], ["motion", "Motion only"], ["text", "Text only"]];
+var EMOTE_GROUPS = [
+  ["GREETINGS", "#7fb2ff", ["wave", "bow", "salute", "welcome", "farewell", "goodbye", "kneel", "praise"]],
+  ["HAPPY", "#7ee08f", ["cheer", "clap", "joy", "hurray", "laugh", "smile", "grin", "jump", "blush", "amazed"]],
+  ["ANSWERS", "#e8c35c", ["yes", "nod", "no", "think", "doubt", "huh", "point", "poke", "stare"]],
+  ["UPSET", "#ff9a5c", ["sigh", "sulk", "cry", "upset", "angry", "fume", "disgusted", "shocked", "surprised", "panic", "stagger", "slap"]],
+  ["CHILL", "#b9a6ff", ["sit", "doze", "comfort", "psych", "toss", "bell", "muted"]]
+];
+var JOB_ROLE = {WAR: "#ff8a7a", MNK: "#ff8a7a", THF: "#ff8a7a", DRK: "#ff8a7a", BST: "#ff8a7a", RNG: "#ff8a7a", SAM: "#ff8a7a", DRG: "#ff8a7a", BLU: "#ff8a7a", PUP: "#ff8a7a", DNC: "#ff8a7a",
+  PLD: "#7fb2ff", NIN: "#7fb2ff", RUN: "#7fb2ff", WHM: "#7ee08f", SCH: "#7ee08f", BLM: "#b9a6ff", RDM: "#b9a6ff", SMN: "#b9a6ff", GEO: "#b9a6ff", BRD: "#e8c35c", COR: "#e8c35c"};
+function emLabel(cmd) {
+  var c = cmd.replace(/^\//, "");
+  if (/^sitchair \d$/.test(c)) return "Chair " + c.slice(-1);
+  if (c === "sitchair") return "Chair";
+  if (/^dance\d$/.test(c)) return "Dance " + c.slice(-1);
+  if (c.indexOf("jobemote ") === 0) return c.slice(9).toUpperCase();
+  return c.charAt(0).toUpperCase() + c.slice(1);
+}
 function renderEmotes() {
   $("emseg").innerHTML = '<div class="seg">' + EMOTE_MODES.map(function (m) { return '<button data-emode="' + m[0] + '"' + (S.emoteMode === m[0] ? ' class="on"' : "") + ">" + m[1] + "</button>"; }).join("") + "</div>";
   var list = commands.emotes || [];
-  var main = list.filter(function (e) { return e !== "sitchair"; });
-  function chip(cmd, label, cls) { return '<button data-emote="' + esc(cmd) + '"' + (cls ? ' class="' + cls + '"' : "") + ">" + esc(label) + "</button>"; }
+  function tile(cmd, cc) { return '<button data-emote="' + esc(cmd) + '" style="--cc:' + cc + '">' + esc(emLabel(cmd)) + "</button>"; }
+  function head(t, cc) { return '<div class="emhead" style="--cc:' + cc + '"><i></i>' + t + "</div>"; }
+  var used = {}, h = "";
   var recent = (S.recentEmotes || []).filter(function (r) { return r; });
-  var h = "";
-  if (recent.length) h += '<div class="sect">RECENT</div><div class="emgrid">' + recent.map(function (r) { return chip(r, r.replace(/^\//, ""), r.indexOf("/jobemote") === 0 ? "job" : ""); }).join("") + "</div>";
-  h += '<div class="sect">EMOTES</div><div class="emgrid">' + main.map(function (e) { return chip("/" + e, e); }).join("") + "</div>";
-  if (list.indexOf("sitchair") >= 0) h += '<div class="sect">SIT IN A CHAIR</div><div class="emgrid">' + chip("/sitchair", "sitchair") + [1, 2, 3, 4].map(function (n) { return chip("/sitchair " + n, "chair " + n); }).join("") + "</div>";
-  if ((commands.jobs || []).length) h += '<div class="sect">JOB EMOTES</div><div class="emgrid">' + commands.jobs.map(function (j) { return chip("/jobemote " + j.toLowerCase(), j, "job"); }).join("") + '</div><div class="sfoot" style="padding:0 0 8px">Job emotes unlock with each job\'s emote quest.</div>';
-  h += '<div class="sfoot">Emotes play on your current in-game target if you have one. Stock FFXI emotes; tell me if CatsEye is missing or adds any.</div>';
+  if (recent.length) h += head("RECENT", "var(--gold)") + '<div class="emrecent">' + recent.map(function (r) { return '<button data-emote="' + esc(r) + '">' + esc(emLabel(r)) + "</button>"; }).join("") + "</div>";
+  EMOTE_GROUPS.forEach(function (g) {
+    var have = g[2].filter(function (e) { return list.indexOf(e) >= 0; });
+    have.forEach(function (e) { used[e] = 1; });
+    if (have.length) h += head(g[0], g[1]) + '<div class="emtiles">' + have.map(function (e) { return tile("/" + e, g[1]); }).join("") + "</div>";
+  });
+  var dances = list.filter(function (e) { return /^dance\d?$/.test(e); });
+  dances.forEach(function (e) { used[e] = 1; });
+  if (dances.length) h += head("DANCE", "#ff8fd0") + '<div class="emtiles">' + dances.map(function (e) { return tile("/" + e, "#ff8fd0"); }).join("") + "</div>";
+  if (list.indexOf("sitchair") >= 0) { used.sitchair = 1; h += head("SIT IN A CHAIR", "#4fd6c8") + '<div class="emtiles">' + ["/sitchair", "/sitchair 1", "/sitchair 2", "/sitchair 3", "/sitchair 4"].map(function (c) { return tile(c, "#4fd6c8"); }).join("") + "</div>"; }
+  var rest = list.filter(function (e) { return !used[e]; });
+  if (rest.length) h += head("MORE", "var(--mute)") + '<div class="emtiles">' + rest.map(function (e) { return tile("/" + e, "var(--mute)"); }).join("") + "</div>";
+  if ((commands.jobs || []).length) h += head("JOB EMOTES", "var(--emote)") + '<div class="emtiles jobs">' + commands.jobs.map(function (j) { return tile("/jobemote " + j.toLowerCase(), JOB_ROLE[j] || "var(--emote)"); }).join("") + '</div><div class="sfoot" style="padding:8px 2px 0">Job emotes unlock with each job\'s emote quest.</div>';
+  h += '<div class="sfoot" style="padding:14px 2px 6px">Emotes play on your current in-game target if you have one.</div>';
   $("emotes").innerHTML = list.length ? h : '<div class="empty">Loading emotes&hellip;</div>';
 }
 $("emseg").addEventListener("click", function (e) {
@@ -1092,9 +1602,10 @@ $("emotes").addEventListener("click", function (e) {
   api("/api/command", {text: line}).then(function (j) {
     sending = false;
     if (!j.ok) { toast(j.error || "Could not send that emote."); return; }
-    toast("Sent " + line);
+    b.classList.add("sent"); var was = b.textContent; b.textContent = "Sent \u2713";
     var r = (S.recentEmotes || []).filter(function (x) { return x !== base; });
-    r.unshift(base); S.recentEmotes = r.slice(0, 8); save(); renderEmotes();
+    r.unshift(base); S.recentEmotes = r.slice(0, 8); save();
+    setTimeout(function () { b.textContent = was; renderEmotes(); }, 900);
   }).catch(function () { sending = false; toast("The bridge didn't answer."); });
 });
 
@@ -1107,7 +1618,7 @@ function tellPeers() {
     if (!name) return;
     var k = name.toLowerCase();
     var p = map[k] || (map[k] = {name: name, last: null, unread: 0, saved: false, failed: false});
-    if (!p.last || m.ts >= p.last.ts) { p.last = m; p.failed = isPend && (m.state === "failed"); }
+    if (!p.last || m.ts >= p.last.ts) { p.last = m; p.failed = (isPend && m.state === "failed") || !!m.failed; }
     if (m.saved) p.saved = true;
     if (!isPend && m.dir === "in" && m.ts > (S.read[k] || 0)) p.unread++;
   }
@@ -1117,11 +1628,12 @@ function tellPeers() {
 }
 function renderTells() {
   var peers = tellPeers();
-  $("ban-tells").innerHTML = status.save_tells ?
-    '<div class="banner info">Saving is on for tells. The last 50 lines per person are kept on the bridge. <button class="linkbtn" data-go="settings">Change in Settings</button></div>' :
-    '<div class="banner info">Tells are kept until the bridge stops. <button class="linkbtn" data-go="settings">Turn on saving</button></div>';
+  var tb = status.save_tells ?
+    '<span class="bt">Saving tells is on.<button class="linkbtn" data-go="settings">Settings</button></span>' :
+    '<span class="bt">Tells clear when the bridge stops.<button class="linkbtn" data-go="settings">Save them</button></span>';
+  $("ban-tells").innerHTML = S.tellsBan ? "" : '<div class="banner info dis">' + tb + '<button class="ax" data-bandis="tells" aria-label="Dismiss">&times;</button></div>';
   $("tells-list").innerHTML = peers.length ? peers.map(function (p) {
-    var m = p.last, prev = m.state === "failed" ? (m.reason || "Not delivered") : ((m.dir === "out" ? "&gt;&gt; " : "") + esc(m.body));
+    var m = p.last, prev = (m.state === "failed" || m.failed) ? esc(m.reason || "Not delivered") : ((m.dir === "out" ? "&gt;&gt; " : "") + esc(m.body));
     return '<button class="lrow" data-thread="' + esc(p.name) + '"><div class="av">' + esc(p.name.charAt(0).toUpperCase()) + '</div><div class="lmain"><div class="ltop"><b>' + esc(p.name) + (p.saved ? '<span class="tag">SAVED</span>' : "") + "</b><span>" + hhmm(m.ts) + '</span></div><div class="lsub' + (p.failed ? " bad" : "") + '">' + prev + "</div></div>" + (p.unread ? '<span class="cnt">' + p.unread + "</span>" : "") + "</button>";
   }).join("") : '<div class="empty">No tells yet.</div>';
   var total = peers.reduce(function (n, p) { return n + p.unread; }, 0);
@@ -1144,40 +1656,111 @@ function openThread(peer) {
 // ------------------------------------------------------------------------------------------
 // Ventures and notices
 // ------------------------------------------------------------------------------------------
-function renderVent() {
-  var v = msgs.filter(function (m) { return m.ch === "venture"; });
-  var alerts = v.filter(function (m) { return m.zones; }).reverse();
-  var other = v.filter(function (m) { return !m.zones; });
-  var statusLine = other.length ? other[other.length - 1] : null;
-  var html = "";
-  if (statusLine) html += '<div class="vstatus">' + ico("vent", 18) + "<span>" + esc(statusLine.body) + "</span></div>";
-  if (alerts.length) {
-    var a = alerts[0];
-    html += '<div class="sect">LATEST ALERT</div><div class="vcard"><div class="row" style="justify-content:space-between"><div class="row" style="gap:8px">' + ico("vent", 20) + '<b style="font-size:16px">Venture alert</b></div><span style="font-size:13px;color:var(--mute)">' + hhmm(a.ts) + "</span></div>" +
-      (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") +
-      a.zones.map(function (z) { return '<div class="vzone"><div class="vgrid">' + esc(z.grid) + '</div><div style="min-width:0"><div style="font-size:16px;font-weight:700">' + esc(z.zone) + '</div><div style="font-size:13px;color:var(--mute)">Map square ' + esc(z.grid) + "</div></div></div>"; }).join("") + "</div>";
-    if (alerts.length > 1) {
-      html += '<div class="sect">EARLIER</div>' + alerts.slice(1, 12).map(function (m) {
-        return '<div class="vold"><div class="h"><span>Venture alert</span><span>' + hhmm(m.ts) + '</span></div><div style="font-size:15px">' + m.zones.map(function (z) { return esc(z.zone) + " (" + esc(z.grid) + ")"; }).join(" / ") + "</div></div>";
-      }).join("");
+function vzones(zs) {
+  return zs.map(function (z) { return '<div class="vzone"><div class="vgrid">' + esc(z.grid) + '</div><div style="min-width:0"><div style="font-size:16px;font-weight:700">' + esc(z.zone) + '</div><div style="font-size:13px;color:var(--mute)">Map square ' + esc(z.grid) + "</div></div></div>"; }).join("");
+}
+// 10-minute countdown on a VNM that has reached 100%. Ticks every second without redrawing the page.
+function cdText(end) {
+  var left = Math.max(0, end - nowSec());
+  return Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
+}
+function cdHtml(end) { return '<span class="cd" data-end="' + end + '">' + cdText(end) + "</span>"; }
+function tickCd() {
+  var spans = document.querySelectorAll(".cd[data-end]"), done = false;
+  spans.forEach(function (e) {
+    var end = +e.dataset.end;
+    e.textContent = cdText(end);
+    if (end <= nowSec()) done = true;
+  });
+  if (done) schedule();
+}
+function renderAlerts() {
+  // Ventures: only Populox's VNM alert ("Hmm... something's stirring" plus the zones).
+  var v = msgs.filter(function (m) { return m.ch === "venture" && m.name === "Populox"; });
+  var hid = {};
+  (S.hidden || []).forEach(function (k) { hid[k] = 1; });
+  var DONE = nowSec() - 600;      // a venture is over about 10 minutes after its alert, so old ones fade
+  var pop = v.filter(function (m) { return m.zones; }).reverse();
+  // Every alert card has the same head: icon and a bold label on the left, the time on the right.
+  function card(icon, color, label, ts, body, x) {
+    return '<div class="acard" style="--c:' + color + '"><div class="ah"><span class="al">' + ico(icon, 15) + "<b>" + label + "</b></span>" +
+      '<span class="vt">' + (ts ? hhmm(ts) : "") + "</span>" + (x ? '<button class="ax" data-dismiss="' + esc(x) + '" aria-label="Dismiss">&times;</button>' : "") + "</div>" + body + "</div>";
+  }
+  function row(main, ts, right) {
+    return '<div class="vrow"><span class="vm">' + main + "</span>" + (right || "") + (ts ? '<span class="vt">' + hhmm(ts) + "</span>" : "") + "</div>";
+  }
+  function zl(zones, sep) { return zones.map(function (z) { return esc(z.zone) + ' <span class="vt">(' + esc(z.grid) + ")</span>"; }).join(sep); }
+  var h = "";
+  if (pop.length && !hid["v|" + noticeKey(pop[0])]) {
+    var a = pop[0], ak = "v|" + noticeKey(a);
+    if (a.ts < DONE) {
+      h += card("vent", "var(--mute)", "VNM &middot; Expired", a.ts, '<div class="abody">' + zl(a.zones, " / ") + "</div>", ak);
+    } else {
+      h += '<div class="vcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + "<b>VNM &middot; Active</b></span>" + cdHtml(a.ts + 600) + '<span class="vt">' + hhmm(a.ts) + "</span>" +
+        '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' +
+        (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") + vzones(a.zones) + "</div>";
     }
   }
-  var recent = other.slice(-8).reverse();
-  if (recent.length > 1) html += '<div class="sect">OTHER VENTURE LINES</div>' + recent.map(function (m) { return '<div class="vold"><div class="h"><span>' + esc(m.name || "Venture") + "</span><span>" + hhmm(m.ts) + '</span></div><div style="font-size:14.5px">' + esc(m.body) + "</div></div>"; }).join("");
-  $("vent").innerHTML = html || '<div class="empty">No venture alerts yet. Populox alerts show up here as cards.</div>';
-  var newest = v.length ? v[v.length - 1].ts : 0;
-  var bd = $("bdg-vent");
-  bd.hidden = !(newest > S.seenVent && curTab !== "vent"); bd.textContent = "!";
+  // Safety net: a Populox line the page can't read (say CatsEye rewords it) still shows as plain
+  // text instead of vanishing. Kept for 30 minutes.
+  var odd = v.filter(function (m) {
+    if (m.zones) return false;
+    if (pop.some(function (p) { return p.teaser === m.body && Math.abs(p.ts - m.ts) < 10; })) return false;
+    return m.ts >= nowSec() - 1800 && !hid["vo|" + m.ts + "|" + (m.body || "").slice(0, 24)];
+  }).slice(-3).reverse();
+  odd.forEach(function (m) {
+    h += card("vent", "var(--vent)", "Populox", m.ts, '<div class="abody">' + fmt(m.body) + "</div>", "vo|" + m.ts + "|" + (m.body || "").slice(0, 24));
+  });
+  $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
+
+  var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
+  $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add your name in Settings.</div>' :
+    (men.length ? men.map(function (m) {
+      return card(CH[m.ch].icon, "var(--" + m.ch + ", var(--soft))", esc(m.name || CH[m.ch].full), m.ts, '<div class="abody">' + bodyHtml(m) + "</div>");
+    }).join("") : '<div class="empty sm">Nothing yet.</div>'));
+
+  var baz = S.bazaar ? msgs.filter(function (m) { return m.ch === "bazaar"; }).slice(-20).reverse() : [];
+  $("bazaar").innerHTML = S.bazaar ? '<div class="sect">BAZAAR</div>' + (baz.length ?
+    card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), m.ts); }).join("")) :
+    '<div class="empty sm">No visitors yet.</div>') : "";
+
+  var n = msgs.filter(function (m) { return (m.ch === "server" || m.ch === "system") && !hid[noticeKey(m)]; }).reverse().slice(0, 60);
+  $("notices").innerHTML = '<div class="shead"><div class="sect">NOTICES</div>' + (n.length > 1 ? '<button class="linkbtn" data-dismiss="*">Clear all</button>' : "") + "</div>" +
+    (n.length ? n.map(function (m) {
+      return card("bell", "var(--soft)", m.ch === "server" ? "Server" : "System", m.ts, '<div class="abody" style="white-space:pre-wrap">' + fmt(m.body) + "</div>", noticeKey(m));
+    }).join("") : '<div class="empty sm">Server messages show here.</div>');
+
+  var since = S.seenAlerts || 0, unseenMen = 0, other = false;
+  msgs.forEach(function (m) {
+    if (m.ts <= since) return;
+    if (m._men) unseenMen++;
+    else if (m.ch === "venture" || m.ch === "server" || (S.bazaar && m.ch === "bazaar")) other = true;
+  });
+  var bd = $("bdg-alerts");
+  bd.hidden = curTab === "alerts" || !(unseenMen || other);
+  bd.textContent = unseenMen ? String(Math.min(unseenMen, 99)) : "!";
+  if (curTab === "alerts") S.seenAlerts = nowSec();
 }
-function renderNotices() {
-  var n = msgs.filter(function (m) { return m.ch === "server" || m.ch === "system"; }).reverse().slice(0, 100);
-  $("notices").innerHTML = n.length ? n.map(function (m) {
-    return '<div class="vold"><div class="h"><span>' + (m.ch === "server" ? "Server" : "System") + "</span><span>" + dayLabel(m.ts) + '</span></div><div style="font-size:15px;white-space:pre-wrap">' + fmt(m.body) + "</div></div>";
-  }).join("") : '<div class="empty">Server broadcasts, maintenance warnings and the LS message of the day show here.</div>';
-  var newest = n.length ? n[0].ts : 0;
-  var bd = $("bdg-notices");
-  bd.hidden = !(newest > S.seenNotice && curTab !== "notices"); bd.textContent = "!";
+function noticeKey(m) { return String(m.id || (m.ts + ":" + (m.body || "").slice(0, 40))); }
+function renderMotd() {
+  function strip(chs) {
+    return chs.filter(function (c) { return lsMotd[c]; }).map(function (c) {
+      return '<div class="motd' + (S.motdMin ? " min" : "") + '" style="--c:' + CH[c].c + '"><b>' + CH[c].label + '</b><span>' + fmt(lsMotd[c]) + '</span><button class="x" data-motd aria-label="' + (S.motdMin ? "Show all" : "Shrink") + '">' + (S.motdMin ? "&#9662;" : "&#9652;") + "</button></div>";
+    }).join("");
+  }
+  var v = curView();
+  $("motd-chat").innerHTML = curTab === "chat" ? strip(["ls1", "ls2"].filter(function (c) { return shows(c, v); })) : "";
+  $("motd-focus").innerHTML = stack[stack.length - 1] === "focus" && (focus.ch === "ls1" || focus.ch === "ls2") ? strip([focus.ch]) : "";
 }
+document.addEventListener("click", function (e) {
+  if (e.target.closest("[data-motd]")) { S.motdMin = !S.motdMin; save(); render(); }
+  var dz = e.target.closest("[data-dismiss]");
+  if (dz) {
+    var keys = dz.dataset.dismiss === "*" ? msgs.filter(function (m) { return m.ch === "server" || m.ch === "system"; }).map(noticeKey) : dz.dataset.dismiss.split(";;");
+    S.hidden = (S.hidden || []).concat(keys).slice(-300);   // only alert cards can be dismissed; nothing is deleted from chat
+    save(); render();
+  }
+});
 
 // ------------------------------------------------------------------------------------------
 // Settings
@@ -1187,29 +1770,50 @@ function segs(key, opts, cur) { return '<div class="segs">' + opts.map(function 
 function srow(title, sub, right) { return '<div class="srow"><div class="m"><div>' + title + "</div>" + (sub ? "<small>" + sub + "</small>" : "") + "</div>" + right + "</div>"; }
 var showQr = false;
 function renderSettings() {
+  var ae = document.activeElement;
+  if (ae && ae.id === "watchin") return;          // don't redraw under the reader's thumb
   var link = location.origin + "/?t=" + encodeURIComponent(TOKEN);
   var h = '<div class="sect">CONNECTION</div>' +
-    srow("Bridge", connected ? "Connected" + (status.version ? " &middot; v" + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
+    srow("Bridge", connected ? "Connected" + (status.version ? " &middot; " + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
     (showQr ? '<div id="qrbox"></div><div class="sfoot" style="text-align:center;word-break:break-all">' + esc(link) + "</div>" : "") +
-    srow("Start with the game", "Set in the Decky panel on the Deck, or <span class=\"code\">/pchat config</span> in game.", '<span class="fixed">On the bridge</span>') +
+    srow("Start with the game", "Turn on in the <span class=\"code\">/pchat</span> window.", "") +
+    srow("New phone link", "In the <span class=\"code\">/pchat</span> window, or type <span class=\"code\">/pchat newlink</span>.", "") +
     '<div class="sect">CHANNELS</div>' +
-    CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Mostly trade spam. Read only, no sending." : (c === "shout" ? "Local area chat" : (c === "say" ? "Nearby" : "")), tog(S.master[c], "m." + c)); }).join("") +
+    CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Trade spam. Read only." : (c === "shout" ? "Local area" : (c === "say" ? "Nearby" : (c === "finder" ? "Read only." : ""))), tog(S.master[c], "m." + c)); }).join("") +
     '<div class="sect">CALLS</div>' +
-    srow("When a call comes in", "Roll calls can be noisy", segs("calls", [["off", "Off"], ["highlight", "Highlight"], ["badge", "Badge"]], S.calls)) +
-    srow("Group call bursts", "Fold 1, 2, 3... into one line", tog(S.groupCalls, "groupCalls")) +
-    '<div class="sect">COMMANDS</div>' +
-    srow("Allowed commands", "CatsEye server ! commands and stock emotes only", '<span class="fixed">Fixed</span>') +
-    srow("Automation", "None. Every send is one tap.", '<span class="fixed">Never</span>') +
+    srow("When a call comes in", "", segs("calls", [["off", "Off"], ["highlight", "Highlight"], ["badge", "Badge"]], S.calls)) +
+    '<div class="sect">ALERTS</div>' +
+    '<div class="srow col"><div class="m"><div>Your name</div><small>Your name or nicknames, up to 3, letters only. Marked in chat and listed in Alerts. Separate with commas.</small></div>' +
+    '<input class="field" id="watchin" placeholder="Charta, Char" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(S.watch || "") + '">' +
+    '<small id="watchnote" style="color:var(--mute)">' + (watchWords.length ? "Watching: " + esc(watchWords.join(", ")) : "Not watching anything yet.") + "</small></div>" +
+    srow("Bazaar visits", "Listed in Alerts when someone browses your bazaar.", tog(S.bazaar, "bazaar")) +
+    '<div class="sect">TYPING</div>' +
+    srow("Capitalize first letter", "Off by default, since most people type lowercase in game.", tog(S.caps, "caps")) +
+    srow("Autocorrect", "Off by default, so game words like Jeuno or Windurst aren't changed.", tog(S.autocorrect, "autocorrect")) +
     '<div class="sect">PRIVACY</div>' +
-    srow("Remember tells", "Off by default. Last 50 lines per person, kept on the bridge. Other channels are never saved.", tog(status.save_tells, "save_tells")) +
+    srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
-    '<div class="sect">COLORS</div>' +
-    CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
-    srow("Reset colors", "Back to the defaults", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
-    '<div class="sect">DISPLAY</div>' +
-    srow("Density", "Comfortable shows names above lines", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
+    '<div class="sect">APPEARANCE</div>' +
+    srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"]], S.skin || "midnight")) +
+    srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Classic"]], S.font || "readable")) +
+    srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
-    '<div class="foot">phonechatXI &middot; bridge ' + esc(status.version || "?") + "</div>";
+    srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +
+    srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
+    '<div class="subsect">Channel colors</div>' +
+    CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
+    srow("Reset colors", "", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
+    '<div class="sect">BACKUP</div>' +
+    srow("Your settings", "Also saved on the bridge, so a new shortcut or phone picks them up.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
+    '<input type="file" id="importin" accept="application/json,.json" hidden>' +
+    '<div class="sect">ABOUT</div>' +
+    srow("Version", esc(status.version || "Unknown") + " &middot; by Charta", "") +
+    srow("Staff review", "1.0.0 reviewed by CatsEyeXI staff: T1, Sanctioned. Later versions are listed in the changelog.", "") +
+    srow("What it sends", "Only what you tap: chat, emotes and CatsEye ! commands, one line per tap. Never game actions, never on its own.", "") +
+    srow("On iPhone", "No tell notifications. It pauses when the phone locks and catches up when you come back.", "") +
+    srow("Your data", "Stays on your home network. Only item links leave it, to BG-Wiki.", "") +
+    srow("Something wrong?", "Copy details for a bug report. Your phone link isn't included.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
+    '<div style="height:28px"></div>';
   $("settings").innerHTML = h;
   if (showQr && window.qrcode) {
     try { var q = qrcode(0, "M"); q.addData(link); q.make(); $("qrbox").innerHTML = q.createSvgTag({cellSize: 5, margin: 2, scalable: true}); } catch (e) {}
@@ -1219,7 +1823,17 @@ function loadQr(cb) {
   if (window.qrcode) { cb(); return; }
   var s = document.createElement("script"); s.src = "/qr.js"; s.onload = cb; document.head.appendChild(s);
 }
+$("settings").addEventListener("change", function (e) {
+  if (e.target.id === "importin") { if (e.target.files[0]) importPrefs(e.target.files[0]); return; }
+  if (e.target.id !== "watchin") return;
+  S.watch = e.target.value; save(); setWatch(); e.target.blur(); render();
+});
+$("settings").addEventListener("keydown", function (e) {
+  if (e.target.id === "watchin" && e.key === "Enter") e.target.blur();
+});
 $("settings").addEventListener("input", function (e) {
+  // Save the watch words as you type: iOS doesn't fire "change" when you leave the box by tapping Back.
+  if (e.target.id === "watchin") { S.watch = e.target.value; save(); setWatch(); schedule(); return; }
   var c = e.target.closest("[data-color]");
   if (!c) return;
   S.colors = S.colors || {};
@@ -1231,7 +1845,9 @@ $("settings").addEventListener("click", function (e) {
   if (t) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
-    else if (k === "groupCalls") { S.groupCalls = !S.groupCalls; }
+    else if (k === "bazaar") { S.bazaar = !S.bazaar; }
+    else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
+    else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
     else if (k === "save_tells") {
       api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); });
       return;
@@ -1239,10 +1855,20 @@ $("settings").addEventListener("click", function (e) {
     save(); render(); return;
   }
   var s = e.target.closest("[data-seg]");
-  if (s) { S[s.dataset.seg] = s.dataset.val; save(); applyLook(); seenCount = {}; render(); return; }
+  if (s) {
+    var key = s.dataset.seg, val = s.dataset.val;
+    if (key === "scrollback") {
+      S.scrollback = +val;
+      api("/api/settings", {scrollback: +val}).then(function (j) { if (!j.ok) toast(j.error || "Could not change that."); });
+    } else S[key] = val;
+    save(); applyLook(); seenCount = {}; render(); return;
+  }
   var a = e.target.closest("[data-act]");
   if (!a) return;
   if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
+  if (a.dataset.act === "export") { exportPrefs(); return; }
+  if (a.dataset.act === "debug") { showDebug(); return; }
+  if (a.dataset.act === "import") { $("importin").click(); return; }
   if (a.dataset.act === "qr") { showQr = !showQr; loadQr(render); render(); }
   if (a.dataset.act === "clear") {
     openSheet('<div class="grab"></div><div class="shead"><div class="sect">CLEAR SAVED TELLS?</div></div><div class="sfoot">This deletes the saved tell files on the bridge. Tells from this session stay until the bridge stops.</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok" style="background:var(--bad)">Clear</button></div>', function (e2) {
@@ -1258,23 +1884,41 @@ $("settings").addEventListener("click", function (e) {
 // Navigation, sheets, banners
 // ------------------------------------------------------------------------------------------
 var curTab = "chat", stack = [], histOK = true;
+function showTab(name, cseg) {
+  var again = name === curTab && !stack.length && (name !== "cmds" || !cseg || cseg === S.cseg);
+  while (stack.length) { $("scr-" + stack.pop()).classList.remove("open"); }
+  curTab = name;
+  if (cseg) S.cseg = cseg;
+  // Emotes and Server are two buttons on one screen, so match the panel too.
+  document.querySelectorAll("#tabbar button").forEach(function (x) {
+    x.classList.toggle("on", x.dataset.tab === name && (!x.dataset.cs || x.dataset.cs === (S.cseg === "server" ? "server" : "emote")));
+  });
+  document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.id === "tab-" + curTab); });
+  if (curTab === "alerts") S.seenAlerts = nowSec();
+  if (curTab === "cmds") showCseg();
+  if (again) {   // tap the tab you're on: jump to the latest
+    var pane = name === "chat" ? $("pane-chat") : (name === "cmds" ? $("pane-cmd") : null);
+    if (pane) { pane.scrollTop = pane.scrollHeight; seenCount[pane.id] = undefined; }
+    var list = name === "tells" ? $("tells-list") : (name === "alerts" ? $("alerts") : (name === "cmds" ? $("emotes") : null));
+    if (list) list.scrollTop = 0;
+  }
+  save(); render();
+}
 document.getElementById("tabbar").addEventListener("click", function (e) {
   var b = e.target.closest("[data-tab]");
-  if (!b) return;
-  while (stack.length) { $("scr-" + stack.pop()).classList.remove("open"); }
-  curTab = b.dataset.tab;
-  document.querySelectorAll("#tabbar button").forEach(function (x) { x.classList.toggle("on", x === b); });
-  document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("on", t.id === "tab-" + curTab); });
-  if (curTab === "vent") S.seenVent = nowSec();
-  if (curTab === "notices") S.seenNotice = nowSec();
-  save(); render();
+  if (b) showTab(b.dataset.tab, b.dataset.cs);
 });
+function showCseg() {
+  var em = S.cseg !== "server";
+  $("cp-emote").hidden = !em;
+  $("cp-server").hidden = em;
+  $("cmdtitle").textContent = em ? "Emotes" : "Server";
+  if (em) renderEmotes(); else { renderCmd(); renderModeSeg(); renderCmdList(); }
+}
 function go(name) {
   var el = $("scr-" + name);
   if (!el) return;
-  if (name === "cmdlist") { $("cmdsearch").value = ""; renderCmdList(); }
   if (name === "settings") refreshStatus();
-  if (name === "emote") renderEmotes();
   stack.push(name);
   el.style.zIndex = (el.classList.contains("tabs") ? 5 : 20) + stack.length;
   el.classList.add("open");
@@ -1290,22 +1934,94 @@ function back() {
 }
 window.addEventListener("popstate", function () { if ($("sheet").classList.contains("on")) { closeSheet(); return; } if (stack.length) back(); });
 document.addEventListener("click", function (e) {
+  if (e.target.closest("[data-tipok]")) { S.tipSeen = true; save(); render(); return; }
+  if (e.target.closest("[data-bandis]")) { S.tellsBan = true; save(); render(); return; }
   var g = e.target.closest("[data-go]");
   if (g) { go(g.dataset.go); return; }
   if (e.target.closest("[data-back]")) { if (stack.length) { if (histOK) history.back(); else back(); } }
+  if (e.target.closest("a")) return;
+  var fc = e.target.closest("[data-focus]");
+  if (fc && fc.closest(".pane")) { openFocus(fc.dataset.focus); return; }
   var w = e.target.closest("[data-who]");
   if (w && w.closest(".pane")) {
-    var ch = w.dataset.ch;
-    if (ch === "tell" && w.dataset.who) { openThread(w.dataset.who); return; }
-    if (CH[ch]) { focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; go("focus"); }
+    var ch = w.dataset.ch, who = w.dataset.who;
+    if (ch === "tell" && who) { openThread(who); return; }
+    if (who && who.toLowerCase() !== myName().toLowerCase()) {
+      if (w.closest("#pane-chat")) replyTo({ch: "tell", peer: who}, w.closest("[data-reply]"), true);
+      else openThread(who);
+      return;
+    }
+    if (CH[ch]) openFocus(ch);
+    return;
+  }
+  var r = e.target.closest("[data-reply]");
+  if (r && r.closest("#pane-chat")) {
+    var sel = window.getSelection && window.getSelection();
+    if (sel && String(sel).length) return;
+    var rc = r.dataset.reply;
+    if (rc === "tell") { if (r.dataset.peer) openThread(r.dataset.peer); return; }
+    if (SENDABLE.indexOf(rc) >= 0) replyTo({ch: rc, peer: ""}, r, false);
   }
 });
+function openFocus(ch) {
+  if (!CH[ch]) return;
+  focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; go("focus");
+}
+function replyTo(t, lineEl, typeNow) {
+  var same = S.target && S.target.ch === t.ch && (S.target.peer || "") === (t.peer || "");
+  S.target = t; save(); updateComposers();
+  if (lineEl) { lineEl.classList.remove("picked"); void lineEl.offsetWidth; lineEl.classList.add("picked"); }
+  var comp = document.querySelector('[data-comp="chat"]');
+  if (comp && !same) {
+    var chip = comp.querySelector(".tgt");
+    if (chip) { chip.classList.remove("bump"); void chip.offsetWidth; chip.classList.add("bump"); }
+  }
+  if (typeNow && comp) comp.querySelector("input").focus();
+}
 $("focus-filters").addEventListener("click", function (e) {
   var b = e.target.closest("[data-f]");
   if (!b) return;
   focus.filter = b.dataset.f; seenCount["pane-focus"] = undefined; render();
 });
 var sheetHandler = null;
+// Debug info for bug reports. Leaves out the link, the token, watch words and all chat text.
+function debugText() {
+  var last = msgs.length ? msgs[msgs.length - 1].ts : 0;
+  var lines = [
+    "phonechatXI debug info",
+    "bridge: " + (status.version || "unknown") + (connected ? ", connected" : ", not connected") + (linkDead ? ", link replaced" : ""),
+    "character seen: " + (status.char ? "yes" : "no"),
+    "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
+    "settings: skin " + (S.skin || "midnight") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+      ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
+    "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
+    "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
+    "browser: " + navigator.userAgent,
+    "recent problems:" + (errLog.length ? "" : " none")
+  ];
+  return lines.concat(errLog.map(function (x) { return "  " + x; })).join("\n");
+}
+function showDebug() {
+  var text = debugText();
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">DEBUG INFO</div></div>' +
+    '<div class="sfoot" style="padding-top:0">Paste this into your bug report. It doesn\'t include your phone link or any chat.</div>' +
+    '<textarea id="dbgtxt" class="sinput" readonly style="height:240px;font:16px/1.35 var(--mono);white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto">' + esc(text) + '</textarea>' +
+    '<div class="sbtns"><button class="sec" data-sb="x">Close</button><button class="pri" data-sb="copy">Copy</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    if (b.dataset.sb === "x") { closeSheet(); return; }
+    var ta = $("dbgtxt");
+    function fallback() {
+      ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+      var ok = false;
+      try { ok = document.execCommand("copy"); } catch (err) {}
+      toast(ok ? "Copied." : "Select the text and copy it.");
+    }
+    // The clipboard API needs https, which a home-network page doesn't have, so fall back.
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(ta.value).then(function () { toast("Copied."); }, fallback);
+    else fallback();
+  });
+}
 function openSheet(html, onClick) {
   $("sheet").innerHTML = html;
   sheetHandler = onClick;
@@ -1320,15 +2036,30 @@ function closeSheet() {
 $("sheet").addEventListener("click", function (e) { if (sheetHandler) sheetHandler(e); });
 $("scrim").addEventListener("click", closeSheet);
 
+// The bridge window's "no response from the game" notice, shown on the phone too.
+var gameQuiet = 0, gameTimer = null;
+function gameBanner() {
+  var left = Math.max(0, Math.round(gameQuiet - Date.now() / 1000));
+  if (!gameTimer) gameTimer = setTimeout(function () { gameTimer = null; if (gameQuiet) render(); }, 5000);
+  return '<div class="banner bad"><b>No response from the game</b>The game may have closed or frozen, or the addon was unloaded. ' +
+    (left > 0 ? 'The bridge closes by itself unless the game comes back (<span class="cdown">' + left + ' seconds</span>).' : 'The bridge is closing.') + '</div>';
+}
 function banner() {
+  if (linkDead) {
+    return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat</span> in game).</div>';
+  }
   if (!connected && everConnected && Date.now() - offlineSince > 3000) {
-    return '<div class="banner bad"><b>Bridge is off or out of reach</b>Messages are paused. Start it from the Decky panel, or type <span class="code">/pchat start</span> in game on Windows. This page reconnects by itself.</div>';
+    return '<div class="banner bad"><b>Bridge offline. Reconnecting...</b>Start it with <span class="code">/pchat start</span>. If your Deck or PC got a new address, scan the QR again.</div>';
   }
   if (!connected && !everConnected && Date.now() - offlineSince > 4000) {
-    return '<div class="banner bad"><b>Can\'t reach the bridge</b>Check that it is running and that your phone is on the same Wi-Fi.</div>';
+    return '<div class="banner bad"><b>Can\'t reach the bridge</b>Same Wi-Fi as the Deck or PC? Is the bridge on?</div>';
   }
+  if (connected && gameQuiet) return gameBanner();
   if (connected && !status.char) {
-    return '<div class="banner info"><b>Waiting for the game</b>The bridge is on but no character has logged in yet.</div>';
+    return '<div class="banner info"><b>Waiting for the game</b>Log in and chat shows up here.</div>';
+  }
+  if (connected && !S.tipSeen) {
+    return '<div class="banner info">Tip: tap Share, then Add to Home Screen. <button class="linkbtn" data-tipok>Got it</button></div>';
   }
   return "";
 }
@@ -1346,11 +2077,11 @@ function render() {
   var b = banner();
   $("ban-chat").innerHTML = b;
   renderViews();
-  if (curTab === "chat") renderPane("pane-chat", chatItems(), "chat", "No messages in this view yet.<br>Chat from the game shows up here.");
+  if (curTab === "chat") renderPane("pane-chat", chatItems(), "chat", "No messages yet.");
   renderTells();
   if (curTab === "tells" && b) $("ban-tells").innerHTML = b + $("ban-tells").innerHTML;
-  renderVent();
-  renderNotices();
+  renderMotd();
+  renderAlerts();
   var top = stack[stack.length - 1];
   if (top === "focus") {
     var c = CH[focus.ch];
@@ -1363,7 +2094,7 @@ function render() {
     S.read[thread.peer.toLowerCase()] = nowSec();
     renderPane("pane-thread", threadItems(), "thread", "No tells with " + esc(thread.peer) + " yet. Say hi.");
   }
-  if (stack.indexOf("cmd") >= 0) renderCmd();
+  if (curTab === "cmds" && S.cseg === "server") renderCmd();
   if (top === "settings") renderSettings();
   updateComposers();
 }
@@ -1378,35 +2109,66 @@ function setTabH() {
 }
 new MutationObserver(setTabH).observe(document.body, {attributes: true, attributeFilter: ["class"]});
 window.addEventListener("resize", setTabH);
+// Only follow the visual viewport while the keyboard is up. Otherwise let #app fill the screen:
+// Home Screen apps report a short viewport, which left a dark band under the tab bar.
+var kbUp = false;
+// The full height is measured while no keyboard is up. On a Home Screen app iOS sometimes shrinks
+// innerHeight along with the keyboard, which made the old "visible < window" check miss and left the
+// composer hidden behind the keys.
+var fullH = window.innerHeight;
 function fitViewport() {
   var vv = window.visualViewport;
   if (!vv) return;
-  app.style.height = vv.height + "px";
-  app.style.transform = "translateY(" + vv.offsetTop + "px)";
+  var typing = document.body.classList.contains("typing");
+  if (!typing) fullH = Math.max(window.innerHeight, vv.height);
+  var shrunk = fullH - vv.height > 80;
+  if (typing && shrunk) {
+    app.style.height = vv.height + "px";
+    app.style.transform = "translateY(" + vv.offsetTop + "px)";
+  } else {
+    app.style.height = "";
+    app.style.transform = "";
+  }
   if (window.scrollY) window.scrollTo(0, 0);
+  var up = typing && shrunk;
+  if (up !== kbUp) { kbUp = up; pinPanes(); }
 }
 function pinPanes() {
-  ["pane-chat", "pane-focus", "pane-thread", "pane-cmd"].forEach(function (id) { var p = $(id); p.scrollTop = p.scrollHeight; });
+  // Keyboard opened or closed: keep the newest line in view, but only where the reader was at the bottom.
+  ["pane-chat", "pane-focus", "pane-thread", "pane-cmd"].forEach(function (id) {
+    var p = $(id);
+    if (p && (p._count === undefined || p.scrollHeight - p.scrollTop - p.clientHeight < 200)) p.scrollTop = p.scrollHeight;
+  });
 }
 if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", function () { fitViewport(); pinPanes(); });
+  window.visualViewport.addEventListener("resize", fitViewport);
   window.visualViewport.addEventListener("scroll", fitViewport);
 }
+new MutationObserver(function () {
+  fitViewport();
+  // iOS reports the keyboard late and sometimes only once, so look again a few times after focus.
+  if (document.body.classList.contains("typing")) [120, 350, 700, 1200].forEach(function (ms) { setTimeout(fitViewport, ms); });
+}).observe(document.body, {attributes: true, attributeFilter: ["class"]});
+window.addEventListener("orientationchange", function () { setTimeout(fitViewport, 300); });
 
 // ------------------------------------------------------------------------------------------
 // Start
 // ------------------------------------------------------------------------------------------
 applyLook();
+setWatch();
 buildComposers();
 render();
 setTabH();
 if (!TOKEN) {
-  $("ban-chat").innerHTML = '<div class="banner bad"><b>Missing link token</b>Open the full link from the Decky panel or the bridge window (it ends in ?t=...).</div>';
+  $("ban-chat").innerHTML = '<div class="banner bad"><b>Missing link token</b>Scan the QR in the <span class="code">/pchat</span> window, or open the full link (it ends in ?t=...).</div>';
 } else {
   connect();
-  getJSON("/api/commands").then(function (j) { commands = j; renderCmdList(); }).catch(function () {});
+  syncPrefs();
+  getJSON("/api/commands").then(function (j) { commands = j; renderCmdList(); if (curTab === "cmds") showCseg(); }).catch(function () {});
   setInterval(refreshStatus, 30000);
   setInterval(function () { if (!connected) render(); }, 2000);
+  setInterval(function () { if (curTab === "alerts") schedule(); }, 30000);
+  setInterval(function () { if (curTab === "alerts") tickCd(); }, 1000);   // lets old venture cards fade
 }
 })();
 </script>

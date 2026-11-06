@@ -1,5 +1,5 @@
 {
-  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-15). Server commands are sent as /say !name. Add a new command as one line here.",
+  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-18). Server commands are sent as /say !name. Adding a command changes what can be sent: it needs a staff review first, and the addon's own list (SERVER in phonechat.lua) must match this one (a test checks).",
   "info": {
     "artifacts": "Stronghold artifact info",
     "currency": "Dynamis, Alexandrite, H-P Bayld and Incursion currency and where it is",
@@ -30,6 +30,23 @@
     "vault": "Opens your Mog Vault (towns) or shows quest progress",
     "ventures": "Daily Venture objectives (optional category)",
     "wspoints": "Weapon skill points (main, sub or ranged)"
+  },
+  "_not_included": "!campaign and !squire are on the BG-Wiki page but left out for now. Adding them changes what can be sent, so they wait for a staff review.",
+  "_modes": "Game modes (ace, cw, wew) for commands that don't work in every mode. Leave a command out if it works in all three. Shown as icons and used by the mode filter on the phone. It doesn't change what can be sent.",
+  "_modes_asof": "October 2026",
+  "modes": {
+    "box": ["cw"],
+    "chef": ["ace", "wew"],
+    "fatigue": ["ace", "wew"],
+    "incursion": ["cw"],
+    "keys": ["cw"],
+    "mog": ["ace", "wew"],
+    "pass": ["cw"],
+    "sanction": ["ace"],
+    "scroll": ["cw"],
+    "sigil": ["ace"],
+    "signet": ["ace"],
+    "summitreward": ["cw"]
   },
   "action": {
     "box": "Check, withdraw or store items in the Ephemeral Box",
