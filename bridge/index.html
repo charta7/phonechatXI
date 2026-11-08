@@ -214,6 +214,9 @@ body.typing .tabbar{display:none}
 /* ventures */
 .vcard{border-radius:16px;background:#1a1730;border:1px solid #5a4620;padding:16px;display:flex;flex-direction:column;gap:12px}
 .vteaser{font-size:15px;color:var(--soft);line-height:1.4;font-style:italic}
+.vpop{color:var(--gold);font-size:20px;font-weight:800;letter-spacing:1px}
+.vpopcard{border-color:var(--gold)}
+.cd.vhide{display:none}
 .vzone{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#241f3d}
 .vgrid{flex:none;width:52px;height:52px;border-radius:12px;background:var(--vent);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:19px}
 .vrow{display:flex;gap:10px;align-items:baseline;font-size:14.5px;padding:3px 0}
@@ -1735,13 +1738,36 @@ function tickCd() {
   });
   if (done) schedule();
 }
+// A VNM runs 10 minutes from Populox's FIRST message ("Something is interrupting ventures in these
+// zones..." plus the zones). About 5 minutes in, a second message ("Whatever's stirring ... is about to
+// reveal itself..." plus the same zones) is only a warning and never moves the timer. Nothing prints
+// when it pops, so the page shows POP! for a minute, then it's over. Real gaps in a CatsEye log
+// between the two messages were 5:04 to 5:12.
+var VNM_LEN = 600, VNM_POP = 60, VNM_WARN_AT = 308;
+function vnmKey(zs) { return zs.map(function (z) { return z.zone + "|" + z.grid; }).join("/"); }
+function vnmIsWarning(t) { return /about to reveal|stirring/i.test(t || ""); }
+// list: Populox messages that carry zones, oldest first. Several VNMs can run at once (one per zone pair).
+function vnmBuild(list) {
+  var out = [], open = {};
+  list.forEach(function (m) {
+    var k = vnmKey(m.zones), cur = open[k], warn = vnmIsWarning(m.teaser);
+    if (cur && m.ts < cur.start + VNM_LEN + VNM_POP) {      // same zones, same VNM: a warning (or a repeat) leaves the timer alone
+      if (warn) { cur.warned = true; cur.teaser = m.teaser; }
+      return;
+    }
+    // A warning with no first message before it (it was missed, say while zoning) counts back from the warning.
+    cur = {zones: m.zones, start: warn ? m.ts - VNM_WARN_AT : m.ts, warned: warn, teaser: m.teaser, m: m};
+    open[k] = cur;
+    out.push(cur);
+  });
+  return out;
+}
 function renderAlerts() {
   // Ventures: only Populox's VNM alert ("Hmm... something's stirring" plus the zones).
   var v = msgs.filter(function (m) { return m.ch === "venture" && m.name === "Populox"; });
   var hid = {};
   (S.hidden || []).forEach(function (k) { hid[k] = 1; });
-  var DONE = nowSec() - 600;      // a venture is over about 10 minutes after its alert, so old ones fade
-  var pop = v.filter(function (m) { return m.zones; }).reverse();
+  var pop = v.filter(function (m) { return m.zones; });
   // Every alert card has the same head: icon and a bold label on the left, the time on the right.
   function card(icon, color, label, ts, body, x) {
     return '<div class="acard" style="--c:' + color + '"><div class="ah"><span class="al">' + ico(icon, 15) + "<b>" + label + "</b></span>" +
@@ -1752,16 +1778,26 @@ function renderAlerts() {
   }
   function zl(zones, sep) { return zones.map(function (z) { return esc(z.zone) + ' <span class="vt">(' + esc(z.grid) + ")</span>"; }).join(sep); }
   var h = "";
-  if (pop.length && !hid["v|" + noticeKey(pop[0])]) {
-    var a = pop[0], ak = "v|" + noticeKey(a);
-    if (a.ts < DONE) {
-      h += card("vent", "var(--mute)", "VNM &middot; Expired", a.ts, '<div class="abody">' + zl(a.zones, " / ") + "</div>", ak);
-    } else {
-      h += '<div class="vcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + "<b>VNM &middot; Active</b></span>" + cdHtml(a.ts + 600) + '<span class="vt">' + hhmm(a.ts) + "</span>" +
-        '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' +
-        (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") + vzones(a.zones) + "</div>";
-    }
-  }
+  var now = nowSec();
+  var all = vnmBuild(pop).filter(function (x) { return !hid["v|" + noticeKey(x.m)]; });
+  var popped = all.filter(function (x) { return now >= x.start + VNM_LEN && now < x.start + VNM_LEN + VNM_POP; }).sort(function (a, b) { return b.start - a.start; });
+  var active = all.filter(function (x) { return now < x.start + VNM_LEN; }).sort(function (a, b) { return a.start - b.start; });
+  var over = all.filter(function (x) { return now >= x.start + VNM_LEN + VNM_POP && now < x.start + VNM_LEN + 1800; }).sort(function (a, b) { return b.start - a.start; }).slice(0, 1);
+  popped.forEach(function (a) {
+    var ak = "v|" + noticeKey(a.m);
+    h += '<div class="vcard vpopcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + '<b class="vpop">POP!</b></span>' +
+      '<span class="cd vhide" data-end="' + (a.start + VNM_LEN + VNM_POP) + '"></span><span class="vt">' + hhmm(a.start) + "</span>" +
+      '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' + vzones(a.zones) + "</div>";
+  });
+  active.forEach(function (a) {
+    var ak = "v|" + noticeKey(a.m);
+    h += '<div class="vcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + "<b>VNM &middot; Active</b></span>" + cdHtml(a.start + VNM_LEN) + '<span class="vt">' + hhmm(a.start) + "</span>" +
+      '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' +
+      (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") + vzones(a.zones) + "</div>";
+  });
+  over.forEach(function (a) {
+    h += card("vent", "var(--mute)", "VNM &middot; Over", a.start, '<div class="abody">' + zl(a.zones, " / ") + "</div>", "v|" + noticeKey(a.m));
+  });
   // Safety net: a Populox line the page can't read (say CatsEye rewords it) still shows as plain
   // text instead of vanishing. Kept for 30 minutes.
   var odd = v.filter(function (m) {

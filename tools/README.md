@@ -10,7 +10,7 @@ Plays a short made-up session into the bridge: a linkshell message of the day, l
 
 ```
 python3 fakefeed.py            one session
-python3 fakefeed.py --loop     keeps going, with a VNM alert every few minutes
+python3 fakefeed.py --loop     keeps going, with a VNM (first message, then the 5 minute warning) every few minutes
 python3 fakefeed.py --fast     5x speed
 python3 fakefeed.py --game     acts like a running game, then stops at the end
 ```

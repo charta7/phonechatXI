@@ -38,7 +38,7 @@ SESSION = [
     (5,  "server",  "in", "", "This command may only be used in cities."),
     (6,  "ls1",     "in", "Quenby", "selling {{Suppanomimi}} for {Looking for party}"),
     (8,  "ls1",     "in", "Marlow", "<call 1>"),
-    (1,  "venture", "in", "Populox", "Hmm... Whatever's stirring in these venture zones is about to reveal itself..."),
+    (1,  "venture", "in", "Populox", "Hmm... Something is interrupting ventures in these zones..."),
     (1,  "venture", "in", "Populox", "Meriphataud Mountains (H-11) / Valkurm Dunes (E-8)"),
     (6,  "ls1",     "in", "Tolliver", "nice, VNM time"),
     (5,  "bazaar",  "in", "", "Mara begins to browse the merchandise in your bazaar."),
@@ -107,10 +107,14 @@ def main():
             z = ZONES[n % len(ZONES)]
             time.sleep(10 / speed)
             time.sleep(1 / speed)
+            emit(path, "venture", "in", "Populox", "Hmm... Something is interrupting ventures in these zones...")
+            time.sleep(1 / speed)
+            emit(path, "venture", "in", "Populox", z)
+            time.sleep(307 / speed)          # the real warning comes about 5 minutes after the first message
             emit(path, "venture", "in", "Populox", "Hmm... Whatever's stirring in these venture zones is about to reveal itself...")
             time.sleep(1 / speed)
             emit(path, "venture", "in", "Populox", z)
-            time.sleep(150 / speed)
+            time.sleep(60 / speed)
     except KeyboardInterrupt:
         print("\nStopped.")
     print("Done.")
