@@ -14,6 +14,7 @@ Fixes only. It reads the same lines as 1.1.0, except one that it now reads less 
 - The Party Finder filter is now "PF", with a "looking for members" icon instead of a magnifying glass.
 - About in Settings is shorter and up to date.
 - The QR code in Settings stays black on white even if your browser has a night mode, so it can be scanned.
+- The message box grows as you type, up to 4 lines, then scrolls inside itself, so a long line is readable while you write it. Return still sends. A line break you paste in becomes a space.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
 - The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The field starts with the defaults (^^, ^_^, :), ;), :D, :P, XD and <3), so you can add to them, and "Reset to defaults" brings them back. They open as a grid that grows to fit, with a red × to close.
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.

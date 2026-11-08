@@ -156,9 +156,12 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .tgt.tell{border-color:#7a4a96;background:#2a1a3a}
 .tgt.cmd{border-color:var(--gold);background:#1a1730}
 .tgt .car{color:var(--mute);font-size:11px}
-.comp input{flex:1;min-width:0;font-size:16px;padding:10px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--pane);color:var(--text);outline:none;-webkit-appearance:none}
-.comp input:focus{border-color:var(--gold)}
-.comp input::placeholder{font-style:italic;opacity:.55}
+.comp input,.comp textarea{flex:1;min-width:0;font-size:16px;line-height:1.3;padding:10px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--pane);color:var(--text);outline:none;-webkit-appearance:none;font-family:inherit}
+.comp textarea{display:block;resize:none;overflow-y:hidden;height:43px;border-radius:21px;-webkit-overflow-scrolling:touch}
+.comp.multi{align-items:flex-end}
+.comp.multi .tgt,.comp.multi .emob{margin-bottom:2px}
+.comp input:focus,.comp textarea:focus{border-color:var(--gold)}
+.comp input::placeholder,.comp textarea::placeholder{font-style:italic;opacity:.55}
 .comp input.mono{font-family:var(--mono);font-size:16px;border-radius:10px}
 .send{flex:none;width:40px;height:40px;border-radius:50%;background:#3a3f5c;display:flex;align-items:center;justify-content:center}
 .send.on{background:var(--gold)}
@@ -370,7 +373,7 @@ body.skin-classic .lrow,body.skin-classic .srow,body.skin-classic .opt,body.skin
 body.skin-classic .big{font-weight:700;letter-spacing:.3px}
 body.skin-classic .sect{letter-spacing:1.5px;color:var(--gold)}
 body.skin-classic .rail{width:2px}
-body.skin-classic .comp input{border-radius:4px;background:linear-gradient(180deg,#0c1440,#152062);border-color:rgba(220,228,255,.6)}
+body.skin-classic .comp input,body.skin-classic .comp textarea{border-radius:4px;background:linear-gradient(180deg,#0c1440,#152062);border-color:rgba(220,228,255,.6)}
 body.skin-classic .tgt,body.skin-classic .chipb,body.skin-classic .seg,body.skin-classic .segs,body.skin-classic .pencil{border-radius:4px}
 body.skin-classic .chipb.on,body.skin-classic .opt.sel{background:linear-gradient(180deg,#3b55b8,#22327a);border-color:rgba(240,244,255,.85)}
 body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#f6ecbd,#d9c47a);color:#1b1a0e}
@@ -1236,17 +1239,38 @@ function placeholder(t) {
   if (t.ch === "tell") return t.peer ? "Tell " + t.peer : "Pick a name first";
   return "Message " + CH[t.ch].label;
 }
+function compInput(el) { return el.querySelector("textarea") || el.querySelector("input"); }
+// The message box starts as one line and grows as you type, up to 4 lines, then scrolls inside itself.
+var BOX_MAX = 4;
+function growBox(el, ta) {
+  if (ta.tagName !== "TEXTAREA") return;
+  var before = ta.offsetHeight;
+  ta.style.height = "auto";
+  var cs = getComputedStyle(ta), line = parseFloat(cs.lineHeight) || 21, pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + 2;
+  var max = Math.round(line * BOX_MAX + pad), want = Math.max(ta.scrollHeight + 2, Math.round(line + pad));
+  ta.style.height = Math.min(want, max) + "px";
+  ta.style.overflowY = want > max ? "auto" : "hidden";
+  el.classList.toggle("multi", want > Math.round(line + pad) + 4);
+  if (ta.offsetHeight !== before) { pinPanes(); }
+  if (document.activeElement === ta && want > max) ta.scrollTop = ta.selectionEnd >= ta.value.length ? ta.scrollHeight : ta.scrollTop;
+}
 function buildComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp;
-    el.innerHTML = '<span class="chipslot"></span><input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"' + (ctx === "cmd" ? ' class="mono"' : "") + ' maxlength="400"><span class="left" hidden></span><span class="nogame" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
-    var inp = el.querySelector("input"), btn = el.querySelector(".send");
+    el.innerHTML = '<span class="chipslot"></span>' + (ctx === "cmd" ? '<input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" class="mono" maxlength="400">' : '<textarea rows="1" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="400"></textarea>') + '<span class="left" hidden></span><span class="nogame" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
+    var inp = compInput(el), btn = el.querySelector(".send");
     if (ctx !== "cmd") setupEmoStrip(el, inp);
-    inp.addEventListener("input", function () { if (ctx !== "cmd") emoSwap(inp); btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); });
+    inp.addEventListener("input", function () {
+      if (ctx !== "cmd") {
+        if (/[\r\n]/.test(inp.value)) inp.value = inp.value.replace(/\s*[\r\n]+\s*/g, " ");   // a pasted line break becomes a space
+        emoSwap(inp);
+      }
+      btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); growBox(el, inp);
+    });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(ctx, inp); } });
     btn.addEventListener("click", function () { submit(ctx, inp); inp.focus(); });
     inp.addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); setTimeout(pinPanes, 320); });
-    inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || document.activeElement.tagName !== "INPUT") document.body.classList.remove("typing"); fitViewport(); }, 80); });
+    inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) document.body.classList.remove("typing"); fitViewport(); }, 80); });
   });
   applyCaps();
   updateComposers();
@@ -1255,7 +1279,7 @@ function buildComposers() {
 // phone's keyboard doesn't capitalize or autocorrect unless you turn those on in Settings.
 // (An iPhone-wide setting can still override capitalization.)
 function applyCaps() {
-  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) input').forEach(function (i) {
+  document.querySelectorAll('[data-comp]:not([data-comp="cmd"]) textarea').forEach(function (i) {
     i.setAttribute("autocapitalize", S.caps ? "sentences" : "off");
     i.setAttribute("autocorrect", S.autocorrect ? "on" : "off");
     i.setAttribute("spellcheck", S.autocorrect ? "true" : "false");
@@ -1285,7 +1309,7 @@ function noGame(el, text) {
   hint.textContent = seen.length ? '"' + seen.join(" ") + '" not valid, won\'t appear in game' : "";
 }
 function updateLeft(el) {
-  var ctx = el.dataset.comp, inp = el.querySelector("input"), left = el.querySelector(".left"), btn = el.querySelector(".send");
+  var ctx = el.dataset.comp, inp = compInput(el), left = el.querySelector(".left"), btn = el.querySelector(".send");
   if (!left || ctx === "cmd") return;
   var room = lineRoom(compTarget(ctx)), used = sjisLen((inp.value || "").trim()), rem = room - used;
   noGame(el, inp.value || "");
@@ -1300,7 +1324,7 @@ function updateComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp, t = compTarget(ctx);
     el.querySelector(".chipslot").innerHTML = chipHtml(t, ctx);
-    var inp = el.querySelector("input");
+    var inp = compInput(el);
     inp.placeholder = placeholder(t);
     updateLeft(el);
     el.classList.toggle("dis", !connected && everConnected);
@@ -2026,7 +2050,7 @@ function replyTo(t, lineEl, typeNow) {
     var chip = comp.querySelector(".tgt");
     if (chip) { chip.classList.remove("bump"); void chip.offsetWidth; chip.classList.add("bump"); }
   }
-  if (typeNow && comp) comp.querySelector("input").focus();
+  if (typeNow && comp) compInput(comp).focus();
 }
 $("focus-filters").addEventListener("click", function (e) {
   var b = e.target.closest("[data-f]");
