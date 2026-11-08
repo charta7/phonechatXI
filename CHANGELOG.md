@@ -4,8 +4,9 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
-Fixes only. It reads the same lines as 1.1.0; only how LS1's message of the day is sorted changed.
+Fixes only. It reads the same lines as 1.1.0, except one that it now reads less of (the first fix below), and how LS1's message of the day is sorted changed.
 
+- Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
 - The LS1 message of the day now shows in full. LS1's comes in as a server message, and 1.1.0 pinned its first line ("LS name: set by") instead, with the message itself under server notices.
 - The pinned message of the day has an × to hide it. A linkshell with no message of the day prints nothing when you switch to it, so the old one stayed up. A hidden one stays hidden until it changes.
 - When a linkshell's message of the day comes in, its old one is cleared first.

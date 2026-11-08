@@ -889,7 +889,18 @@ local function handle_line(raw_mode, message)
         return
     end
 
-    if channel == 'system' or channel == 'emote' then
+    if channel == 'system' then
+        -- Mode 123 is the game's feedback for a line that didn't go through. Only the two
+        -- failures the phone knows about are passed on; other 123 lines (the auction
+        -- "You can only place a single item..." refusal, for one) are not chat.
+        local low = text:lower()
+        if low:find('not received', 1, true) or low:find('no party members', 1, true) then
+            emit(channel, dir, '', text)
+        end
+        return
+    end
+
+    if channel == 'emote' then
         emit(channel, dir, '', text)
         return
     end
