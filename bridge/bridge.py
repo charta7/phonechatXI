@@ -45,6 +45,15 @@ from urllib.parse import parse_qs, urlparse
 VERSION = "1.1.1"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
+def build_id():
+    try:
+        with open(os.path.join(HERE, "manifest.txt"), encoding="utf-8") as f:
+            line = f.readline().strip()
+        return line[8:] if re.fullmatch(r"# build [A-Za-z0-9-]{1,64}", line) else "unknown"
+    except OSError:
+        return "unknown"
+
+
 # Max messages kept in memory per channel, so shout/yell spam can't push out LS or tells.
 CAPS = {
     "ls1": 500, "ls2": 500, "party": 500, "tell": 600,
@@ -962,7 +971,7 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/events":
             self.stream()
         elif u.path == "/api/status":
-            self.send_json(200, {"version": VERSION, "url": self.url, "boot": store.boot,
+            self.send_json(200, {"version": VERSION, "build": build_id(), "url": self.url, "boot": store.boot,
                                  "char": self.sender.char, "save_tells": self.tells.enabled,
                                  "scrollback": store.mult})
         elif u.path == "/api/prefs":

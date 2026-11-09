@@ -2119,6 +2119,7 @@ function debugText() {
   var lines = [
     "phonechatXI debug info",
     "bridge: " + (status.version || "unknown") + (connected ? ", connected" : ", not connected") + (linkDead ? ", link replaced" : ""),
+    "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
     "settings: skin " + (S.skin || "midnight") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +

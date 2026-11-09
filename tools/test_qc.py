@@ -26,6 +26,14 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     line(123,'There are no party members.')
     feed=(path/'feed-Tester.log').read_text();assert 'single item' not in feed and 'no party members' in feed
     print('PASS: system failure allowlist')
+    before = (path/'feed-Tester.log').read_bytes()
+    for mode in (20, 21, 22, 23, 30, 999):
+        line(mode, 'Tester hits the Goblin for 50 points of damage.')
+    line(123, 'You cannot perform that action.')
+    line(9, 'Unrelated game status')
+    g.EVENTS['text_in'](lua.table_from(dict(mode=14, message='[1]<Tester> injected test', injected=True, blocked=False)))
+    assert (path/'feed-Tester.log').read_bytes() == before
+    print('PASS: combat, unknown modes, unrelated system status and injected chat stay excluded')
 for file in ROOT.rglob('*.py'):ast.parse(file.read_text())
 print('PASS: Python syntax')
 spec=importlib.util.spec_from_file_location('bridge',ROOT/'bridge/bridge.py');bridge=importlib.util.module_from_spec(spec);spec.loader.exec_module(bridge)

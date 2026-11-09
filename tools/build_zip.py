@@ -50,14 +50,24 @@ def main():
             fail("refusing to ship " + name)
         if not os.path.isfile(src):
             fail("missing " + src)
+    build = hashlib.sha256()
+    for src, name in sorted(files, key=lambda x: x[1]):
+        build.update(name.encode("utf-8") + b"\0")
+        with open(src, "rb") as f:
+            build.update(f.read())
+    build_id = build.hexdigest()[:16]
     os.makedirs(os.path.join(ROOT, "dist"), exist_ok=True)
     out = os.path.join(ROOT, "dist", "phonechatXI-v%s.zip" % av)
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
         for src, name in sorted(files, key=lambda x: x[1]):
-            z.write(src, name)
+            if name == "phonechat/bridge/manifest.txt":
+                z.writestr(name, "# build " + build_id + "\n" + "\n".join(listed) + "\n")
+            else:
+                z.write(src, name)
     with open(out, "rb") as f:
         digest = hashlib.sha256(f.read()).hexdigest()
     print("wrote %s (%d files, %d bytes)" % (out, len(files), os.path.getsize(out)))
+    print("build %s" % build_id)
     print("sha256 %s" % digest)
     for _, name in sorted(files, key=lambda x: x[1]):
         print("  " + name)
