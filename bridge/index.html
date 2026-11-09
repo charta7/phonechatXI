@@ -1899,7 +1899,7 @@ function renderSettings() {
     srow("Bridge", connected ? "Connected" + (status.version ? " &middot; " + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
     (showQr ? '<div id="qrbox"></div><div class="sfoot" style="text-align:center;word-break:break-all">' + esc(link) + "</div>" : "") +
     srow("Start with the game", "Turn on in the <span class=\"code\">/pchat</span> window.", "") +
-    srow("New phone link", "In the <span class=\"code\">/pchat</span> window, or type <span class=\"code\">/pchat newlink</span>.", "") +
+    srow("Replace phone link", "If someone saw your link or QR, replace it in the <span class=\"code\">/pchat</span> window, or type <span class=\"code\">/pchat newlink</span>. Old links stop working. Scan the new QR, then replace any old Home Screen shortcut.", "") +
     '<div class="sect">CHANNELS</div>' +
     CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Read only." : (c === "shout" ? "Local area" : (c === "say" ? "Nearby" : (c === "finder" ? "Read only." : ""))), tog(S.master[c], "m." + c)); }).join("") +
     '<div class="sect">CALLS</div>' +
@@ -2178,7 +2178,7 @@ function gameBanner() {
 }
 function banner() {
   if (linkDead) {
-    return '<div class="banner bad"><b>This link was replaced</b>Scan the new QR (<span class="code">/pchat</span> in game).</div>';
+    return '<div class="banner bad"><b>This link was replaced</b>Open <span class="code">/pchat</span> in game and scan the new QR. Open the new link in your phone browser and check that chat connects. If you use a Home Screen shortcut, remove the old shortcut and add this new link using your browser menu.</div>';
   }
   if (!connected && everConnected && Date.now() - offlineSince > 3000) {
     return '<div class="banner bad"><b>Bridge offline. Reconnecting...</b>Start it with <span class="code">/pchat start</span>. If your Deck or PC got a new address, scan the QR again.</div>';

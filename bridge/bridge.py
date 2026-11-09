@@ -889,7 +889,7 @@ p{color:#c9d2ec;line-height:1.5}</style></head><body><main><h1><img src="/icons/
 <p><a href="%(url)s">%(url)s</a></p><p>Bridge %(version)s is running. Watching %(folder)s</p>
 <form method="post" action="/setup/newlink" onsubmit="return confirm('Make a new phone link? The old link stops working and you will need to scan the new QR.')">
 <button style="font:inherit;color:#e8ecf6;background:#1d2850;border:1px solid #3a4a80;border-radius:10px;padding:10px 16px">Make a new link</button></form>
-<p style="font-size:13px;color:#8e9ac0">Use this if someone else saw your link or QR. Your phone will need to scan again.</p></main>
+<p style="font-size:13px;color:#8e9ac0">Use this if someone else saw your link or QR. Scan the new QR and check that chat connects. If you use a Home Screen shortcut, remove the old shortcut and add the new link from your phone browser.</p></main>
 <script>var q=qrcode(0,"M");q.addData("%(url)s");q.make();document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:5,margin:2,scalable:true});</script>
 </body></html>"""
 

@@ -180,6 +180,17 @@ The bridge also closes itself when the game is gone. If the game closes or freez
 | Page says "This link was replaced" | Scan the new QR code, then remove the old Home Screen shortcut and add the new one. |
 | Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose) or the phonechatXI thread on the CatsEyeXI Discord. |
 
+## Replacing a phone link and Home Screen shortcut
+
+Use this if someone saw your link or QR. You do not need a new link for a routine addon update.
+
+1. On your Deck or PC, open `/pchat`, select **New phone link**, then select it again to confirm.
+2. Scan the new QR and open the link in your phone browser. Verify that chat connects.
+3. If you use a Home Screen shortcut, remove the old shortcut. Add the newly opened link to your Home Screen using the browser menu.
+4. Open the new shortcut and verify it connects. Old links remain invalid; removing a shortcut alone does not revoke access.
+
+Your Deck or PC changing network address can also break a shortcut. Scan the current QR and recreate the shortcut in that case; rotating the secret is not required just for an address change.
+
 ## Privacy
 
 - Chat is held in the bridge's memory and is gone when it stops. On the way, it passes through a feed file, and lines you send pass through an outbox file, both in the phonechat folder. They're emptied the next time the bridge starts, and the addon also empties the feed file when it loads.

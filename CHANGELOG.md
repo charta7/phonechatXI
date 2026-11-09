@@ -4,6 +4,8 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
+- Link replacement now explains re-scanning and rebuilding Home Screen shortcuts on the Deck, phone, and local setup page. Authentication and capture scope are unchanged.
+
 - Quick filter row visibility is now a saved option inside Edit view, removing the separate Filters button. Channel-colored message text defaults on for new settings; existing choices are preserved. LS2 defaults to #06ED00. Shortened Yell and saved-tell descriptions.
 
 - HVNM cards recognize the existing Populox announcements, with the same countdown and warning rules as VNM. VNM and HVNM timers stay separate. This only interprets text already delivered to the phone; no additional game data is captured.
