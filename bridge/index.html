@@ -24,7 +24,7 @@
 :root{
   --bg:#0b1020; --pane:#0e1530; --raise:#12182f; --chip:#171f40; --line:#1d2850; --edge:#2c3a6e; --edge2:#3a4a80;
   --text:#e8ecf6; --soft:#c9d2ec; --mute:#8e9ac0; --gold:#d9b45a; --ink:#1a1405;
-  --ls1:#7ee08f; --ls2:#4fd6c8; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
+  --ls1:#7ee08f; --ls2:#70b35a; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
   --emote:#b9a6ff; --finder:#8fd0ff; --say:#dfe5f5; --vent:#f0b24d; --sys:#8e9ac0; --bad:#ff9a9a; --badbg:#2a1418; --badedge:#5a2a2a; --ok:#7ee08f;
   --fs:15.5px; --serif:'Cinzel',Georgia,serif; --sans:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
@@ -147,8 +147,12 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .run.mine .rbody{max-width:84%;align-items:flex-end;flex:none}
 .run.mine .rhead{justify-content:flex-end}
 .run.mine .ln{text-align:right}
-.jump{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--gold);color:var(--ink);font-weight:700;font-size:13px;border-radius:999px;padding:6px 14px;box-shadow:0 4px 14px rgba(0,0,0,.5);display:none}
+.jump{flex:none;align-self:center;background:none;color:var(--gold);font-weight:600;font-size:12px;min-height:32px;padding:5px 16px;display:none}
 .jump.show{display:block}
+.pills[hidden]{display:none}
+.filterbtn{flex:none;min-height:36px;padding:4px 8px;color:var(--gold);font-size:13px}
+.views .seg{min-width:0}
+.views .pencil{flex:none}
 
 /* composer */
 .comp{display:flex;align-items:center;gap:8px;padding:10px 12px 10px;border-top:1px solid var(--line);background:var(--bg)}
@@ -431,11 +435,11 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
   <div class="screen" id="main">
     <section class="tab on" id="tab-chat">
       <div class="top"><div class="big">Chat</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="views"><div class="seg" id="viewseg"></div><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
-      <div class="pills" id="pills"></div>
+      <div class="views"><div class="seg" id="viewseg"></div><button class="filterbtn" id="togglefilters" aria-expanded="false" aria-controls="pills">Filters</button><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
+      <div class="pills" id="pills" hidden></div>
       <div id="ban-chat"></div>
       <div id="motd-chat"></div>
-      <div class="panewrap"><div class="pane" id="pane-chat"><div class="inner"></div></div><button class="jump" data-jump="pane-chat"></button></div>
+      <div class="panewrap"><div class="pane" id="pane-chat"><div class="inner"></div></div></div><button class="jump" data-jump="pane-chat"></button>
       <div class="comp" data-comp="chat"></div>
     </section>
     <section class="tab" id="tab-tells">
@@ -470,14 +474,14 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
     <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px" id="focus-title"></div><small id="focus-sub"></small></div><div class="end"><span class="pill-on off" data-bridge style="border:0;padding:0"><i></i><span>OFF</span></span></div></div>
     <div class="pills" id="focus-filters"></div>
     <div id="motd-focus"></div>
-    <div class="panewrap"><div class="pane" id="pane-focus"><div class="inner"></div></div><button class="jump" data-jump="pane-focus"></button></div>
+    <div class="panewrap"><div class="pane" id="pane-focus"><div class="inner"></div></div></div><button class="jump" data-jump="pane-focus"></button>
     <div class="comp" data-comp="focus"></div>
   </div>
 
   <!-- tell thread -->
   <div class="screen overlay" id="scr-thread">
     <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Tells</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell</small></div><div class="end"></div></div>
-    <div class="panewrap" style="margin-top:10px"><div class="pane" id="pane-thread"><div class="inner"></div></div><button class="jump" data-jump="pane-thread"></button></div>
+    <div class="panewrap" style="margin-top:10px"><div class="pane" id="pane-thread"><div class="inner"></div></div></div><button class="jump" data-jump="pane-thread"></button>
     <div class="comp" data-comp="thread"></div>
   </div>
 
@@ -572,7 +576,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -628,7 +632,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -713,7 +717,7 @@ function importPrefs(file) {
   };
   r.readAsText(file);
 }
-var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#4fd6c8", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
+var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#70b35a", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 function colorOf(c) { return (S.colors && S.colors[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
@@ -819,6 +823,10 @@ function onMsg(m) {
     lsName[m.name] = m.body;
     schedule();
     return;
+  }
+  if (m.ch === "venture" && m.name === "Populox" && !m.zones) {
+    var hv = (m.body || "").match(/^Hmm\.{3}\s*(?:Something really dangerous has appeared|The danger) at \(([A-Z]-\d+)\) in (.+?)(?: is about to reveal itself)?\.{3}\s*$/i);
+    if (hv) { m.zones = [{zone: hv[2], grid: hv[1]}]; m.teaser = m.body; m.tier = "HVNM"; }
   }
   if (byId[m.id]) return;
   byId[m.id] = m;
@@ -985,7 +993,7 @@ function fmtFinder(body) {
   if (!mm) return '<i class="pf">' + fmt(body) + "</i>";
   return '<b class="pfn">' + esc(mm[1]) + '</b> <i class="pf">' + esc(mm[2]) + ":</i> " + fmt(mm[3]);
 }
-function bodyHtml(m) { return m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); }
+function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return S.channelText ? '<span style="color:var(--c)">' + h + "</span>" : h; }
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
   if (m.ch === "tell" && ctx !== "thread") {
@@ -1156,6 +1164,7 @@ document.addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 // Chat tab pieces
 // ------------------------------------------------------------------------------------------
+$("togglefilters").addEventListener("click", function () { var p = $("pills"); p.hidden = !p.hidden; this.setAttribute("aria-expanded", String(!p.hidden)); pinPanes(); });
 function renderViews() {
   $("viewseg").innerHTML = S.views.map(function (v) {
     return '<button data-view="' + esc(v.id) + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
@@ -1400,11 +1409,12 @@ function submit(ctx, inp) {
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
   if (/^[\/!]/.test(text) && ["/", "!", "!!", "!?"].indexOf(text) < 0) { toast("Emotes and ! commands have their own tabs."); return; }
   if (sjisLen(text) > lineRoom(t)) { toast("Too long for one line. Trim it a bit."); return; }
+  var submittedValue = inp.value;
   sending = true;
   api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {
     sending = false;
     if (!j.ok) { toast(j.error || "Could not send."); return; }
-    inp.value = ""; inp.dispatchEvent(new Event("input"));
+    if (inp.value === submittedValue) { inp.value = ""; inp.dispatchEvent(new Event("input")); }
     (j.parts || []).forEach(function (p) {
       pend[p.pid] = {pid: p.pid, pending: true, ch: t.ch, peer: t.peer || "", body: p.text, ts: nowSec(), state: "sending", dir: "out", name: myName(), retry: {target: t.ch, peer: t.peer || "", text: p.text}};
       pendOrder.push(p.pid);
@@ -1644,7 +1654,7 @@ function renderEmotes() {
   var dances = list.filter(function (e) { return /^dance\d?$/.test(e); });
   dances.forEach(function (e) { used[e] = 1; });
   if (dances.length) h += head("DANCE", "#ff8fd0") + '<div class="emtiles">' + dances.map(function (e) { return tile("/" + e, "#ff8fd0"); }).join("") + "</div>";
-  if (list.indexOf("sitchair") >= 0) { used.sitchair = 1; h += head("SIT IN A CHAIR", "#4fd6c8") + '<div class="emtiles">' + ["/sitchair", "/sitchair 1", "/sitchair 2", "/sitchair 3", "/sitchair 4"].map(function (c) { return tile(c, "#4fd6c8"); }).join("") + "</div>"; }
+  if (list.indexOf("sitchair") >= 0) { used.sitchair = 1; h += head("SIT IN A CHAIR", "#70b35a") + '<div class="emtiles">' + ["/sitchair", "/sitchair 1", "/sitchair 2", "/sitchair 3", "/sitchair 4"].map(function (c) { return tile(c, "#70b35a"); }).join("") + "</div>"; }
   var rest = list.filter(function (e) { return !used[e]; });
   if (rest.length) h += head("MORE", "var(--mute)") + '<div class="emtiles">' + rest.map(function (e) { return tile("/" + e, "var(--mute)"); }).join("") + "</div>";
   if ((commands.jobs || []).length) h += head("JOB EMOTES", "var(--emote)") + '<div class="emtiles jobs">' + commands.jobs.map(function (j) { return tile("/jobemote " + j.toLowerCase(), JOB_ROLE[j] || "var(--emote)"); }).join("") + '</div><div class="sfoot" style="padding:8px 2px 0">Job emotes unlock with each job\'s emote quest.</div>';
@@ -1750,13 +1760,13 @@ function vnmIsWarning(t) { return /about to reveal|stirring/i.test(t || ""); }
 function vnmBuild(list) {
   var out = [], open = {};
   list.forEach(function (m) {
-    var k = vnmKey(m.zones), cur = open[k], warn = vnmIsWarning(m.teaser);
+    var k = (m.tier || "VNM") + ":" + vnmKey(m.zones), cur = open[k], warn = vnmIsWarning(m.teaser);
     if (cur && m.ts < cur.start + VNM_LEN + VNM_POP) {      // same zones, same VNM: a warning (or a repeat) leaves the timer alone
       if (warn) { cur.warned = true; cur.teaser = m.teaser; }
       return;
     }
     // A warning with no first message before it (it was missed, say while zoning) counts back from the warning.
-    cur = {zones: m.zones, start: warn ? m.ts - VNM_WARN_AT : m.ts, warned: warn, teaser: m.teaser, m: m};
+    cur = {tier: m.tier || "VNM", zones: m.zones, start: warn ? m.ts - VNM_WARN_AT : m.ts, warned: warn, teaser: m.teaser, m: m};
     open[k] = cur;
     out.push(cur);
   });
@@ -1785,18 +1795,18 @@ function renderAlerts() {
   var over = all.filter(function (x) { return now >= x.start + VNM_LEN + VNM_POP && now < x.start + VNM_LEN + 1800; }).sort(function (a, b) { return b.start - a.start; }).slice(0, 1);
   popped.forEach(function (a) {
     var ak = "v|" + noticeKey(a.m);
-    h += '<div class="vcard vpopcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + '<b class="vpop">POP!</b></span>' +
+    h += '<div class="vcard vpopcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + '<b class="vpop">' + a.tier + ' POP!</b></span>' +
       '<span class="cd vhide" data-end="' + (a.start + VNM_LEN + VNM_POP) + '"></span><span class="vt">' + hhmm(a.start) + "</span>" +
       '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' + vzones(a.zones) + "</div>";
   });
   active.forEach(function (a) {
     var ak = "v|" + noticeKey(a.m);
-    h += '<div class="vcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + "<b>VNM &middot; Active</b></span>" + cdHtml(a.start + VNM_LEN) + '<span class="vt">' + hhmm(a.start) + "</span>" +
+    h += '<div class="vcard" style="--c:var(--vent)"><div class="ah"><span class="al">' + ico("vent", 18) + "<b>" + a.tier + " &middot; Active</b></span>" + cdHtml(a.start + VNM_LEN) + '<span class="vt">' + hhmm(a.start) + "</span>" +
       '<button class="ax" data-dismiss="' + esc(ak) + '" aria-label="Dismiss">&times;</button></div>' +
       (a.teaser ? '<div class="vteaser">' + esc(a.teaser) + "</div>" : "") + vzones(a.zones) + "</div>";
   });
   over.forEach(function (a) {
-    h += card("vent", "var(--mute)", "VNM &middot; Over", a.start, '<div class="abody">' + zl(a.zones, " / ") + "</div>", "v|" + noticeKey(a.m));
+    h += card("vent", "var(--mute)", a.tier + " &middot; Over", a.start, '<div class="abody">' + zl(a.zones, " / ") + "</div>", "v|" + noticeKey(a.m));
   });
   // Safety net: a Populox line the page can't read (say CatsEye rewords it) still shows as plain
   // text instead of vanishing. Kept for 30 minutes.
@@ -1842,7 +1852,11 @@ function noticeKey(m) { return String(m.id || (m.ts + ":" + (m.body || "").slice
 // A linkshell with no MOTD prints nothing when you switch to it, so the old one would stay pinned.
 // The x hides that MOTD (remembered on the phone); the same MOTD re-sent after zoning stays hidden,
 // and a different one shows again.
-function motdKey(c) { return "motd:" + c + ":" + String(lsMotd[c] || "").slice(0, 80); }
+function motdKey(c) {
+  var text = String(lsMotd[c] || ""), a = 2166136261, b = 5381;
+  for (var i = 0; i < text.length; i++) { a = Math.imul(a ^ text.charCodeAt(i), 16777619); b = Math.imul(b, 33) ^ text.charCodeAt(i); }
+  return "motd:" + c + ":" + text.length + ":" + (a >>> 0).toString(16) + ":" + (b >>> 0).toString(16);
+}
 function renderMotd() {
   function strip(chs) {
     return chs.filter(function (c) { return lsMotd[c] && (S.hidden || []).indexOf(motdKey(c)) < 0; }).map(function (c) {
@@ -1871,8 +1885,11 @@ document.addEventListener("click", function (e) {
 function tog(on, key) { return '<button class="tog' + (on ? " on" : "") + '" data-set="' + key + '"></button>'; }
 function segs(key, opts, cur) { return '<div class="segs">' + opts.map(function (o) { return '<button data-seg="' + key + '" data-val="' + o[0] + '"' + (o[0] === cur ? ' class="on"' : "") + ">" + o[1] + "</button>"; }).join("") + "</div>"; }
 function srow(title, sub, right) { return '<div class="srow"><div class="m"><div>' + title + "</div>" + (sub ? "<small>" + sub + "</small>" : "") + "</div>" + right + "</div>"; }
-var showQr = false;
+var showQr = false, colorPicking = false;
+$("settings").addEventListener("click", function (e) { colorPicking = !!e.target.closest("[data-color]"); }, true);
+document.addEventListener("click", function (e) { if (!e.target.closest("#settings")) colorPicking = false; }, true);
 function renderSettings() {
+  if (colorPicking) return;
   var ae = document.activeElement;
   if (ae && (ae.id === "watchin" || ae.id === "emoin")) return;          // don't redraw under the reader's thumb
   var link = location.origin + "/?t=" + encodeURIComponent(TOKEN);
@@ -1908,6 +1925,7 @@ function renderSettings() {
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
     '<div class="subsect">Channel colors</div>' +
     CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
+    srow("Color message text by channel", "Use channel colors for message text too.", tog(S.channelText, "channelText")) +
     srow("Reset colors", "", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
     '<div class="sect">BACKUP</div>' +
     srow("Your settings", "Also saved on the bridge, so a new shortcut or phone picks them up.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
@@ -1954,6 +1972,7 @@ $("settings").addEventListener("click", function (e) {
   if (t) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
+    else if (k === "channelText") { S.channelText = !S.channelText; }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }

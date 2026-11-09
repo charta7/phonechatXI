@@ -829,8 +829,8 @@ end
 local function motd_body(text, need_stamp)
     local f = S.motd_for
     if not f or os.clock() - f.at > 5 then return false end
-    S.motd_for = nil
     if need_stamp and not text:find(MOTD_STAMP) then return false end
+    S.motd_for = nil
     local msg = (text:gsub(MOTD_STAMP, ''))
     if msg ~= '' then emit('motd', 'in', 'ls' .. f.n, msg) end
     return true

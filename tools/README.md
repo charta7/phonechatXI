@@ -32,3 +32,7 @@ python3 replay.py sample-debug-Charta.log --instant
 To get a log, turn on `/pchat debug` on an approved version, play normally, then turn it off. Debug logs hold other players' chat and combat lines, so don't share them publicly. Like the addon, `replay.py` empties that character's feed file in the bridge folder when it starts. `sample-debug-Charta.log` is a made-up one in the same format.
 
 Both tools need Python 3.7 or newer. Pass `--dir` if the bridge's folder isn't `~/phonechat`.
+
+## Focused QC checks
+
+Run `node tools/test_qc.js` and `python3 tools/test_qc.py` (the latter needs `lupa`). These exercise page logic and addon parsing without connecting to the game. Native phone color pickers, keyboard layout, and Home Screen safe areas still need device checks.

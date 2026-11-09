@@ -4,6 +4,12 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
+- HVNM cards recognize the existing Populox announcements, with the same countdown and warning rules as VNM. VNM and HVNM timers stay separate. This only interprets text already delivered to the phone; no additional game data is captured.
+- Native channel color pickers survive live updates. Default LS2 is a deeper green; existing custom colors are preserved. Optional channel-colored message text is available in Settings.
+- Channel filters collapse behind a Filters button. Jump to latest sits below the feed instead of covering messages. Device safe-area padding is retained.
+- MOTDs survive intervening server notices, and changing the end of a dismissed MOTD makes it visible again.
+- A successful chat send preserves a draft edited while the request was pending.
+
 Fixes only. It reads the same lines as 1.1.0, except one that it now reads less of (the first fix below), and how LS1's message of the day is sorted changed.
 
 - Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
