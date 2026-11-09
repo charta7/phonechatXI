@@ -24,7 +24,7 @@
 :root{
   --bg:#0b1020; --pane:#0e1530; --raise:#12182f; --chip:#171f40; --line:#1d2850; --edge:#2c3a6e; --edge2:#3a4a80;
   --text:#e8ecf6; --soft:#c9d2ec; --mute:#8e9ac0; --gold:#d9b45a; --ink:#1a1405;
-  --ls1:#7ee08f; --ls2:#70b35a; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
+  --ls1:#7ee08f; --ls2:#06ED00; --party:#7fb2ff; --tell:#ff8fd0; --unity:#e8c35c; --shout:#ff9a5c; --yell:#c98a5c;
   --emote:#b9a6ff; --finder:#8fd0ff; --say:#dfe5f5; --vent:#f0b24d; --sys:#8e9ac0; --bad:#ff9a9a; --badbg:#2a1418; --badedge:#5a2a2a; --ok:#7ee08f;
   --fs:15.5px; --serif:'Cinzel',Georgia,serif; --sans:'Atkinson Hyperlegible',system-ui,-apple-system,sans-serif;
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
@@ -150,7 +150,6 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .jump{flex:none;align-self:center;background:none;color:var(--gold);font-weight:600;font-size:12px;min-height:32px;padding:5px 16px;display:none}
 .jump.show{display:block}
 .pills[hidden]{display:none}
-.filterbtn{flex:none;min-height:36px;padding:4px 8px;color:var(--gold);font-size:13px}
 .views .seg{min-width:0}
 .views .pencil{flex:none}
 
@@ -435,7 +434,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
   <div class="screen" id="main">
     <section class="tab on" id="tab-chat">
       <div class="top"><div class="big">Chat</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="views"><div class="seg" id="viewseg"></div><button class="filterbtn" id="togglefilters" aria-expanded="false" aria-controls="pills">Filters</button><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
+      <div class="views"><div class="seg" id="viewseg"></div><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
       <div class="pills" id="pills" hidden></div>
       <div id="ban-chat"></div>
       <div id="motd-chat"></div>
@@ -521,7 +520,7 @@ var CH = {
   say:   {label: "Say",    full: "Say",         icon: "say",   c: "var(--say)",   send: "/s", sub: "Nearby"},
   shout: {label: "Shout",  full: "Shout",       icon: "shout", c: "var(--shout)", send: "/sh", sub: "Local area"},
   unity: {label: "Unity",  full: "Unity",       icon: "unity", c: "var(--unity)"},
-  yell:  {label: "Yell",   full: "Yell",        icon: "yell",  c: "var(--yell)",  sub: "Trade spam. Read only."},
+  yell:  {label: "Yell",   full: "Yell",        icon: "yell",  c: "var(--yell)",  sub: "Read only."},
   emote: {label: "Emotes", full: "Emotes",      icon: "emote", c: "var(--emote)"},
   finder:{label: "PF", full: "Party Finder", icon: "finder", c: "var(--finder)", sub: "Party Finder ads. Read only."}
 };
@@ -576,7 +575,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: true, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -632,7 +631,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -717,7 +716,7 @@ function importPrefs(file) {
   };
   r.readAsText(file);
 }
-var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#70b35a", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
+var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 function colorOf(c) { return (S.colors && S.colors[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
@@ -1164,8 +1163,8 @@ document.addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 // Chat tab pieces
 // ------------------------------------------------------------------------------------------
-$("togglefilters").addEventListener("click", function () { var p = $("pills"); p.hidden = !p.hidden; this.setAttribute("aria-expanded", String(!p.hidden)); pinPanes(); });
 function renderViews() {
+  $("pills").hidden = !S.quickFilters;
   $("viewseg").innerHTML = S.views.map(function (v) {
     return '<button data-view="' + esc(v.id) + '"' + (v.id === S.view ? ' class="on"' : "") + ">" + esc(v.name) + "</button>";
   }).join("");
@@ -1202,6 +1201,7 @@ function editView(id) {
     return '<div class="grab"></div><div class="shead"><div class="sect">' + (isNew ? "NEW VIEW" : "EDIT VIEW") + '</div><button class="linkbtn" data-sb="done" style="font-weight:700;font-size:15px">Done</button></div>' +
       (draft.id === "all" ? '<div class="sfoot" style="padding-top:0">The All view can\'t be renamed.</div>' :
         '<label class="sfield" for="vname">Name</label><input class="sinput" id="vname" maxlength="18" value="' + esc(draft.name) + '" placeholder="View name">') +
+      '<div class="srow"><div class="m"><div>Quick filter row</div><small>Show channel shortcuts below your views.</small></div><button class="tog' + (S.quickFilters ? " on" : "") + '" data-quick-filters aria-label="Quick filter row" aria-pressed="' + !!S.quickFilters + '"></button></div>' +
       CHAT_CH.map(function (c) {
         return '<div class="srow" style="padding:8px 6px">' + ico(CH[c].icon, 22) + '<div class="m"><div>' + CH[c].full + "</div>" + (CH[c].sub ? "<small>" + CH[c].sub + "</small>" : "") + (!S.master[c] ? "<small>Hidden everywhere (Settings)</small>" : "") + '</div><button class="tog' + (draft.ch[c] ? " on" : "") + '" data-vt="' + c + '" aria-label="' + CH[c].full + '"></button></div>';
       }).join("") +
@@ -1210,6 +1210,8 @@ function editView(id) {
       '<div class="sfoot">Hiding a channel only hides it in this view. Messages still come in, so turn it back on and they\'re there. Combat and battle messages are never captured.</div>';
   }
   openSheet(body(), function (e) {
+    var q = e.target.closest("[data-quick-filters]");
+    if (q) { S.quickFilters = !S.quickFilters; q.classList.toggle("on", S.quickFilters); q.setAttribute("aria-pressed", String(S.quickFilters)); save(); renderViews(); return; }
     var t = e.target.closest("[data-vt]");
     if (t) { draft.ch[t.dataset.vt] = !draft.ch[t.dataset.vt]; t.classList.toggle("on"); return; }
     var b = e.target.closest("[data-sb]");
@@ -1899,7 +1901,7 @@ function renderSettings() {
     srow("Start with the game", "Turn on in the <span class=\"code\">/pchat</span> window.", "") +
     srow("New phone link", "In the <span class=\"code\">/pchat</span> window, or type <span class=\"code\">/pchat newlink</span>.", "") +
     '<div class="sect">CHANNELS</div>' +
-    CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Trade spam. Read only." : (c === "shout" ? "Local area" : (c === "say" ? "Nearby" : (c === "finder" ? "Read only." : ""))), tog(S.master[c], "m." + c)); }).join("") +
+    CHAT_CH.map(function (c) { return srow('<span class="dot" style="--c:' + CH[c].c + '"></span>' + CH[c].full, c === "yell" ? "Read only." : (c === "shout" ? "Local area" : (c === "say" ? "Nearby" : (c === "finder" ? "Read only." : ""))), tog(S.master[c], "m." + c)); }).join("") +
     '<div class="sect">CALLS</div>' +
     srow("When a call comes in", "", segs("calls", [["off", "Off"], ["highlight", "Highlight"], ["badge", "Badge"]], S.calls)) +
     '<div class="sect">ALERTS</div>' +
@@ -1914,7 +1916,7 @@ function renderSettings() {
     '<input class="field" id="emoin" placeholder="' + esc(EMO_DEFAULT.join(", ")) + '" maxlength="400" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(S.emoticons || EMO_DEFAULT.join(", ")) + '">' +
     '<div style="display:flex;align-items:center;gap:10px"><small id="emonote" style="color:var(--mute);flex:1">Showing: ' + esc(emoList().join("  ")) + '</small><button class="linkbtn" data-act="emoreset">Reset to defaults</button></div></div>' +
     '<div class="sect">PRIVACY</div>' +
-    srow("Remember tells", "Last 50 lines per person, on the bridge. Nothing else is saved.", tog(status.save_tells, "save_tells")) +
+    srow("Remember tells", "Last 50 lines per person, on the bridge.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
     srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"]], S.skin || "midnight")) +

@@ -4,6 +4,8 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
+- Quick filter row visibility is now a saved option inside Edit view, removing the separate Filters button. Channel-colored message text defaults on for new settings; existing choices are preserved. LS2 defaults to #06ED00. Shortened Yell and saved-tell descriptions.
+
 - HVNM cards recognize the existing Populox announcements, with the same countdown and warning rules as VNM. VNM and HVNM timers stay separate. This only interprets text already delivered to the phone; no additional game data is captured.
 - Native channel color pickers survive live updates. Default LS2 is a deeper green; existing custom colors are preserved. Optional channel-colored message text is available in Settings.
 - Channel filters collapse behind a Filters button. Jump to latest sits below the feed instead of covering messages. Device safe-area padding is retained.
