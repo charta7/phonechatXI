@@ -401,34 +401,45 @@ body.skin-onyx .pane .inner{gap:7px}
 body.skin-onyx.compact .pane .inner{gap:2px}
 body.skin-onyx .ln{text-shadow:1px 1px 0 #000}
 body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
-/* YunaUI style: an unofficial look inspired by YunaUI by YunasXI. Colors and sizes only; none of its code or images.
+/* YunaUI style: an unofficial look inspired by YunaUI by Yunas. Colors and sizes only; none of its code or images.
    Near-black with a violet tint, periwinkle accents, a pink highlight for mentions. */
-body.skin-yuna{--bg:#161925;--pane:#100f19;--raise:#1b1f30;--chip:#2D3245;--line:#262b3d;--edge:#363c58;--edge2:#454c72;
-  --text:#E8EBF4;--soft:#cdd2e4;--mute:#8B93AA;--gold:#7D8EFF;--ink:#0e0b14;--serif:var(--sans);
+body.skin-yuna{--bg:#161925;--pane:#100f19;--raise:#1b1f30;--chip:#2D3245;--line:#22263a;--edge:#2f3550;--edge2:#3a4166;
+  --text:#E8EBF4;--soft:#cdd2e4;--mute:#8B93AA;--gold:#7D8EFF;--ink:#1a0d24;--serif:var(--sans);
   --vent:#9EEBC7;--sys:#FFF2D1;--bad:#FF59A6;--badbg:#2a1226;--badedge:#5a2a50}
-body.skin-yuna .pane{border:1px solid #2a2f45;border-radius:10px;box-shadow:none}
+/* His AvantGarde-style font is used everywhere in YunaUI, so it is here too (unless Font is set to Classic). */
+body.skin-yuna.font-readable{--sans:'TeX Gyre Adventor','Atkinson Hyperlegible',system-ui,-apple-system,sans-serif}
+/* The chat panel: near-black with a hint of violet, a fine lavender edge with a soft glow (his "Panel border"). */
+body.skin-yuna .pane{border:1px solid rgba(189,168,242,.28);border-radius:10px;box-shadow:0 0 14px rgba(189,168,242,.10),inset 0 0 0 1px rgba(14,11,20,.6)}
 body.skin-yuna .pane .inner{gap:9px}
 body.skin-yuna.compact .pane .inner{gap:3px}
 body.skin-yuna .rail{width:3px}
-body.skin-yuna .rhead .t,body.skin-yuna .cl .t{font-size:.78em;opacity:.8}
+/* Times in their own soft lilac grey, so the words stand out. */
+body.skin-yuna .rhead .t,body.skin-yuna .cl .t{color:#9E99AD;opacity:.85}
+body.skin-yuna .rhead .t{font-size:.78em}
 body.skin-yuna .cl .t{font-size:10.5px}
-body.skin-yuna.font-readable .ln,body.skin-yuna.font-readable .rhead,body.skin-yuna.font-readable .cl .ln{font-family:'TeX Gyre Adventor',var(--sans)}
-body.skin-yuna .ln{text-shadow:0 1px 2px rgba(0,0,0,.65)}
-body.skin-yuna .big{font-weight:700;letter-spacing:.4px;color:#BDA8F2}
+body.skin-yuna.font-readable .ln{font-size:calc(var(--fs)*.95)}
+/* A thin dark outline round the letters, as his chat draws it. */
+body.skin-yuna .ln,body.skin-yuna .rhead b{text-shadow:0 0 1px rgba(0,0,0,.9),0 0 1px rgba(0,0,0,.9),0 1px 2px rgba(0,0,0,.6)}
+/* Titles flow from periwinkle to ice blue, like his window titles. */
+body.skin-yuna .top .big{font-weight:700;letter-spacing:.4px;background:linear-gradient(90deg,#7D8EFF,#8CE0FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+body.skin-yuna .bar .mid b{color:#E8EBF4}
 body.skin-yuna .sect{color:#BDA8F2;letter-spacing:1.2px}
+/* Mentions get the pink to magenta of his HP bars. */
 body.skin-yuna .mention{background:linear-gradient(90deg,rgba(255,92,158,.18),rgba(219,61,219,.05))}
 body.skin-yuna mark.mw{color:#FF5C9E}
-body.skin-yuna .seg button.on,body.skin-yuna .send.on{background:linear-gradient(135deg,#668CFF,#9E66FF);color:#fff}
+/* Selected buttons and Send use his "Yuna" theme: pink to violet, dark letters. */
+body.skin-yuna .seg button.on,body.skin-yuna .segs button.on,body.skin-yuna .send.on{background:linear-gradient(135deg,#FF85C2,#B385FF);color:#1a0d24}
 body.skin-yuna .tabbar button.on{color:#BDA8F2}
 body.skin-yuna .tabbar .bdg{background:linear-gradient(135deg,#FF5C9E,#DB3DDB);color:#fff}
-body.skin-yuna .chipb.on{border-color:#7D8EFF}
-body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:10px;background:#100f19}
-body.skin-yuna .emtiles button{background:#1b1f30;border-color:#363c58;box-shadow:none}
-body.skin-yuna .vcard{background:#15131f;border-color:#3b3470}
-body.skin-yuna .vzone{background:#1b1f30}
-body.skin-yuna #toast{background:#1b1f30;border-color:#454c72}
-body.skin-yuna .chips button{border-color:#454c72}
-body.skin-yuna.font-readable .ln{font-size:calc(var(--fs)*.95)}
+body.skin-yuna .chipb.on{border-color:#BDA8F2}
+body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:10px;background:#100f19;border-color:#2f3550}
+body.skin-yuna .comp textarea:focus,body.skin-yuna .comp input:focus{border-color:#BDA8F2;box-shadow:0 0 10px rgba(189,168,242,.18)}
+body.skin-yuna .emtiles button{background:#1b1f30;border-color:#2f3550;box-shadow:none}
+body.skin-yuna .vcard{background:#15131f;border-color:rgba(189,168,242,.3)}
+body.skin-yuna .vzone{background:#1b1f30;line-height:1.35}
+body.skin-yuna{line-height:1.3}
+body.skin-yuna #toast{background:#1b1f30;border-color:#3a4166}
+body.skin-yuna .chips button{border-color:#3a4166}
 @keyframes yglow{from{opacity:0;transform:translateY(6px);filter:drop-shadow(0 0 7px rgba(189,168,242,.9))}to{opacity:1;transform:none;filter:none}}
 body.skin-yuna .fresh{animation:yglow .5s ease-out}
 
@@ -774,7 +785,7 @@ function importPrefs(file) {
 }
 var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
-var SKIN_COLORS = {yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#8FD6F5"}};
+var SKIN_COLORS = {yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
@@ -2004,7 +2015,7 @@ function renderSettings() {
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
     srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"], ["yuna", "YunaUI style"]], S.skin || "midnight")) +
-    (S.skin === "yuna" ? '<div class="skinnote">Inspired by YunaUI by YunasXI. This is an unofficial look, not made or supported by YunasXI. If something looks wrong, tell Charta, not YunasXI.</div>' : "") +
+    (S.skin === "yuna" ? '<div class="skinnote">Inspired by YunaUI by Yunas. This is an unofficial look, not made or supported by Yunas. If something looks wrong, tell Charta, not Yunas.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Classic"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
@@ -2020,7 +2031,7 @@ function renderSettings() {
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta. Reviewed and approved by CatsEyeXI staff.", "") +
     srow("Build", esc(status.build || "Unknown"), "") +
-    srow("YunaUI style skin", "Inspired by YunaUI by YunasXI (github.com/YunasXI/yunaui). Unofficial: not made, endorsed or supported by YunasXI. Uses its look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
+    srow("YunaUI style skin", "Inspired by YunaUI by Yunas (github.com/YunasXI/yunaui). Unofficial: not made, endorsed or supported by Yunas. Uses its look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
     srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';
