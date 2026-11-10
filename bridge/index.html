@@ -20,6 +20,8 @@
 @font-face{font-family:'Atkinson Hyperlegible';font-weight:700;font-display:swap;src:url(/fonts/atkinson-hyperlegible-latin-700-normal.woff2) format('woff2')}
 @font-face{font-family:'Atkinson Hyperlegible';font-weight:400;font-style:italic;font-display:swap;src:url(/fonts/atkinson-hyperlegible-latin-400-italic.woff2) format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-weight:400;font-display:swap;src:url(/fonts/jetbrains-mono-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'TeX Gyre Adventor';font-weight:400;font-display:swap;src:url(/fonts/texgyreadventor-regular.otf) format('opentype')}
+@font-face{font-family:'TeX Gyre Adventor';font-weight:700;font-display:swap;src:url(/fonts/texgyreadventor-bold.otf) format('opentype')}
 @font-face{font-family:'JetBrains Mono';font-weight:700;font-display:swap;src:url(/fonts/jetbrains-mono-latin-700-normal.woff2) format('woff2')}
 :root{
   --bg:#0b1020; --pane:#0e1530; --raise:#12182f; --chip:#171f40; --line:#1d2850; --edge:#2c3a6e; --edge2:#3a4a80;
@@ -200,6 +202,7 @@ body.typing .tabbar{display:none}
 .banner .cdown{font-weight:700;font-variant-numeric:tabular-nums}
 .code{font-family:var(--mono);color:var(--gold)}
 .list{flex:1;min-height:0;overflow-y:auto;padding:0 18px 12px}
+.skinnote{margin:2px 0 8px;padding:8px 10px;border-radius:8px;background:var(--raise);border:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--soft)}
 .sect{padding:16px 0 6px;font-family:var(--serif);font-weight:600;font-size:13px;letter-spacing:1.2px;color:var(--gold)}
 .lrow{display:flex;gap:14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
 .av{flex:none;width:46px;height:46px;border-radius:50%;background:#2a1a3a;border:2px solid var(--tell);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;color:var(--tell)}
@@ -398,6 +401,36 @@ body.skin-onyx .pane .inner{gap:7px}
 body.skin-onyx.compact .pane .inner{gap:2px}
 body.skin-onyx .ln{text-shadow:1px 1px 0 #000}
 body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
+/* YunaUI style: an unofficial look inspired by YunaUI by YunasXI. Colors and sizes only; none of its code or images.
+   Near-black with a violet tint, periwinkle accents, a pink highlight for mentions. */
+body.skin-yuna{--bg:#161925;--pane:#100f19;--raise:#1b1f30;--chip:#2D3245;--line:#262b3d;--edge:#363c58;--edge2:#454c72;
+  --text:#E8EBF4;--soft:#cdd2e4;--mute:#8B93AA;--gold:#7D8EFF;--ink:#0e0b14;--serif:var(--sans);
+  --vent:#9EEBC7;--sys:#FFF2D1;--bad:#FF59A6;--badbg:#2a1226;--badedge:#5a2a50}
+body.skin-yuna .pane{border:1px solid #2a2f45;border-radius:10px;box-shadow:none}
+body.skin-yuna .pane .inner{gap:9px}
+body.skin-yuna.compact .pane .inner{gap:3px}
+body.skin-yuna .rail{width:3px}
+body.skin-yuna .rhead .t,body.skin-yuna .cl .t{font-size:.78em;opacity:.8}
+body.skin-yuna .cl .t{font-size:10.5px}
+body.skin-yuna.font-readable .ln,body.skin-yuna.font-readable .rhead,body.skin-yuna.font-readable .cl .ln{font-family:'TeX Gyre Adventor',var(--sans)}
+body.skin-yuna .ln{text-shadow:0 1px 2px rgba(0,0,0,.65)}
+body.skin-yuna .big{font-weight:700;letter-spacing:.4px;color:#BDA8F2}
+body.skin-yuna .sect{color:#BDA8F2;letter-spacing:1.2px}
+body.skin-yuna .mention{background:linear-gradient(90deg,rgba(255,92,158,.18),rgba(219,61,219,.05))}
+body.skin-yuna mark.mw{color:#FF5C9E}
+body.skin-yuna .seg button.on,body.skin-yuna .send.on{background:linear-gradient(135deg,#668CFF,#9E66FF);color:#fff}
+body.skin-yuna .tabbar button.on{color:#BDA8F2}
+body.skin-yuna .tabbar .bdg{background:linear-gradient(135deg,#FF5C9E,#DB3DDB);color:#fff}
+body.skin-yuna .chipb.on{border-color:#7D8EFF}
+body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:10px;background:#100f19}
+body.skin-yuna .emtiles button{background:#1b1f30;border-color:#363c58;box-shadow:none}
+body.skin-yuna .vcard{background:#15131f;border-color:#3b3470}
+body.skin-yuna .vzone{background:#1b1f30}
+body.skin-yuna #toast{background:#1b1f30;border-color:#454c72}
+body.skin-yuna .chips button{border-color:#454c72}
+body.skin-yuna.font-readable .ln{font-size:calc(var(--fs)*.95)}
+@keyframes yglow{from{opacity:0;transform:translateY(6px);filter:drop-shadow(0 0 7px rgba(189,168,242,.9))}to{opacity:1;transform:none;filter:none}}
+body.skin-yuna .fresh{animation:yglow .5s ease-out}
 
 #toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
@@ -447,7 +480,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 <symbol id="i-bang" viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="15" height="15" rx="4" fill="#2a3466"/><path d="M10 5.6v5.6" stroke="#d9b45a" stroke-width="2.2" stroke-linecap="round"/><circle cx="10" cy="14.4" r="1.3" fill="#d9b45a"/></symbol>
 <symbol id="i-cmd" viewBox="0 0 20 20"><rect x="1.5" y="3" width="17" height="14" rx="3" fill="#2a3466"/><path d="M5 7.5l3.5 2.5L5 12.5M10.5 13h4.5" fill="none" stroke="#d9b45a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" fill="#8e9ac0" transform="translate(0 -1)"/></symbol>
-<symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="#d9b45a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 10l14-7-5 14-3-6z" fill="#1a1405"/></symbol>
 <symbol id="i-pen" viewBox="0 0 20 20"><path d="M3 14.5V17h2.5L15 7.5 12.5 5zM16.7 5.8a1 1 0 000-1.4l-1.1-1.1a1 1 0 00-1.4 0l-1.2 1.2 2.5 2.5z" fill="#8e9ac0"/></symbol>
 </svg>
@@ -650,7 +683,7 @@ function cleanPrefs(o) {
   o.clock = pick(o.clock, ["12", "24"], D.clock);
   o.cmdMode = pick(o.cmdMode, ["all", "ace", "cw", "wew"], D.cmdMode);
   o.cseg = pick(o.cseg, ["emote", "server"], D.cseg);
-  o.skin = pick(o.skin, ["midnight", "classic", "onyx"], D.skin);
+  o.skin = pick(o.skin, ["midnight", "classic", "onyx", "yuna"], D.skin);
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
@@ -740,7 +773,9 @@ function importPrefs(file) {
   r.readAsText(file);
 }
 var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
-function colorOf(c) { return (S.colors && S.colors[c]) || DEFAULT_COLORS[c]; }
+// A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
+var SKIN_COLORS = {yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#8FD6F5"}};
+function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
 }
@@ -772,7 +807,7 @@ document.addEventListener("pointerdown", function (e) {
 document.addEventListener("scroll", cursorHide, true);
 function applyLook() {
   applyColors();
-  ["skin-midnight", "skin-classic", "skin-onyx", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
+  ["skin-midnight", "skin-classic", "skin-onyx", "skin-yuna", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
   if (S.font !== "classic") S.font = "readable";
   document.body.classList.add("skin-" + (S.skin || "midnight"), "font-" + S.font);
   document.body.classList.toggle("compact", S.density === "compact");
@@ -1968,7 +2003,8 @@ function renderSettings() {
     srow("Remember tells", "Last 50 lines per person, on the bridge.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
-    srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"]], S.skin || "midnight")) +
+    srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"], ["yuna", "YunaUI style"]], S.skin || "midnight")) +
+    (S.skin === "yuna" ? '<div class="skinnote">Inspired by YunaUI by YunasXI. This is an unofficial look, not made or supported by YunasXI. If something looks wrong, tell Charta, not YunasXI.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Classic"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
@@ -1984,6 +2020,7 @@ function renderSettings() {
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta. Reviewed and approved by CatsEyeXI staff.", "") +
     srow("Build", esc(status.build || "Unknown"), "") +
+    srow("YunaUI style skin", "Inspired by YunaUI by YunasXI (github.com/YunasXI/yunaui). Unofficial: not made, endorsed or supported by YunasXI. Uses its look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
     srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';

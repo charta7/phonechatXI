@@ -1,10 +1,11 @@
-# build 20261109-005439
+# build 20261111-063038
 README.md
 bridge.py
 commands.json
 fonts/LICENSE-atkinson-hyperlegible.txt
 fonts/LICENSE-cinzel.txt
 fonts/LICENSE-jetbrains-mono.txt
+fonts/LICENSE-tex-gyre-adventor.txt
 fonts/atkinson-hyperlegible-latin-400-italic.woff2
 fonts/atkinson-hyperlegible-latin-400-normal.woff2
 fonts/atkinson-hyperlegible-latin-700-normal.woff2
@@ -12,6 +13,8 @@ fonts/cinzel-latin-600-normal.woff2
 fonts/cinzel-latin-700-normal.woff2
 fonts/jetbrains-mono-latin-400-normal.woff2
 fonts/jetbrains-mono-latin-700-normal.woff2
+fonts/texgyreadventor-bold.otf
+fonts/texgyreadventor-regular.otf
 icons/apple-touch-icon.png
 icons/favicon-32.png
 icons/icon-512.png
