@@ -353,6 +353,7 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 
 /* ============ Skins (look only; nothing here changes what is read or sent) ============ */
 /* Fonts */
+/* Font: Plain (stored as "classic" so saved settings carry over) */
 body.font-classic{--sans:'Trebuchet MS','Verdana','Segoe UI',system-ui,sans-serif}
 
 /* Classic: the blue game-window look. Original CSS, no game art. */
@@ -406,7 +407,7 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
 body.skin-yuna{--bg:#161925;--pane:#100f19;--raise:#1b1f30;--chip:#2D3245;--line:#22263a;--edge:#2f3550;--edge2:#3a4166;
   --text:#E8EBF4;--soft:#cdd2e4;--mute:#8B93AA;--gold:#7D8EFF;--ink:#1a0d24;--serif:var(--sans);
   --vent:#9EEBC7;--sys:#FFF2D1;--bad:#FF59A6;--badbg:#2a1226;--badedge:#5a2a50}
-/* His AvantGarde-style font is used everywhere in YunaUI, so it is here too (unless Font is set to Classic). */
+/* His AvantGarde-style font is used everywhere in YunaUI, so it is here too (unless Font is set to Plain). */
 body.skin-yuna.font-readable{--sans:'TeX Gyre Adventor','Atkinson Hyperlegible',system-ui,-apple-system,sans-serif}
 /* The chat panel: near-black with a hint of violet, a fine lavender edge with a soft glow (his "Panel border"). */
 body.skin-yuna .pane{border:1px solid rgba(189,168,242,.28);border-radius:10px;box-shadow:0 0 14px rgba(189,168,242,.10),inset 0 0 0 1px rgba(14,11,20,.6)}
@@ -2018,7 +2019,7 @@ function renderSettings() {
     '<div class="sect">APPEARANCE</div>' +
     srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"], ["yuna", "Yuna"]], S.skin || "midnight")) +
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, not Yunas.</div>' : "") +
-    srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Classic"]], S.font || "readable")) +
+    srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
     srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +

@@ -30,6 +30,7 @@ Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads 
 - When a linkshell's message of the day comes in, its old one is cleared first. A server notice arriving in between no longer loses it.
 
 ### Settings
+- The Classic font is now called "Plain", so it isn't confused with the Classic skin. If you'd picked it, it stays picked.
 - The name field shows a made-up example (faded, in italics), so it no longer looks already filled in.
 - The :) emoticons are yours to set ("Your emoticons", separated by commas, up to 20). The field starts with the defaults (^^, ^_^, :), ;), :D, :P, XD and <3), so you can add to them, and "Reset to defaults" brings them back. They open as a grid with a red × to close.
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
