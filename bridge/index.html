@@ -401,6 +401,23 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
 
 #toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
+/* Reading-first chat layout: wide draft, compact controls beneath it. */
+#viewseg{flex:0 1 auto;min-width:0}
+#viewseg button{flex:0 0 auto;padding:7px 10px}
+.views .pencil{margin-left:auto}
+#tab-chat .top{padding:6px 12px}
+#tab-chat .top .big{font-size:18px}
+#tab-chat .top .iconbtn{width:32px;height:32px}
+#tab-chat .top .pill-on{font-size:12px;padding:4px 7px}
+body.skin-classic #tab-chat .top{margin-top:4px;padding:5px 10px}
+.comp.chat{display:grid;grid-template-columns:minmax(0,1fr) auto 32px 32px;gap:5px 8px;padding:6px 12px 8px;align-items:center}
+.comp.chat textarea{grid-column:1/-1;grid-row:1;width:100%;padding:8px 12px;border-radius:10px}
+.comp.chat .chipslot{grid-column:1;grid-row:2;min-width:0}
+.comp.chat .tgt{font-size:12px;padding:4px 7px;max-width:100%;width:max-content;min-height:30px;margin:0}
+.comp.chat .left{position:static;grid-column:2;grid-row:2;font-size:11px;white-space:nowrap}
+.comp.chat .emob{grid-column:3;grid-row:2;width:30px;height:30px;margin:0}
+.comp.chat .send{grid-column:4;grid-row:2;width:32px;height:32px}
+.comp.chat .nogame{position:static;grid-column:1/-1;grid-row:3;max-width:100%;font-size:11px}
 /* Accessible controls retain visible keyboard focus and usable touch targets. */
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
@@ -1296,7 +1313,7 @@ function buildComposers() {
     stashDraft(compInput(el));
     el.innerHTML = '<span class="chipslot"></span>' + (ctx === "cmd" ? '<input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" class="mono" maxlength="400">' : '<textarea rows="1" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="400"></textarea>') + '<span class="left" hidden></span><span class="nogame" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
     var inp = compInput(el), btn = el.querySelector(".send");
-    if (ctx !== "cmd") setupEmoStrip(el, inp);
+    if (ctx !== "cmd") { el.insertBefore(inp, el.firstChild); setupEmoStrip(el, inp); }
     inp.addEventListener("input", function () {
       if (ctx !== "cmd") {
         if (/[\r\n]/.test(inp.value)) inp.value = inp.value.replace(/\s*[\r\n]+\s*/g, " ");   // a pasted line break becomes a space

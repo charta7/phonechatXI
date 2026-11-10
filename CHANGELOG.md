@@ -4,6 +4,8 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
+- Chat, channel, and tell composers use a full-width draft above compact target/emoticon/send controls. Chat header is slimmer and saved view tabs fit their labels.
+
 - Unsent drafts stay in the open page across navigation, composer rebuilds, and reconnects, separated by composer/channel/tell recipient. Reloading or closing the page clears them; they are never sent automatically or included in settings backups.
 - Build ID is visible in Settings. Keyboard focus indicators, composer labels, reduced-motion support, and readable optional channel text colors improve accessibility without enlarging view/channel controls.
 - Neutral message text is again the default for new settings; explicit existing preferences remain unchanged.
