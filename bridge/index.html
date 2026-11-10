@@ -2018,7 +2018,7 @@ function renderSettings() {
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
     srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"], ["yuna", "Yunas"]], S.skin || "midnight")) +
-    (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, not Yunas.</div>' : "") +
+    (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
@@ -2034,7 +2034,7 @@ function renderSettings() {
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta. Reviewed and approved by CatsEyeXI staff.", "") +
     srow("Build", esc(status.build || "Unknown"), "") +
-    srow("Yunas skin", "Inspired by Yunas's YunaUI (github.com/YunasXI/yunaui). Unofficial, so send any issues to Charta, not Yunas. It copies the look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
+    srow("Yunas skin", "Inspired by Yunas's YunaUI (github.com/YunasXI/yunaui). Unofficial, so send any issues to Charta, <b>not Yunas</b>. It copies the look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
     srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';
