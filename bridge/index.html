@@ -401,6 +401,9 @@ body.skin-onyx .big{font-weight:700;letter-spacing:.3px}
 
 #toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
+/* Accessible controls retain visible keyboard focus and usable touch targets. */
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body class="size-M">
@@ -575,7 +578,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: true, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: false, emote: true, finder: true}},
@@ -992,7 +995,14 @@ function fmtFinder(body) {
   if (!mm) return '<i class="pf">' + fmt(body) + "</i>";
   return '<b class="pfn">' + esc(mm[1]) + '</b> <i class="pf">' + esc(mm[2]) + ":</i> " + fmt(mm[3]);
 }
-function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return S.channelText ? '<span style="color:var(--c)">' + h + "</span>" : h; }
+function readableColor(hex) {
+  var rgb = [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
+  function lum(a) { return a.map(function (v) { v /= 255; return v <= .04045 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }).reduce(function (n, v, i) { return n + v * [.2126, .7152, .0722][i]; }, 0); }
+  var floor = lum([64, 88, 178]);
+  while ((lum(rgb) + .05) / (floor + .05) < 4.5 && rgb.some(function (v) { return v < 255; })) rgb = rgb.map(function (v) { return Math.min(255, v + 8); });
+  return "#" + rgb.map(function (v) { return v.toString(16).padStart(2, "0"); }).join("");
+}
+function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return S.channelText ? '<span style="color:' + readableColor(colorOf(m.ch)) + '">' + h + "</span>" : h; }
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
   if (m.ch === "tell" && ctx !== "thread") {
@@ -1268,9 +1278,22 @@ function growBox(el, ta) {
   if (ta.offsetHeight !== before) { pinPanes(); }
   if (document.activeElement === ta && want > max) ta.scrollTop = ta.selectionEnd >= ta.value.length ? ta.scrollHeight : ta.scrollTop;
 }
+// Drafts stay in this page only: never exported, persisted to disk, or sent automatically.
+var drafts = Object.create(null);
+function stashDraft(inp) { if (inp && inp._draftKey) drafts[inp._draftKey] = inp.value; }
+function syncDraft(inp, ctx, t) {
+  var key = ctx + ":" + t.ch + ":" + (t.peer || "").toLowerCase();
+  if (inp._draftKey === key) return;
+  stashDraft(inp); inp._draftKey = key; inp.value = drafts[key] || "";
+}
+function finishDraft(inp, key, value) {
+  if (key && drafts[key] === value) delete drafts[key];
+  if (inp._draftKey === key && inp.value === value) { inp.value = ""; inp.dispatchEvent(new Event("input")); }
+}
 function buildComposers() {
   document.querySelectorAll("[data-comp]").forEach(function (el) {
     var ctx = el.dataset.comp;
+    stashDraft(compInput(el));
     el.innerHTML = '<span class="chipslot"></span>' + (ctx === "cmd" ? '<input type="text" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" class="mono" maxlength="400">' : '<textarea rows="1" enterkeyhint="send" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="400"></textarea>') + '<span class="left" hidden></span><span class="nogame" hidden></span>' + (ctx === "cmd" ? "" : '<button class="emob" type="button" aria-label="Emoticons">:)</button>') + '<button class="send" aria-label="Send">' + ico("send", 18) + "</button>";
     var inp = compInput(el), btn = el.querySelector(".send");
     if (ctx !== "cmd") setupEmoStrip(el, inp);
@@ -1279,6 +1302,7 @@ function buildComposers() {
         if (/[\r\n]/.test(inp.value)) inp.value = inp.value.replace(/\s*[\r\n]+\s*/g, " ");   // a pasted line break becomes a space
         emoSwap(inp);
       }
+      stashDraft(inp);
       btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); growBox(el, inp);
     });
     inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(ctx, inp); } });
@@ -1339,6 +1363,10 @@ function updateComposers() {
     var ctx = el.dataset.comp, t = compTarget(ctx);
     el.querySelector(".chipslot").innerHTML = chipHtml(t, ctx);
     var inp = compInput(el);
+    syncDraft(inp, ctx, t);
+    inp.setAttribute("aria-label", placeholder(t));
+    el.querySelector(".send").classList.toggle("on", !!inp.value.trim());
+    if (el.offsetParent !== null) growBox(el, inp);
     inp.placeholder = placeholder(t);
     updateLeft(el);
     el.classList.toggle("dis", !connected && everConnected);
@@ -1411,12 +1439,12 @@ function submit(ctx, inp) {
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
   if (/^[\/!]/.test(text) && ["/", "!", "!!", "!?"].indexOf(text) < 0) { toast("Emotes and ! commands have their own tabs."); return; }
   if (sjisLen(text) > lineRoom(t)) { toast("Too long for one line. Trim it a bit."); return; }
-  var submittedValue = inp.value;
+  var submittedValue = inp.value, submittedKey = inp._draftKey;
   sending = true;
   api("/api/send", {target: t.ch, peer: t.peer || "", text: text}).then(function (j) {
     sending = false;
     if (!j.ok) { toast(j.error || "Could not send."); return; }
-    if (inp.value === submittedValue) { inp.value = ""; inp.dispatchEvent(new Event("input")); }
+    finishDraft(inp, submittedKey, submittedValue);
     (j.parts || []).forEach(function (p) {
       pend[p.pid] = {pid: p.pid, pending: true, ch: t.ch, peer: t.peer || "", body: p.text, ts: nowSec(), state: "sending", dir: "out", name: myName(), retry: {target: t.ch, peer: t.peer || "", text: p.text}};
       pendOrder.push(p.pid);
@@ -1445,6 +1473,7 @@ document.addEventListener("click", function (e) {
 // Commands
 // ------------------------------------------------------------------------------------------
 function sendCommand(text, confirmed, inp) {
+  var submittedValue = inp && inp.value, submittedKey = inp && inp._draftKey;
   sending = true;
   api("/api/command", {text: text, confirm: !!confirmed}).then(function (j) {
     sending = false;
@@ -1453,7 +1482,7 @@ function sendCommand(text, confirmed, inp) {
     cmdLog.push({ts: nowSec(), text: "→ " + text, kind: "sent"});
     cmdLog.push({ts: nowSec(), text: "Sent. Waiting on the game…", kind: "wait"});
     lastCmdAt = Date.now();
-    if (inp) { inp.value = ""; inp.dispatchEvent(new Event("input")); }
+    if (inp && submittedValue.trim() === text.trim()) finishDraft(inp, submittedKey, submittedValue);
     schedule();
   }).catch(function () { sending = false; toast("The bridge didn't answer."); });
 }
@@ -1934,6 +1963,7 @@ function renderSettings() {
     '<input type="file" id="importin" accept="application/json,.json" hidden>' +
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta. Reviewed and approved by CatsEyeXI staff.", "") +
+    srow("Build", esc(status.build || "Unknown"), "") +
     srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';

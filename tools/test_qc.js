@@ -8,7 +8,7 @@ assert.notEqual(old,c.motdKey('ls1')); console.log('PASS: changed MOTD gets a di
 let resolve;
 c={sending:false, compTarget:()=>({ch:'ls1'}), sjisLen:s=>s.length,lineRoom:()=>127,
  api:()=>new Promise(r=>resolve=r),pend:{},pendOrder:[],nowSec:()=>123,myName:()=> 'Tester',seenCount:{},schedule:()=>{},Event:class{},toast:console.log};
-vm.createContext(c); vm.runInContext(extract('function submit(', 'document.addEventListener("click", function (e) {\n  var r ='),c);
+vm.createContext(c); vm.runInContext(extract("var drafts =", "function buildComposers("),c); vm.runInContext(extract('function submit(', 'document.addEventListener("click", function (e) {\n  var r ='),c);
 const inp={value:'first message',dispatchEvent:()=>{}}; c.submit('chat',inp); inp.value='next draft'; resolve({ok:true,parts:[{pid:'123',text:'first message'}]});
 setImmediate(()=>{assert.equal(inp.value,'next draft'); console.log('PASS: pending send preserves edited draft');});
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1]; new vm.Script(script); console.log('PASS: inline JavaScript syntax');
@@ -29,3 +29,15 @@ assert.equal(h.msgs[0].zones[0].zone,'Qufim Island');assert.equal(h.msgs[1].zone
 const hv=v.vnmBuild(h.msgs);assert.equal(hv.length,1);assert.equal(hv[0].start,1000);assert.equal(hv[0].tier,'HVNM');
 assert.equal(v.vnmBuild([first,{...first,tier:'HVNM'}]).length,2);
 console.log('PASS: screenshot HVNM first/warning share timer; tiers remain separate');
+
+let d={};vm.createContext(d);vm.runInContext(extract('var drafts =','function buildComposers('),d);
+let box={value:'',dispatchEvent:()=>{}};
+d.syncDraft(box,'thread',{ch:'tell',peer:'Alice'});box.value='For Alice';d.stashDraft(box);
+d.syncDraft(box,'thread',{ch:'tell',peer:'Bob'});assert.equal(box.value,'');box.value='For Bob';
+d.syncDraft(box,'thread',{ch:'tell',peer:'Alice'});assert.equal(box.value,'For Alice');
+d.finishDraft(box,'thread:tell:bob','For Bob');assert.equal(box.value,'For Alice');
+d.syncDraft(box,'thread',{ch:'tell',peer:'Bob'});assert.equal(box.value,'');
+console.log('PASS: recipient-specific drafts restore and successful sends clear only their draft');
+vm.runInContext(extract('function readableColor(', 'function bodyHtml('),d);
+assert.notEqual(d.readableColor('#000000'),'#000000');assert.equal(d.readableColor('#ffffff'),'#ffffff');
+console.log('PASS: dark message colors lighten; white is preserved');

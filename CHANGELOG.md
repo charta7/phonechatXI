@@ -4,6 +4,10 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
+- Unsent drafts stay in the open page across navigation, composer rebuilds, and reconnects, separated by composer/channel/tell recipient. Reloading or closing the page clears them; they are never sent automatically or included in settings backups.
+- Build ID is visible in Settings. Keyboard focus indicators, composer labels, reduced-motion support, and readable optional channel text colors improve accessibility without enlarging view/channel controls.
+- Neutral message text is again the default for new settings; explicit existing preferences remain unchanged.
+
 - Link replacement now explains re-scanning and rebuilding Home Screen shortcuts on the Deck, phone, and local setup page. Authentication and capture scope are unchanged.
 
 - Quick filter row visibility is now a saved option inside Edit view, removing the separate Filters button. Channel-colored message text defaults on for new settings; existing choices are preserved. LS2 defaults to #06ED00. Shortened Yell and saved-tell descriptions.
