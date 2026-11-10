@@ -43,13 +43,13 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - An Alerts tab: Populox's VNM alerts, one card per VNM, with a 10 minute countdown from Populox's first message (the 5 minute warning doesn't change it), then POP! for a minute, mentions, server notices and, if you turn it on, bazaar visits. Tap × to clear one.
 - A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
-- Four skins (Midnight, Classic, Onyx and Yuna, an unofficial look inspired by YunaUI, with its own channel colors), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
+- Four skins (Midnight, Classic, Onyx and Yunas, an unofficial look inspired by YunaUI, with its own channel colors), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
 
 <p>
   <img src="docs/screenshots/skin-midnight.png" width="180" alt="Midnight skin">
   <img src="docs/screenshots/skin-classic.png" width="180" alt="Classic skin">
   <img src="docs/screenshots/skin-onyx.png" width="180" alt="Onyx skin">
-  <img src="docs/screenshots/skin-yuna.png" width="180" alt="Yuna skin">
+  <img src="docs/screenshots/skin-yuna.png" width="180" alt="Yunas skin">
 </p>
 
 <p>
@@ -219,7 +219,7 @@ phonechatXI is for chat: reading it on your phone and typing messages without fi
 - Built by Charta with Claude.
 - `bridge/qrcode.js` is [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) by Kazuhiko Arase (MIT).
 - The in-game QR code uses [luaqrcode](https://github.com/speedata/luaqrcode) by speedata (BSD-3), in `addon/phonechat/qrencode.lua`.
-- Yuna skin: Based on YunaUI by Yunas - https://github.com/YunasXI/yunaui
+- Yunas skin: Based on YunaUI by Yunas - https://github.com/YunasXI/yunaui
   It's inspired by Yunas's YunaUI and used with his OK. It's unofficial, so send any issues to Charta (bug reports or the Discord thread), not Yunas. It copies the look only (colors and sizes) and uses none of YunaUI's code or images.
-- Fonts: Cinzel, Atkinson Hyperlegible and JetBrains Mono on the phone page, and Cormorant SC in the logo image, all under the SIL Open Font License. TeX Gyre Adventor, used in the Yuna skin, is under the GUST Font License and shipped unchanged. License files for the bundled fonts are in `bridge/fonts/`.
+- Fonts: Cinzel, Atkinson Hyperlegible and JetBrains Mono on the phone page, and Cormorant SC in the logo image, all under the SIL Open Font License. TeX Gyre Adventor, used in the Yunas skin, is under the GUST Font License and shipped unchanged. License files for the bundled fonts are in `bridge/fonts/`.
 - The server command list and the game mode icons come from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki (as of October 2026).
