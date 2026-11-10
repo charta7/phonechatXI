@@ -4,40 +4,48 @@ Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor v
 
 ## 1.1.1 (November 2026)
 
-- Chat, channel, and tell composers use a full-width draft above compact target/emoticon/send controls. Chat header is slimmer and saved view tabs fit their labels.
+Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads less of (the first item under Fixes), and how LS1's message of the day is sorted.
 
-- Unsent drafts stay in the open page across navigation, composer rebuilds, and reconnects, separated by composer/channel/tell recipient. Reloading or closing the page clears them; they are never sent automatically or included in settings backups.
-- Build ID is visible in Settings. Keyboard focus indicators, composer labels, reduced-motion support, and readable optional channel text colors improve accessibility without enlarging view/channel controls.
-- Neutral message text is again the default for new settings; explicit existing preferences remain unchanged.
-
-- Link replacement now explains re-scanning and rebuilding Home Screen shortcuts on the Deck, phone, and local setup page. Authentication and capture scope are unchanged.
-
-- Quick filter row visibility is now a saved option inside Edit view, removing the separate Filters button. Channel-colored message text defaults on for new settings; existing choices are preserved. LS2 defaults to #06ED00. Shortened Yell and saved-tell descriptions.
-
-- HVNM cards recognize the existing Populox announcements, with the same countdown and warning rules as VNM. VNM and HVNM timers stay separate. This only interprets text already delivered to the phone; no additional game data is captured.
-- Native channel color pickers survive live updates. Default LS2 is a deeper green; existing custom colors are preserved. Optional channel-colored message text is available in Settings.
-- Channel filters collapse behind a Filters button. Jump to latest sits below the feed instead of covering messages. Device safe-area padding is retained.
-- MOTDs survive intervening server notices, and changing the end of a dismissed MOTD makes it visible again.
-- A successful chat send preserves a draft edited while the request was pending.
-
-Fixes only. It reads the same lines as 1.1.0, except one that it now reads less of (the first fix below), and how LS1's message of the day is sorted changed.
-
-- Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
-- The VNM countdown starts at Populox's first message ("Something is interrupting ventures in these zones...") and runs 10 minutes. The 5 minute warning ("Whatever's stirring... is about to reveal itself...") no longer restarts it. When it reaches zero the card shows POP! for a minute, then it's over. Each VNM gets its own card, so two or three running at once all show. If only the warning is seen (say you were zoning), the countdown counts back from it, about 4:50 left.
-- The LS1 message of the day now shows in full. LS1's comes in as a server message, and 1.1.0 pinned its first line ("LS name: set by") instead, with the message itself under server notices.
-- The pinned message of the day has an × to hide it. A linkshell with no message of the day prints nothing when you switch to it, so the old one stayed up. A hidden one stays hidden until it changes.
-- When a linkshell's message of the day comes in, its old one is cleared first.
-- The name field in Settings shows a made-up example (faded, in italics) instead of a real name, so it no longer looks already filled in.
-- The Party Finder filter is now "PF", with a "looking for members" icon instead of a magnifying glass.
-- About in Settings is shorter and up to date.
-- The QR code in Settings stays black on white even if your browser has a night mode, so it can be scanned.
-- The message box grows as you type, up to 4 lines, then scrolls inside itself, so a long line is readable while you write it. Return still sends. A line break you paste in becomes a space.
+### Chat and layout
+- The message box is full width, with the target, emoticon and send buttons in a small row under it. It grows as you type, up to 4 lines, then scrolls inside itself. Return still sends. A line break you paste in becomes a space.
+- Unsent text stays put while you move between pages, switch channels or the connection drops and comes back. Each chat, channel and tell recipient keeps its own draft. Reloading or closing the page clears them. Drafts are never sent on their own and never go in a settings backup. If you keep typing while a send is going through, the new text stays.
+- Every page has the same slim header: Chat, Tells, Emotes and Server, Alerts, Settings.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
-- The :) emoticons are yours to set in Settings ("Your emoticons", separated by commas, up to 20). The field starts with the defaults (^^, ^_^, :), ;), :D, :P, XD and <3), so you can add to them, and "Reset to defaults" brings them back. They open as a grid that grows to fit, with a red × to close.
+- "Jump to latest" sits under the feed instead of covering messages.
+- The quick filter row (LS1, LS2, Party and so on) is off by default. Turn it on in Edit view. The separate Filters button is gone.
+- View tabs fit their labels.
+- Message text is neutral by default. "Color message text by channel" in Settings turns on channel colors for the text too, and dark colors are lightened so they stay readable.
+- LS2 is now `#06ED00`. Colors you chose yourself stay as they are. The color picker stays open while new messages arrive.
+- Keyboard focus is visible, the message box is labeled for screen readers, and animations stop if your device is set to reduce motion.
+
+### Alerts
+- The VNM countdown starts at Populox's first message ("Something is interrupting ventures in these zones...") and runs 10 minutes. The 5 minute warning ("Whatever's stirring... is about to reveal itself...") no longer restarts it. At zero the card shows POP! for a minute, then it's over.
+- Each VNM gets its own card, so two or three running at once all show. If only the warning was seen (say you were zoning), the countdown counts back from it, about 4:50 left.
+- HVNM announcements get the same cards, with their own timers kept apart from VNM. This only reads text Populox already sends to the phone.
+
+### Message of the day
+- LS1's message of the day shows in full. It comes in as a server message, and 1.1.0 pinned only its first line ("LS name: set by"), with the message itself under server notices.
+- The pinned message has an × to hide it. A linkshell with no message of the day prints nothing when you switch to it, so the old one used to stay up. A hidden one stays hidden until it changes, even if only its ending changes.
+- When a linkshell's message of the day comes in, its old one is cleared first. A server notice arriving in between no longer loses it.
+
+### Settings
+- The name field shows a made-up example (faded, in italics), so it no longer looks already filled in.
+- The :) emoticons are yours to set ("Your emoticons", separated by commas, up to 20). The field starts with the defaults (^^, ^_^, :), ;), :D, :P, XD and <3), so you can add to them, and "Reset to defaults" brings them back. They open as a grid with a red × to close.
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
-- The `/pchat debug` log keeps the previous 2 MB as `debug-<Name>.old.log` when it fills up, instead of starting over, so the lines just before a problem aren't lost.
+- The Party Finder filter is now "PF", with a "looking for members" icon.
+- About is shorter and up to date. Settings now shows a Build ID, and Copy debug info includes it.
+- Replacing your phone link is explained step by step in the `/pchat` window, on the setup page, in Settings, on the "link was replaced" banner and in the README: scan the new QR, check chat connects, then remove the old Home Screen shortcut and add the new link. Old links stop working. How links are checked is unchanged.
+- The QR code in Settings stays black on white even if your browser has a night mode, so it can be scanned.
 - A settings change made just before closing the page is no longer lost. The phone's newer copy now wins over an older one on the bridge.
-- A failed tell or party line no longer shows the game's error twice. It's on the failed line only, not repeated as its own chat line.
+
+### Fixes
+- Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
+- A failed tell or party line no longer shows the game's error twice. It's on the failed line only.
+- The `/pchat debug` log keeps the previous 2 MB as `debug-<Name>.old.log` when it fills up, instead of starting over.
+- The bug report form asks for the Build ID, whether it's a fresh install or an upgrade, and the phone and browser details.
+
+### For testers
+- Release checks run automatically on GitHub (`.github/workflows/qc.yml`), and `docs/RELEASE_CHECKLIST.md` lists what to check by hand on a phone before a release. The zip's build ID is a hash of its files.
 
 ## 1.1.0 (November 2026)
 
