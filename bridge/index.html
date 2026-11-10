@@ -1071,9 +1071,7 @@ function readableColor(hex) {
 function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return S.channelText ? '<span style="color:' + readableColor(colorOf(m.ch)) + '">' + h + "</span>" : h; }
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
-  if (m.ch === "tell" && ctx !== "thread") {
-    b = m.dir === "in" ? "&gt;&gt; " + b : "&gt;&gt;" + esc(m.pending ? m.peer : m.name) + " : " + b;
-  }
+  // Tells: the normal layout puts the game's arrows in the header (Wren>> / >>Wren), so the line is just the message.
   return '<div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + b + stateHtml(m) + "</div>" + failHtml(m);
 }
 function isCallOnly(m) { return false; }   // roll-call folding removed in 1.1
@@ -1092,11 +1090,11 @@ function blocks(items, ctx) {
       while (j < items.length && isCallOnly(items[j]) && items[j].ch === m.ch && items[j].name === m.name && items[j].ts - grp[grp.length - 1].ts <= 10) { grp.push(items[j]); j++; }
       if (grp.length >= 3) { out.push({type: "burst", m: m, grp: grp}); i = j - 1; last = null; continue; }
     }
-    var who = senderOf(m), dir = m.pending ? "out" : m.dir;
-    if (ctx !== "compact" && last && last.ch === m.ch && last.who === who && last.dir === dir && m.ts - last.lastTs <= 120 && !m.calls && !last.call) {
+    var who = senderOf(m), dir = m.pending ? "out" : m.dir, peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";
+    if (ctx !== "compact" && last && last.ch === m.ch && last.who === who && last.dir === dir && last.peer === peer && m.ts - last.lastTs <= 120 && !m.calls && !last.call) {
       last.ms.push(m); last.lastTs = m.ts; continue;
     }
-    last = {type: "run", ch: m.ch, who: who, dir: dir, ms: [m], lastTs: m.ts, call: !!(m.calls && S.calls !== "off")};
+    last = {type: "run", ch: m.ch, who: who, dir: dir, peer: peer, ms: [m], lastTs: m.ts, call: !!(m.calls && S.calls !== "off")};
     out.push(last);
   }
   return out;
@@ -1109,10 +1107,13 @@ function runHead(b, ctx) {
   if (m.saved && ctx === "thread") extra += " &middot; saved";
   var whoName = b.ch === "tell" ? (m.pending ? m.peer : m.name) : (b.dir === "out" || b.ch === "emote" ? "" : (m.name || ""));
   var nameTap = ' data-who="' + esc(whoName) + '" data-ch="' + b.ch + '"';
+  // Tells read like the game: "Wren>>" for one you got, ">>Wren" for one you sent.
+  var label = esc(b.who || CH[b.ch].full);
+  if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
   if (ctx === "thread" && b.dir === "out") {
     return '<div class="rhead"><span class="t">' + extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
-  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + esc(b.who || CH[b.ch].full) + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
+  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
 }
 function replyAttr(m) {
   var peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";

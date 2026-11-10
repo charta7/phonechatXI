@@ -9,6 +9,7 @@ Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads 
 ### Chat and layout
 - The message box is full width, with the target, emoticon and send buttons in a small row under it. It grows as you type, up to 4 lines, then scrolls inside itself. Return still sends. A line break you paste in becomes a space.
 - Unsent text stays put while you move between pages, switch channels or the connection drops and comes back. Each chat, channel and tell recipient keeps its own draft. Reloading or closing the page clears them. Drafts are never sent on their own and never go in a settings backup. If you keep typing while a send is going through, the new text stays.
+- Tells in chat read like the game: `Wren>>` above a tell you got, `>>Wren` above one you sent, and the message on its own line. Before, the arrows were mixed into the message, and who you'd sent a tell to was only inside the text. The compact layout keeps the game's one-line format.
 - Every page has the same slim header: Chat, Tells, Emotes and Server, Alerts, Settings.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
 - "Jump to latest" sits under the feed instead of covering messages.
