@@ -36,3 +36,7 @@ Both tools need Python 3.7 or newer. Pass `--dir` if the bridge's folder isn't `
 ## Focused QC checks
 
 Run `node tools/test_qc.js` and `python3 tools/test_qc.py` (the latter needs `lupa`). These exercise page logic and addon parsing without connecting to the game. Native phone color pickers, keyboard layout, and Home Screen safe areas still need device checks.
+
+## Screenshots
+
+`python3 tools/screenshots.py` retakes `docs/screenshots/` from made-up chat, so no real player's words end up in an image. It starts the bridge on 127.0.0.1 with a throwaway folder (your real phonechat folder, link and settings aren't touched) and captures each page at iPhone size. Needs Node and Playwright (`npm i playwright`, then `npx playwright install chromium`).

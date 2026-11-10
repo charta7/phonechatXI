@@ -1923,9 +1923,10 @@ function renderAlerts() {
       return card(CH[m.ch].icon, "var(--" + m.ch + ", var(--soft))", esc(m.name || CH[m.ch].full), m.ts, '<div class="abody">' + bodyHtml(m) + "</div>");
     }).join("") : '<div class="empty sm">Nothing yet.</div>'));
 
-  var baz = S.bazaar ? msgs.filter(function (m) { return m.ch === "bazaar"; }).slice(-20).reverse() : [];
+  // The x hides the visits shown (remembered on the phone); a new visit shows again.
+  var baz = S.bazaar ? msgs.filter(function (m) { return m.ch === "bazaar" && !hid[noticeKey(m)]; }).slice(-20).reverse() : [];
   $("bazaar").innerHTML = S.bazaar ? '<div class="sect">BAZAAR</div>' + (baz.length ?
-    card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), m.ts); }).join("")) :
+    card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), m.ts); }).join(""), baz.map(noticeKey).join(";;")) :
     '<div class="empty sm">No visitors yet.</div>') : "";
 
   var n = msgs.filter(function (m) { return (m.ch === "server" || m.ch === "system") && !hid[noticeKey(m)]; }).reverse().slice(0, 60);

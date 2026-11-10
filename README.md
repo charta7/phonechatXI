@@ -53,18 +53,12 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 </p>
 
 <p>
-  <img src="docs/screenshots/chat-compact.png" width="180" alt="Compact layout">
-  <img src="docs/screenshots/send-to.png" width="180" alt="Choosing where to send">
-  <img src="docs/screenshots/emote-action.png" width="180" alt="Emotes view showing only emote lines">
-  <img src="docs/screenshots/ventures.png" width="180" alt="VNM alert with countdown">
+  <img src="docs/screenshots/ventures.png" width="180" alt="Alerts: VNM cards with POP! and a countdown">
+  <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
+  <img src="docs/screenshots/settings.png" width="180" alt="Settings">
 </p>
 
-<p>
-  <img src="docs/screenshots/server.png" width="180" alt="Server tab with the searchable ! command list">
-  <img src="docs/screenshots/command-confirm.png" width="180" alt="Confirm step before a command is sent">
-  <img src="docs/screenshots/settings.png" width="180" alt="Settings">
-  <img src="docs/screenshots/debug-info.png" width="180" alt="Debug info for a bug report">
-</p>
+<sub>Screenshots are made with made-up chat by `tools/screenshots.py`.</sub>
 
 ## What it won't do
 

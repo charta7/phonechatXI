@@ -41,12 +41,13 @@ Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads 
 
 ### Fixes
 - Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
+- Bazaar visits in Alerts have an × to clear them. New visits still show.
 - A failed tell or party line no longer shows the game's error twice. It's on the failed line only.
 - The `/pchat debug` log keeps the previous 2 MB as `debug-<Name>.old.log` when it fills up, instead of starting over.
 - The bug report form asks for the Build ID, whether it's a fresh install or an upgrade, and the phone and browser details.
 
 ### For testers
-- Release checks run automatically on GitHub (`.github/workflows/qc.yml`), and `docs/RELEASE_CHECKLIST.md` lists what to check by hand on a phone before a release. The zip's build ID is a hash of its files.
+- Release checks run automatically on GitHub (`.github/workflows/qc.yml`), and `docs/RELEASE_CHECKLIST.md` lists what to check by hand on a phone before a release. The zip's build ID is a hash of its files. `tools/screenshots.py` retakes the README screenshots from made-up chat.
 
 ## 1.1.0 (November 2026)
 
