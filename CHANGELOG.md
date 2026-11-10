@@ -13,7 +13,7 @@ Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads 
 - Every page has the same slim header: Chat, Tells, Emotes and Server, Alerts, Settings.
 - The hint in the message box ("Message LS2") is in faded italics, so it doesn't look like typed text.
 - "Jump to latest" sits under the feed instead of covering messages.
-- The quick filter row (LS1, LS2, Party and so on) is off by default. Turn it on in Edit view. The separate Filters button is gone.
+- The quick filter row (LS1, LS2, Party and so on) can be turned off in Edit view. It's on by default. The separate Filters button is gone.
 - View tabs fit their labels.
 - Message text is neutral by default. "Color message text by channel" in Settings turns on channel colors for the text too, and dark colors are lightened so they stay readable.
 - LS2 is now `#06ED00`. Colors you chose yourself stay as they are. The color picker stays open while new messages arrive.
