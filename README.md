@@ -23,6 +23,8 @@ There are three parts:
 
 Tested on a Steam Deck and on Windows 11, with an iPhone.
 
+**Made for phones.** The idea is to pair the game with the phone in your hand: play on the handheld or PC, read and type on the phone. The page also opens in a desktop or tablet browser, but the layout is built for a phone screen, and that's what gets tested.
+
 <p>
   <img src="docs/screenshots/chat.png" width="220" alt="Chat feed with linkshell, party, tells, say and shout">
   <img src="docs/screenshots/tell-thread.png" width="220" alt="A tell thread">
@@ -212,6 +214,7 @@ Not sure if a change counts? Ask staff first.
 phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0, and that list isn't growing. There are no plans for more commands, addon controls or macros unless CatsEyeXI staff ask for them.
 
 - Bugs: open a [bug report](../../issues/new/choose) or post in the phonechatXI thread on the CatsEyeXI Discord, and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
+- Phone bugs come first. Something that only happens in a desktop or tablet browser may wait, so say which device and browser you're on.
 - Requests are read, but most of my time goes to fixing bugs, so I can't promise a timeline. Anything that changes what it reads from the game or sends to it needs CatsEyeXI staff review first.
 
 ## Credits
