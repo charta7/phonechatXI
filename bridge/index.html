@@ -540,6 +540,10 @@ body.skin-classic .opt.sel::before{border-left-color:var(--gold);margin-right:6p
 :where(body:not(.skin-yuna)) .run.mine .rhead svg{order:-2}
 :where(body:not(.skin-yuna)) .run.mine .rhead b{order:-1}
 :where(body:not(.skin-yuna)) .run.mine .ln{text-align:left}
+/* 12. Classic: only the two windows (header, chat) carry the bright frame. Controls inside get a quieter line. */
+body.skin-classic .chipb.on,body.skin-classic .tgt,body.skin-classic .seg,body.skin-classic .segs,body.skin-classic .motd,body.skin-classic .search{border-color:rgba(226,232,255,.4)}
+body.skin-classic .comp input,body.skin-classic .comp textarea{border-color:rgba(226,232,255,.34)}
+body.skin-classic .emtiles button,body.skin-classic .emrecent button,body.skin-classic .chips button{border-color:rgba(226,232,255,.38)}
 </style>
 </head>
 <body class="size-M">
