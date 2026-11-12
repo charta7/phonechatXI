@@ -27,7 +27,7 @@ async function tab(p, t, cs) { await p.click('#tabbar [data-tab="' + t + '"]' + 
   for (const skin of ["midnight", "classic", "onyx", "yuna"]) {
     const p = await page(b, Object.assign({}, base, { skin }));
     await shot(p, "skin-" + skin);
-    if (skin === "midnight") {
+    if (skin === "classic") {   // the feature shots lead with Classic
       await shot(p, "chat");
       await tab(p, "tells"); await p.click('[data-thread="Wren"]'); await shot(p, "tell-thread");
       await p.click("#scr-thread [data-back]"); await tab(p, "cmds", "emote"); await shot(p, "emotes");
