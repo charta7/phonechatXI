@@ -15,7 +15,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - "Jump to latest" sits under the feed instead of covering messages.
 - The quick filter row (LS1, LS2, Party and so on) can be turned off in Edit view. It's on by default. The separate Filters button is gone.
 - View tabs fit their labels.
-- Message text is neutral by default. "Color message text by channel" in Settings turns on channel colors for the text too, and dark colors are lightened so they stay readable.
+- Message text is neutral by default. "Color message text" in Settings turns on channel colors for the text too, and dark colors are lightened so they stay readable.
 - LS2 is now `#06ED00`. Colors you chose yourself stay as they are. The color picker stays open while new messages arrive.
 - A tidier look on Midnight, Classic and Onyx: square corners, one window frame, fewer outlines, and gold kept for Send, POP! and the selected tab. Alerts cards lose their inner boxes. CSS only. Yunas is unchanged.
 - Keyboard focus is visible, the message box is labeled for screen readers, and animations stop if your device is set to reduce motion.
@@ -37,6 +37,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
 - A fourth skin, "Yunas": near-black with a violet tint, periwinkle and lavender accents, his pink-to-violet "Yuna" gradient on selected buttons and a pink highlight for mentions, with its own channel colors (colors you picked yourself still win, and Reset colors goes back to the skin's). It uses TeX Gyre Adventor, his AvantGarde-style font, when Font is Readable. It's inspired by Yunas's YunaUI and used with his OK. It's unofficial, so send any issues to Charta, not Yunas. It copies the look only and uses none of YunaUI's code or images, and Settings says so.
 - The Party Finder filter is now "PF", with a "looking for members" icon.
+- Shorter help text in Settings. "Your name" is now "Mentions".
 - About is shorter and up to date. Settings now shows a Build ID, and Copy debug info includes it.
 - Replacing your phone link is explained step by step in the `/pchat` window, on the setup page, in Settings, on the "link was replaced" banner and in the README: scan the new QR, check chat connects, then remove the old Home Screen shortcut and add the new link. Old links stop working. How links are checked is unchanged.
 - The QR code in Settings stays black on white even if your browser has a night mode, so it can be scanned.
