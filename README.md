@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 is a fixes and looks update on top of it: it sends the same lines and reads one fewer. It's the version to use. See the [changelog](CHANGELOG.md).
+> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 builds on it with fixes, looks and a few phone-side features. It sends the same lines and reads nothing new, so it hasn't been back to staff. It's the version to use. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -64,7 +64,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 
 ## What it won't do
 
-- Automate anything. Every line, emote or command is one tap from you. No auto-replies, timers, repeats or macros, and nothing reacts to chat. Mentions only highlight.
+- Automate anything. Every line, emote or command is one tap from you. No auto-replies, repeats or macros, and nothing is sent on a timer or in reaction to chat. Mentions only highlight, and the VNM countdown only shows on your phone.
 - Take game actions. `/ma`, `/ja`, `/ws`, `/item`, `/attack`, `/follow`, targeting and movement are blocked, and so are target tokens like `<st>` in a chat line.
 - Use `/yell`.
 - Split messages. One tap sends one line of 130 bytes at most, counted on the whole typed line (so about 127 letters on a linkshell, fewer for a tell or Japanese text), and no more than one line per second.

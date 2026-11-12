@@ -1,10 +1,10 @@
 # Changelog
 
-Versioning: a patch (like 1.1.1) is fixes and looks only, listed here. A minor version (like 1.2.0) changes what phonechatXI reads, sends or does, and goes to staff for review first; it isn't released until they sign off.
+Versioning: a patch (like 1.1.1) is fixes, looks and phone-side changes that read and send nothing new, listed here. A minor version (like 1.2.0) changes what phonechatXI reads from the game or sends to it, and goes to staff for review first; it isn't released until they sign off.
 
 ## 1.1.1 (November 2026)
 
-Fixes and looks only. It reads the same lines as 1.1.0, except one it now reads less of (the first item under Fixes), and how LS1's message of the day is sorted.
+Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM cards, the Yunas skin). It sends the same lines as 1.1.0 and reads nothing new: one kind of line it now reads less of (the first item under Fixes), and LS1's message of the day is sorted differently.
 
 ### Chat and layout
 - The message box is full width, with the target, emoticon and send buttons in a small row under it. It grows as you type, up to 4 lines, then scrolls inside itself. Return still sends. A line break you paste in becomes a space.
