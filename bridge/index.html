@@ -522,10 +522,13 @@ body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,
 :where(body) .fresh{animation:pcin .1s linear}
 @keyframes pcpop{50%{opacity:.55}}
 :where(body) .vpop{animation:pcpop 1s ease-in-out infinite}
-/* 9. One way to show "selected": the gold caret to its left, bobbing like the game's cursor. */
+/* 9. The gold caret is the cursor. A list (Send To) has one, on the current choice. A segment shows
+      it only on the one you just tapped, then it fades; the fill and bold text mark what's selected. */
 @keyframes pcbob{50%{transform:translateX(-4px)}}
+@keyframes pctap{0%{opacity:0;transform:translateX(-3px)}12%{opacity:1;transform:none}32%{transform:translateX(2px)}52%{transform:none}72%{opacity:1;transform:translateX(2px)}100%{opacity:0;transform:none}}
+:where(body) :is(.seg,.segs) button{position:relative}
 :where(body) :is(.seg,.segs) button.on{box-shadow:none}
-:where(body) :is(.seg,.segs) button.on::before,
+:where(body) :is(.seg,.segs) button.on.tap::before{content:"";position:absolute;left:2px;top:50%;margin-top:-4px;width:0;height:0;border-left:5px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);opacity:0;animation:pctap 1.3s ease-in-out}
 :where(body) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .8s ease-in-out infinite}
 :where(body) .opt.sel{border-color:var(--edge2)}
 body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#3b55b8,#22327a);color:#fff}
@@ -548,7 +551,7 @@ body.skin-classic .emtiles button,body.skin-classic .emrecent button,body.skin-c
 body.skin-yuna .pane{border-radius:var(--r-win)}
 body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:var(--r-ctl)}
 body.skin-yuna .vzone{background:none}
-body.skin-yuna :is(.seg,.segs) button.on::before{border-left-color:#1a0d24;filter:none}
+body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;filter:none}
 </style>
 </head>
 <body class="size-M">
@@ -1319,6 +1322,18 @@ document.addEventListener("click", function (e) {
 });
 
 // ------------------------------------------------------------------------------------------
+// The caret shows on the segment you just tapped, then fades (CSS .tap). Looks only: marks one button.
+document.addEventListener("click", function (e) {
+  var b = e.target.closest(".seg button,.segs button");
+  if (!b) return;
+  var bi = [].indexOf.call(document.querySelectorAll(".seg,.segs"), b.parentNode), i = [].indexOf.call(b.parentNode.children, b);
+  setTimeout(function () {
+    var box = document.querySelectorAll(".seg,.segs")[bi], n = box && box.children[i];
+    if (!n || !n.classList.contains("on")) return;
+    n.classList.remove("tap"); void n.offsetWidth; n.classList.add("tap");
+  }, 0);
+}, true);
+
 // Chat tab pieces
 // ------------------------------------------------------------------------------------------
 function renderViews() {
