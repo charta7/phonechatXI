@@ -1418,7 +1418,8 @@ function buildComposers() {
       stashDraft(inp);
       btn.classList.toggle("on", !!inp.value.trim()); updateLeft(el); growBox(el, inp);
     });
-    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); submit(ctx, inp); } });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") { if (e.isComposing || e.keyCode === 229) return;   // Enter that confirms a Japanese (IME) conversion is not a send
+      e.preventDefault(); submit(ctx, inp); } });
     btn.addEventListener("click", function () { submit(ctx, inp); inp.focus(); });
     inp.addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); setTimeout(pinPanes, 320); });
     inp.addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) document.body.classList.remove("typing"); fitViewport(); }, 80); });

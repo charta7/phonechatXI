@@ -43,6 +43,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - A settings change made just before closing the page is no longer lost. The phone's newer copy now wins over an older one on the bridge.
 
 ### Fixes
+- With a Japanese keyboard, the Enter that confirms a conversion no longer sends the line. You press send (or Enter again) yourself.
 - Game messages that aren't chat no longer show up as a line in your chat. The auction house's "You can only place a single item or a set of 12 such items on auction." was one. Only the two failure lines the phone uses (a tell that wasn't received, and "There are no party members.") come through now.
 - Bazaar visits in Alerts have an × to clear them. New visits still show.
 - A failed tell or party line no longer shows the game's error twice. It's on the failed line only.
