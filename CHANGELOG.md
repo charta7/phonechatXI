@@ -39,6 +39,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - An emoji with no text swap gets a hint above the box ("🤔" not valid, won't appear in game), instead of quietly disappearing from the line.
 - A fourth skin, "Yunas": near-black with a violet tint, periwinkle and lavender accents, his pink-to-violet "Yuna" gradient on selected buttons and a pink highlight for mentions, with its own channel colors (colors you picked yourself still win, and Reset colors goes back to the skin's). It uses TeX Gyre Adventor, his AvantGarde-style font, when Font is Readable. It's inspired by Yunas's YunaUI and used with his OK. It's unofficial, so send any issues to Charta, not Yunas. It copies the look only and uses none of YunaUI's code or images, and Settings says so.
 - The Party Finder filter is now "PF", with a "looking for members" icon.
+- The `/pchat` window has one line under the QR code instead of two paragraphs.
 - Shorter help text in Settings. "Your name" is now "Mentions".
 - About is shorter and up to date. Settings now shows a Build ID, and Copy debug info includes it.
 - Replacing your phone link is explained step by step in the `/pchat` window, on the setup page, in Settings, on the "link was replaced" banner and in the README: scan the new QR, check chat connects, then remove the old Home Screen shortcut and add the new link. Old links stop working. How links are checked is unchanged.

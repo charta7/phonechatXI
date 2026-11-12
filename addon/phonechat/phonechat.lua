@@ -1032,8 +1032,7 @@ local function draw_config()
                     imgui.Text('(The QR code could not be drawn here.)')
                 end
                 imgui.Text(url)
-                imgui.TextWrapped('If someone saw your phone link or QR, replace it here. Old links stop working.')
-                imgui.TextWrapped('After replacing: scan the new QR, check that chat connects, then remove the old Home Screen shortcut and add the new link from your phone browser.')
+                imgui.TextWrapped('If someone else saw this link, replace it. The old one stops working, Home Screen shortcuts included.')
                 local armed = os.clock() < S.newlink_armed
                 if imgui.Button(armed and 'Click again to replace the link' or 'New phone link') then
                     if armed then
