@@ -514,6 +514,14 @@ body.skin-classic .win,body.skin-classic .pane,body.skin-classic .vcard,body.ski
   background:linear-gradient(180deg,rgba(44,62,146,.95) 0%,rgba(24,36,104,.96) 34%,rgba(14,22,70,.97) 100%)}
 body.skin-classic #sheet{border-radius:6px 6px 0 0}
 body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,.85);border-radius:6px}
+/* 8. Motion like a game window: quick and linear. The sheet opens in place, lines just appear, POP! pulses. */
+:where(body:not(.skin-yuna)) #sheet{transform:scaleY(.72);transform-origin:50% 100%;opacity:0;visibility:hidden;transition:transform .12s linear,opacity .12s linear,visibility 0s .12s}
+:where(body:not(.skin-yuna)) #sheet.on{opacity:1;visibility:visible;transition-delay:0s}
+:where(body:not(.skin-yuna)) .overlay{transition:transform .14s linear}
+@keyframes pcin{from{opacity:0}to{opacity:1}}
+:where(body:not(.skin-yuna)) .fresh{animation:pcin .1s linear}
+@keyframes pcpop{50%{opacity:.55}}
+:where(body:not(.skin-yuna)) .vpop{animation:pcpop 1s ease-in-out infinite}
 </style>
 </head>
 <body class="size-M">
