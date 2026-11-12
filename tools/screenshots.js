@@ -24,7 +24,7 @@ async function tab(p, t, cs) { await p.click('#tabbar [data-tab="' + t + '"]' + 
 (async () => {
   const b = await chromium.launch();
   const base = { watch: "Charta", quickFilters: true, bazaar: true };
-  for (const skin of ["midnight", "classic", "onyx", "yuna"]) {
+  for (const skin of ["classic", "midnight", "onyx", "yuna"]) {
     const p = await page(b, Object.assign({}, base, { skin }));
     await shot(p, "skin-" + skin);
     if (skin === "classic") {   // the feature shots lead with Classic

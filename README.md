@@ -45,11 +45,11 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, server notices and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
 - A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
-- Four skins (Midnight, Classic, Onyx and Yunas, an unofficial look inspired by YunaUI), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
+- Four skins (Classic, Midnight, Onyx and Yunas, an unofficial look inspired by YunaUI), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
 
 <p>
-  <img src="docs/screenshots/skin-midnight.png" width="180" alt="Midnight skin">
   <img src="docs/screenshots/skin-classic.png" width="180" alt="Classic skin">
+  <img src="docs/screenshots/skin-midnight.png" width="180" alt="Midnight skin">
   <img src="docs/screenshots/skin-onyx.png" width="180" alt="Onyx skin">
   <img src="docs/screenshots/skin-yuna.png" width="180" alt="Yunas skin">
 </p>

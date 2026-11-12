@@ -736,7 +736,7 @@ var DEFAULTS = {
   view: "all",
   target: {ch: "ls1", peer: ""},
   favs: ["!mog", "!points", "!dailies"],
-  colors: {}, emoteMode: "", recentEmotes: [], skin: "midnight", font: "readable",
+  colors: {}, emoteMode: "", recentEmotes: [], skin: "classic", font: "readable",
   read: {}
 };
 var freshLocal = false;
@@ -904,7 +904,7 @@ function applyLook() {
   applyColors();
   ["skin-midnight", "skin-classic", "skin-onyx", "skin-yuna", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
   if (S.font !== "classic") S.font = "readable";
-  document.body.classList.add("skin-" + (S.skin || "midnight"), "font-" + S.font);
+  document.body.classList.add("skin-" + (S.skin || "classic"), "font-" + S.font);
   document.body.classList.toggle("compact", S.density === "compact");
   document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-S", "size-M", "size-L");
@@ -2113,7 +2113,7 @@ function renderSettings() {
     srow("Remember tells", "Last 50 lines per person, on the bridge.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
-    srow("Skin", "", segs("skin", [["midnight", "Midnight"], ["classic", "Classic"], ["onyx", "Onyx"], ["yuna", "Yunas"]], S.skin || "midnight")) +
+    srow("Skin", "", segs("skin", [["classic", "Classic"], ["midnight", "Midnight"], ["onyx", "Onyx"], ["yuna", "Yunas"]], S.skin || "classic")) +
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
@@ -2321,7 +2321,7 @@ function debugText() {
     "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
-    "settings: skin " + (S.skin || "midnight") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
       ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
     "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
     "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
