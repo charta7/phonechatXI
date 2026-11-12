@@ -515,7 +515,7 @@ body.skin-classic .win,body.skin-classic .pane,body.skin-classic .vcard,body.ski
 body.skin-classic #sheet{border-radius:6px 6px 0 0}
 body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,.85);border-radius:6px}
 /* 8. Motion like a game window: quick and linear. The sheet opens in place, lines just appear, POP! pulses. */
-:where(body:not(.skin-yuna)) #sheet{transform:scaleY(.72);transform-origin:50% 100%;opacity:0;visibility:hidden;transition:transform .12s linear,opacity .12s linear,visibility 0s .12s}
+:where(body:not(.skin-yuna)) #sheet{transform:scale(.96);transform-origin:50% 100%;opacity:0;visibility:hidden;transition:transform .12s linear,opacity .12s linear,visibility 0s .12s}
 :where(body:not(.skin-yuna)) #sheet.on{opacity:1;visibility:visible;transition-delay:0s}
 :where(body:not(.skin-yuna)) .overlay{transition:transform .14s linear}
 @keyframes pcin{from{opacity:0}to{opacity:1}}
@@ -523,12 +523,12 @@ body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,
 @keyframes pcpop{50%{opacity:.55}}
 :where(body:not(.skin-yuna)) .vpop{animation:pcpop 1s ease-in-out infinite}
 /* 9. One way to show "selected": the gold caret to its left, bobbing like the game's cursor. */
-@keyframes pcbob{50%{transform:translateX(-3px)}}
+@keyframes pcbob{50%{transform:translateX(-4px)}}
 :where(body:not(.skin-yuna)) :is(.seg,.segs) button.on{box-shadow:none}
 :where(body:not(.skin-yuna)) :is(.seg,.segs) button.on::before,
-:where(body:not(.skin-yuna)) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .9s ease-in-out infinite}
+:where(body:not(.skin-yuna)) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .8s ease-in-out infinite}
 :where(body:not(.skin-yuna)) .opt.sel{border-color:var(--edge2)}
-:where(body:not(.skin-yuna)) .tabbar button.on::before{top:16px;left:calc(50% - 23px);right:auto;width:0;height:0;background:none;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .9s ease-in-out infinite}
+:where(body:not(.skin-yuna)) .tabbar button.on::before{top:16px;left:calc(50% - 23px);right:auto;width:0;height:0;background:none;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .8s ease-in-out infinite}
 body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#3b55b8,#22327a);color:#fff}
 body.skin-classic .opt.sel::before{border-left-color:var(--gold);margin-right:6px}
 /* 10. Tab and header icons follow the text color, so they light up with their tab. Symbols keep their old colors as the fallback. */
