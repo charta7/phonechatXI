@@ -522,6 +522,15 @@ body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,
 :where(body:not(.skin-yuna)) .fresh{animation:pcin .1s linear}
 @keyframes pcpop{50%{opacity:.55}}
 :where(body:not(.skin-yuna)) .vpop{animation:pcpop 1s ease-in-out infinite}
+/* 9. One way to show "selected": the gold caret to its left, bobbing like the game's cursor. */
+@keyframes pcbob{50%{transform:translateX(-3px)}}
+:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on{box-shadow:none}
+:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on::before,
+:where(body:not(.skin-yuna)) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .9s ease-in-out infinite}
+:where(body:not(.skin-yuna)) .opt.sel{border-color:var(--edge2)}
+:where(body:not(.skin-yuna)) .tabbar button.on::before{top:16px;left:calc(50% - 23px);right:auto;width:0;height:0;background:none;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .9s ease-in-out infinite}
+body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#3b55b8,#22327a);color:#fff}
+body.skin-classic .opt.sel::before{border-left-color:var(--gold);margin-right:6px}
 </style>
 </head>
 <body class="size-M">
