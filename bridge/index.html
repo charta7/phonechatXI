@@ -469,6 +469,51 @@ body.skin-classic .top,body.skin-classic .bar{margin-top:4px;padding:5px 10px}
 /* Accessible controls retain visible keyboard focus and usable touch targets. */
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* ============ 1.1.1 design pass (look only; nothing here changes what is read or sent) ============
+   Square corners, one window frame, fewer outlines, gold kept for the cursor and Send.
+   :where() adds no weight, so every skin rule above still wins. Yunas is left exactly as it was. */
+:where(body:not(.skin-yuna)){--r-ctl:4px;--r-win:6px}
+/* 1. Corners */
+:where(body:not(.skin-yuna)) :is(.chipb,.tgt,.linkbtn,.dangerbtn,.cd,.pill-on,.seg,.segs,.pencil,.field,.sinput,.iconbtn,.send,.emob,.failbox,.opt .oc,.av),
+:where(body:not(.skin-yuna)) :is(.emostrip,.emrecent,.sbtns,.emtiles,.emtiles.jobs) button,
+:where(body:not(.skin-yuna)) .comp :is(textarea,input,input.mono),
+:where(body:not(.skin-yuna)) .comp.chat textarea{border-radius:var(--r-ctl)}
+:where(body:not(.skin-yuna)) :is(.pane,.motd,.banner,.acard,.vcard,.skinnote,.opt),
+:where(body:not(.skin-yuna)) #toast{border-radius:var(--r-win)}
+:where(body:not(.skin-yuna)) #sheet{border-radius:var(--r-win) var(--r-win) 0 0}
+:where(body:not(.skin-yuna)) :is(.run.out,.cl.out,.mention){border-radius:2px}
+:where(body:not(.skin-yuna)) .tog{border-radius:4px}
+:where(body:not(.skin-yuna)) .tog:after{border-radius:2px}
+:where(body:not(.skin-yuna)) .tog.on{background:color-mix(in srgb,var(--ok) 48%,#06140c)}
+/* 2. One frame: a light line, a black line outside it, a lit top edge. No inner glow. */
+:where(body:not(.skin-yuna)) .pane{background:linear-gradient(180deg,var(--raise),var(--pane) 96px);box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.07)}
+/* 3. Fewer outlines: a frame only where it says something */
+:where(body:not(.skin-yuna)) :is(.pill-on:not(.off),.iconbtn,.pencil,.emob:not(.on),.chipb:not(.on)){border-color:transparent}
+:where(body:not(.skin-yuna)) .chipb.on{border-color:var(--edge2)}
+/* 4. Gold only for Send, POP! and the selection mark */
+:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on{background:var(--chip);color:var(--text);box-shadow:inset 0 -2px 0 var(--gold)}
+:where(body:not(.skin-yuna)) .tabbar button.on{color:var(--text)}
+:where(body:not(.skin-yuna)) .tabbar button.on::before{content:"";position:absolute;top:-9px;left:30%;right:30%;height:2px;background:var(--gold)}
+:where(body:not(.skin-yuna)) .linkbtn{color:var(--soft);border-color:var(--edge2)}
+:where(body:not(.skin-yuna)) .sect{display:flex;align-items:center;gap:10px}
+:where(body:not(.skin-yuna)) :is(.sect,.emhead){font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:1.6px;color:var(--mute)}
+:where(body:not(.skin-yuna)) .sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+/* 5. Chat reads like a log: hard 1px shadow, name left, time right */
+:where(body:not(.skin-yuna)) :is(.ln,.rhead b){text-shadow:0 1px 0 rgba(0,0,0,.75)}
+:where(body:not(.skin-yuna)) .rhead{font-size:13px}
+:where(body:not(.skin-yuna)) .rhead .t{margin-left:auto;font-size:11px}
+:where(body:not(.skin-yuna)) .pane .inner{gap:9px}
+/* 6. Alerts: no boxes inside boxes */
+:where(body:not(.skin-yuna)) .vcard{padding:12px 14px;gap:8px;background:var(--raise);border-color:color-mix(in srgb,var(--vent) 40%,transparent)}
+:where(body:not(.skin-yuna)) .vpopcard{border-color:var(--gold)}
+:where(body:not(.skin-yuna)) .vzone{padding:8px 0 0;gap:10px;background:none;border-radius:0;border-top:1px solid var(--line)}
+:where(body:not(.skin-yuna)) .vgrid{width:auto;min-width:48px;height:26px;padding:0 6px;background:none;border:1px solid var(--vent);color:var(--vent);font:700 14px var(--mono);border-radius:var(--r-ctl)}
+:where(body:not(.skin-yuna)) .vzone>div:last-child>div:last-child{display:none}
+/* 7. Classic: one white frame instead of a gold one beside a white one, tighter corners, a darker top */
+body.skin-classic .win,body.skin-classic .pane,body.skin-classic .vcard,body.skin-classic .acard,body.skin-classic .banner.info{border-radius:6px;
+  background:linear-gradient(180deg,rgba(44,62,146,.95) 0%,rgba(24,36,104,.96) 34%,rgba(14,22,70,.97) 100%)}
+body.skin-classic #sheet{border-radius:6px 6px 0 0}
+body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,.85);border-radius:6px}
 </style>
 </head>
 <body class="size-M">

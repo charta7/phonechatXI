@@ -17,6 +17,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - View tabs fit their labels.
 - Message text is neutral by default. "Color message text by channel" in Settings turns on channel colors for the text too, and dark colors are lightened so they stay readable.
 - LS2 is now `#06ED00`. Colors you chose yourself stay as they are. The color picker stays open while new messages arrive.
+- A tidier look on Midnight, Classic and Onyx: square corners, one window frame, fewer outlines, and gold kept for Send, POP! and the selected tab. Alerts cards lose their inner boxes. CSS only. Yunas is unchanged.
 - Keyboard focus is visible, the message box is labeled for screen readers, and animations stop if your device is set to reduce motion.
 
 ### Alerts
