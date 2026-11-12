@@ -471,79 +471,84 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* ============ 1.1.1 design pass (look only; nothing here changes what is read or sent) ============
    Square corners, one window frame, fewer outlines, gold kept for the cursor and Send.
-   :where() adds no weight, so every skin rule above still wins. Yunas is left exactly as it was. */
-:where(body:not(.skin-yuna)){--r-ctl:4px;--r-win:6px}
+   :where() adds no weight, so every skin rule above still wins. Yunas keeps its colors, font, glow and gradients. */
+:where(body){--r-ctl:4px;--r-win:6px}
 /* 1. Corners */
-:where(body:not(.skin-yuna)) :is(.chipb,.tgt,.linkbtn,.dangerbtn,.cd,.pill-on,.seg,.segs,.pencil,.field,.sinput,.iconbtn,.send,.emob,.failbox,.opt .oc,.av,.search),
-:where(body:not(.skin-yuna)) :is(.emostrip,.emrecent,.sbtns,.chips,.emtiles,.emtiles.jobs) button,
-:where(body:not(.skin-yuna)) .comp :is(textarea,input,input.mono),
-:where(body:not(.skin-yuna)) .comp.chat textarea{border-radius:var(--r-ctl)}
-:where(body:not(.skin-yuna)) :is(.pane,.motd,.banner,.acard,.vcard,.skinnote,.opt),
-:where(body:not(.skin-yuna)) #toast{border-radius:var(--r-win)}
-:where(body:not(.skin-yuna)) #sheet{border-radius:var(--r-win) var(--r-win) 0 0}
-:where(body:not(.skin-yuna)) :is(.run.out,.cl.out,.mention){border-radius:2px}
-:where(body:not(.skin-yuna)) .tog{border-radius:4px}
-:where(body:not(.skin-yuna)) .tog:after{border-radius:2px}
-:where(body:not(.skin-yuna)) .tog.on{background:color-mix(in srgb,var(--ok) 48%,#06140c)}
+:where(body) :is(.chipb,.tgt,.linkbtn,.dangerbtn,.cd,.pill-on,.seg,.segs,.pencil,.field,.sinput,.iconbtn,.send,.emob,.failbox,.opt .oc,.av,.search),
+:where(body) :is(.emostrip,.emrecent,.sbtns,.chips,.emtiles,.emtiles.jobs) button,
+:where(body) .comp :is(textarea,input,input.mono),
+:where(body) .comp.chat textarea{border-radius:var(--r-ctl)}
+:where(body) :is(.pane,.motd,.banner,.acard,.vcard,.skinnote,.opt),
+:where(body) #toast{border-radius:var(--r-win)}
+:where(body) #sheet{border-radius:var(--r-win) var(--r-win) 0 0}
+:where(body) :is(.run.out,.cl.out,.mention){border-radius:2px}
+:where(body) .tog{border-radius:4px}
+:where(body) .tog:after{border-radius:2px}
+:where(body) .tog.on{background:color-mix(in srgb,var(--ok) 48%,#06140c)}
 /* 2. One frame: a light line, a black line outside it, a lit top edge. No inner glow. */
-:where(body:not(.skin-yuna)) .pane{background:linear-gradient(180deg,var(--raise),var(--pane) 96px);box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.07)}
+:where(body) .pane{background:linear-gradient(180deg,var(--raise),var(--pane) 96px);box-shadow:0 0 0 1px #000,inset 0 1px 0 rgba(255,255,255,.07)}
 /* 3. Fewer outlines: a frame only where it says something */
-:where(body:not(.skin-yuna)) :is(.pill-on:not(.off),.iconbtn,.pencil,.emob:not(.on),.chipb:not(.on)){border-color:transparent}
-:where(body:not(.skin-yuna)) .chipb.on{border-color:var(--edge2)}
+:where(body) :is(.pill-on:not(.off),.iconbtn,.pencil,.emob:not(.on),.chipb:not(.on)){border-color:transparent}
+:where(body) .chipb.on{border-color:var(--edge2)}
 /* 4. Gold only for Send, POP! and the selection mark */
-:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on{background:var(--chip);color:var(--text);box-shadow:inset 0 -2px 0 var(--gold)}
-:where(body:not(.skin-yuna)) .tabbar button.on{color:var(--text)}
-:where(body:not(.skin-yuna)) .tabbar button.on::before{content:"";position:absolute;top:-9px;left:30%;right:30%;height:2px;background:var(--gold)}
-:where(body:not(.skin-yuna)) .linkbtn{color:var(--soft);border-color:var(--edge2)}
-:where(body:not(.skin-yuna)) .sect{display:flex;align-items:center;gap:10px}
-:where(body:not(.skin-yuna)) :is(.sect,.emhead){font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:1.6px;color:var(--mute)}
-:where(body:not(.skin-yuna)) .sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
+:where(body) :is(.seg,.segs) button.on{background:var(--chip);color:var(--text);box-shadow:inset 0 -2px 0 var(--gold)}
+:where(body) .tabbar button.on{color:var(--text)}
+:where(body) .tabbar button.on::before{content:"";position:absolute;top:-9px;left:30%;right:30%;height:2px;background:var(--gold)}
+:where(body) .linkbtn{color:var(--soft);border-color:var(--edge2)}
+:where(body) .sect{display:flex;align-items:center;gap:10px}
+:where(body) :is(.sect,.emhead){font-family:var(--sans);font-weight:700;font-size:11.5px;letter-spacing:1.6px;color:var(--mute)}
+:where(body) .sect::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--edge),transparent)}
 /* 5. Chat reads like a log: hard 1px shadow, name left, time right */
-:where(body:not(.skin-yuna)) :is(.ln,.rhead b){text-shadow:0 1px 0 rgba(0,0,0,.75)}
-:where(body:not(.skin-yuna)) .rhead{font-size:13px}
-:where(body:not(.skin-yuna)) .rhead .t{margin-left:auto;font-size:11px}
-:where(body:not(.skin-yuna)) .pane .inner{gap:9px}
+:where(body) :is(.ln,.rhead b){text-shadow:0 1px 0 rgba(0,0,0,.75)}
+:where(body) .rhead{font-size:13px}
+:where(body) .rhead .t{margin-left:auto;font-size:11px}
+:where(body) .pane .inner{gap:9px}
 /* 6. Alerts: no boxes inside boxes */
-:where(body:not(.skin-yuna)) .vcard{padding:12px 14px;gap:8px;background:var(--raise);border-color:color-mix(in srgb,var(--vent) 40%,transparent)}
-:where(body:not(.skin-yuna)) .vpopcard{border-color:var(--gold)}
-:where(body:not(.skin-yuna)) .vzone{padding:8px 0 0;gap:10px;background:none;border-radius:0;border-top:1px solid var(--line)}
-:where(body:not(.skin-yuna)) .vgrid{width:auto;min-width:48px;height:26px;padding:0 6px;background:none;border:1px solid var(--vent);color:var(--vent);font:700 14px var(--mono);border-radius:var(--r-ctl)}
-:where(body:not(.skin-yuna)) .vzone>div:last-child>div:last-child{display:none}
+:where(body) .vcard{padding:12px 14px;gap:8px;background:var(--raise);border-color:color-mix(in srgb,var(--vent) 40%,transparent)}
+:where(body) .vpopcard{border-color:var(--gold)}
+:where(body) .vzone{padding:8px 0 0;gap:10px;background:none;border-radius:0;border-top:1px solid var(--line)}
+:where(body) .vgrid{width:auto;min-width:48px;height:26px;padding:0 6px;background:none;border:1px solid var(--vent);color:var(--vent);font:700 14px var(--mono);border-radius:var(--r-ctl)}
+:where(body) .vzone>div:last-child>div:last-child{display:none}
 /* 7. Classic: one white frame instead of a gold one beside a white one, tighter corners, a darker top */
 body.skin-classic .win,body.skin-classic .pane,body.skin-classic .vcard,body.skin-classic .acard,body.skin-classic .banner.info{border-radius:6px;
   background:linear-gradient(180deg,rgba(44,62,146,.95) 0%,rgba(24,36,104,.96) 34%,rgba(14,22,70,.97) 100%)}
 body.skin-classic #sheet{border-radius:6px 6px 0 0}
 body.skin-classic .top,body.skin-classic .bar{border:1px solid rgba(236,240,255,.85);border-radius:6px}
 /* 8. Motion like a game window: quick and linear. The sheet opens in place, lines just appear, POP! pulses. */
-:where(body:not(.skin-yuna)) #sheet{transform:scale(.96);transform-origin:50% 100%;opacity:0;visibility:hidden;transition:transform .12s linear,opacity .12s linear,visibility 0s .12s}
-:where(body:not(.skin-yuna)) #sheet.on{opacity:1;visibility:visible;transition-delay:0s}
-:where(body:not(.skin-yuna)) .overlay{transition:transform .14s linear}
+:where(body) #sheet{transform:scale(.96);transform-origin:50% 100%;opacity:0;visibility:hidden;transition:transform .12s linear,opacity .12s linear,visibility 0s .12s}
+:where(body) #sheet.on{opacity:1;visibility:visible;transition-delay:0s}
+:where(body) .overlay{transition:transform .14s linear}
 @keyframes pcin{from{opacity:0}to{opacity:1}}
-:where(body:not(.skin-yuna)) .fresh{animation:pcin .1s linear}
+:where(body) .fresh{animation:pcin .1s linear}
 @keyframes pcpop{50%{opacity:.55}}
-:where(body:not(.skin-yuna)) .vpop{animation:pcpop 1s ease-in-out infinite}
+:where(body) .vpop{animation:pcpop 1s ease-in-out infinite}
 /* 9. One way to show "selected": the gold caret to its left, bobbing like the game's cursor. */
 @keyframes pcbob{50%{transform:translateX(-4px)}}
-:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on{box-shadow:none}
-:where(body:not(.skin-yuna)) :is(.seg,.segs) button.on::before,
-:where(body:not(.skin-yuna)) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .8s ease-in-out infinite}
-:where(body:not(.skin-yuna)) .opt.sel{border-color:var(--edge2)}
+:where(body) :is(.seg,.segs) button.on{box-shadow:none}
+:where(body) :is(.seg,.segs) button.on::before,
+:where(body) .opt.sel::before{content:"";display:inline-block;flex:none;width:0;height:0;margin-right:6px;border-left:6px solid var(--gold);border-top:4px solid transparent;border-bottom:4px solid transparent;filter:drop-shadow(1px 1px 0 #000);animation:pcbob .8s ease-in-out infinite}
+:where(body) .opt.sel{border-color:var(--edge2)}
 body.skin-classic .seg button.on,body.skin-classic .segs button.on{background:linear-gradient(180deg,#3b55b8,#22327a);color:#fff}
 body.skin-classic .opt.sel::before{border-left-color:var(--gold);margin-right:6px}
 /* 10. Tab and header icons follow the text color, so they light up with their tab. Symbols keep their old colors as the fallback. */
-:where(body:not(.skin-yuna)) :is(.iconbtn,.pencil){--ico:var(--mute)}
-:where(body:not(.skin-yuna)) .tabbar button{--ico:currentColor;--icobox:transparent;--icoline:currentColor;--icofg:currentColor}
+:where(body) :is(.iconbtn,.pencil){--ico:var(--mute)}
+:where(body) .tabbar button{--ico:currentColor;--icobox:transparent;--icoline:currentColor;--icofg:currentColor}
 /* 11. A tell's conversation reads like the log: your lines on the left with the same faint wash, not right-aligned bubbles. */
-:where(body:not(.skin-yuna)) .run.mine{flex-direction:row-reverse;justify-content:flex-start;margin:0 -6px;padding:2px 6px;border-radius:2px;background:color-mix(in srgb,var(--c) 8%,transparent)}
-:where(body:not(.skin-yuna)) .run.mine .rbody{flex:1;max-width:none;align-items:stretch}
-:where(body:not(.skin-yuna)) .run.mine .rhead{justify-content:flex-start}
-:where(body:not(.skin-yuna)) .run.mine .rhead svg{order:-2}
-:where(body:not(.skin-yuna)) .run.mine .rhead b{order:-1}
-:where(body:not(.skin-yuna)) .run.mine .ln{text-align:left}
+:where(body) .run.mine{flex-direction:row-reverse;justify-content:flex-start;margin:0 -6px;padding:2px 6px;border-radius:2px;background:color-mix(in srgb,var(--c) 8%,transparent)}
+:where(body) .run.mine .rbody{flex:1;max-width:none;align-items:stretch}
+:where(body) .run.mine .rhead{justify-content:flex-start}
+:where(body) .run.mine .rhead svg{order:-2}
+:where(body) .run.mine .rhead b{order:-1}
+:where(body) .run.mine .ln{text-align:left}
 /* 12. Classic: only the two windows (header, chat) carry the bright frame. Controls inside get a quieter line. */
 body.skin-classic .chipb.on,body.skin-classic .tgt,body.skin-classic .seg,body.skin-classic .segs,body.skin-classic .motd,body.skin-classic .search{border-color:rgba(226,232,255,.4)}
 body.skin-classic .comp input,body.skin-classic .comp textarea{border-color:rgba(226,232,255,.34)}
 body.skin-classic .emtiles button,body.skin-classic .emrecent button,body.skin-classic .chips button{border-color:rgba(226,232,255,.38)}
+/* 13. Yunas follows the same shapes. Its palette, font, lavender edge, glow and pink-to-violet gradients stay. */
+body.skin-yuna .pane{border-radius:var(--r-win)}
+body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:var(--r-ctl)}
+body.skin-yuna .vzone{background:none}
+body.skin-yuna :is(.seg,.segs) button.on::before{border-left-color:#1a0d24;filter:none}
 </style>
 </head>
 <body class="size-M">
