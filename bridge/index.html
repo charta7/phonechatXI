@@ -441,8 +441,10 @@ body.skin-yuna .vzone{background:#1b1f30;line-height:1.35}
 body.skin-yuna{line-height:1.3}
 body.skin-yuna #toast{background:#1b1f30;border-color:#3a4166}
 body.skin-yuna .chips button{border-color:#3a4166}
-@keyframes yglow{from{opacity:0;transform:translateY(6px);filter:drop-shadow(0 0 7px rgba(189,168,242,.9))}to{opacity:1;transform:none;filter:none}}
-body.skin-yuna .fresh{animation:yglow .5s ease-out}
+@keyframes yin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes yglow{0%{opacity:0;transform:translateY(6px);filter:drop-shadow(0 0 5px rgba(189,168,242,.6))}22%{opacity:1;transform:none;filter:drop-shadow(0 0 5px rgba(189,168,242,.55))}100%{opacity:1;transform:none;filter:drop-shadow(0 0 5px rgba(189,168,242,0))}}
+body.skin-yuna .fresh{animation:yin .2s ease-out}
+body.skin-yuna .fresh.lull{animation:yglow 1.2s ease-out}
 
 #toast{position:absolute;left:16px;right:16px;bottom:calc(90px + var(--safe-b));z-index:70;background:#241f3d;border:1px solid #5a4620;color:var(--text);border-radius:12px;padding:10px 14px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
@@ -1282,6 +1284,9 @@ function renderPane(id, items, ctx, emptyText) {
   if (!first && items.length > before && atBottom) {
     var all = inner.querySelectorAll("[data-k]"), n = Math.min(items.length - before, 6);
     for (var j = Math.max(0, all.length - n); j < all.length; j++) all[j].classList.add("fresh");
+    // Looks only: the newest line is marked when chat had been quiet, so a skin can glow for it and stay calm in busy chat.
+    if (all.length && Date.now() - (pane._lastNew || 0) > 5000) all[all.length - 1].classList.add("lull");
+    pane._lastNew = Date.now();
   }
   var jump = document.querySelector('[data-jump="' + id + '"]');
   if (atBottom || first) {
