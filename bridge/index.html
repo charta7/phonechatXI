@@ -474,8 +474,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{
    :where() adds no weight, so every skin rule above still wins. Yunas is left exactly as it was. */
 :where(body:not(.skin-yuna)){--r-ctl:4px;--r-win:6px}
 /* 1. Corners */
-:where(body:not(.skin-yuna)) :is(.chipb,.tgt,.linkbtn,.dangerbtn,.cd,.pill-on,.seg,.segs,.pencil,.field,.sinput,.iconbtn,.send,.emob,.failbox,.opt .oc,.av),
-:where(body:not(.skin-yuna)) :is(.emostrip,.emrecent,.sbtns,.emtiles,.emtiles.jobs) button,
+:where(body:not(.skin-yuna)) :is(.chipb,.tgt,.linkbtn,.dangerbtn,.cd,.pill-on,.seg,.segs,.pencil,.field,.sinput,.iconbtn,.send,.emob,.failbox,.opt .oc,.av,.search),
+:where(body:not(.skin-yuna)) :is(.emostrip,.emrecent,.sbtns,.chips,.emtiles,.emtiles.jobs) button,
 :where(body:not(.skin-yuna)) .comp :is(textarea,input,input.mono),
 :where(body:not(.skin-yuna)) .comp.chat textarea{border-radius:var(--r-ctl)}
 :where(body:not(.skin-yuna)) :is(.pane,.motd,.banner,.acard,.vcard,.skinnote,.opt),
