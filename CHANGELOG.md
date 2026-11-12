@@ -19,6 +19,7 @@ Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM car
 - LS2 is now `#06ED00`. Colors you chose yourself stay as they are. The color picker stays open while new messages arrive.
 - A tidier look on Midnight, Classic and Onyx: square corners, one window frame, fewer outlines, and gold kept for Send, POP! and the selected tab. Alerts cards lose their inner boxes. CSS only. Yunas is unchanged.
 - The selected view, option and tab are marked with a small gold caret, like the game's cursor. Sheets open in place instead of sliding up, new lines appear without sliding, and POP! pulses. Tab icons follow the text color. Not on Yunas.
+- A tell's conversation keeps your lines on the left with a faint tint, like the main chat, instead of right-aligned.
 - Keyboard focus is visible, the message box is labeled for screen readers, and animations stop if your device is set to reduce motion.
 
 ### Alerts

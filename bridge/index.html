@@ -534,6 +534,13 @@ body.skin-classic .opt.sel::before{border-left-color:var(--gold);margin-right:6p
 /* 10. Tab and header icons follow the text color, so they light up with their tab. Symbols keep their old colors as the fallback. */
 :where(body:not(.skin-yuna)) :is(.iconbtn,.pencil){--ico:var(--mute)}
 :where(body:not(.skin-yuna)) .tabbar button{--ico:currentColor;--icobox:transparent;--icoline:currentColor;--icofg:currentColor}
+/* 11. A tell's conversation reads like the log: your lines on the left with the same faint wash, not right-aligned bubbles. */
+:where(body:not(.skin-yuna)) .run.mine{flex-direction:row-reverse;justify-content:flex-start;margin:0 -6px;padding:2px 6px;border-radius:2px;background:color-mix(in srgb,var(--c) 8%,transparent)}
+:where(body:not(.skin-yuna)) .run.mine .rbody{flex:1;max-width:none;align-items:stretch}
+:where(body:not(.skin-yuna)) .run.mine .rhead{justify-content:flex-start}
+:where(body:not(.skin-yuna)) .run.mine .rhead svg{order:-2}
+:where(body:not(.skin-yuna)) .run.mine .rhead b{order:-1}
+:where(body:not(.skin-yuna)) .run.mine .ln{text-align:left}
 </style>
 </head>
 <body class="size-M">
