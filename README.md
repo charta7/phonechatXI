@@ -108,16 +108,16 @@ The addon puts the bridge in `<Ashita>\config\addons\phonechat\` (on VanaCore, `
 ### Updating
 
 1. Close the game.
-2. In the CatsEye launcher, remove phonechat, then use Add New Addon and pick the new zip.
+2. In the CatsEye launcher, use Add New Addon and pick the new zip. It replaces the old one.
 3. Start the game and the bridge as usual. The bridge updates itself.
 
-Removing the addon doesn't lose anything. Your link, settings and saved tells live in the phonechat folder (`~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` or VanaCore's on Windows), outside the addon folder. The phone page updates itself. For a new Home Screen icon, remove the shortcut and add it again.
+Updating doesn't lose anything. Your link, settings and saved tells live in the phonechat folder (`~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` or VanaCore's on Windows), outside the addon folder. If the phone page was open during the update, it shows "phonechatXI was updated" with a Reload button. For a new Home Screen icon, remove the shortcut and add it again.
 
 If an older bridge is still running (for example, started from Desktop Mode), the addon tells you a newer one came with the update. Run `/pchat stop`, then `/pchat start`.
 
 ### Uninstall
 
-1. In game, `/pchat stop`. Then remove the addon in the launcher.
+1. In game, `/pchat stop`. Then turn the addon off in the launcher.
 2. Delete the phonechat folder: `~/phonechat/` on the Deck, `<Ashita>\config\addons\phonechat\` on Windows (`<VanaCore>\config\addons\phonechat\` on VanaCore).
 3. Remove the shortcut from your Home Screen.
 
