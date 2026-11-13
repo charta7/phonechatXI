@@ -1115,6 +1115,9 @@ ashita.events.register('d3d_present', 'phonechat_tick', function ()
         -- The bridge closes itself after the game has been gone a while (see the bridge window).
         S.next_beat = now + HEARTBEAT_EVERY
         write_file(S.dir .. 'game.heartbeat', ('%d %s'):format(now, S.name or ''))
+        -- The same note in a file of this character's own, so the bridge can tell when two characters
+        -- are running phonechat at once (they share game.heartbeat) and pause sending until one stops.
+        if S.name then write_file(S.dir .. 'game.heartbeat-' .. S.name, ('%d %s'):format(now, S.name)) end
     end
     if now >= S.next_check then
         S.next_check = now + CHECK_EVERY

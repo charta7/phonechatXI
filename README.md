@@ -155,7 +155,7 @@ If the game closes or freezes, or the addon is unloaded, the bridge window and t
 - Safari pauses the page when the phone locks or you switch apps. It catches up when you come back, as long as the bridge kept running.
 - The screen sleeps on its normal timer. Raise Auto-Lock in iPhone Settings to keep it on longer.
 - If your router gives your Deck or PC a new address, the saved link breaks. Scan the QR code again, or reserve an address for it in your router (a DHCP reservation).
-- One character at a time. If two characters are logged in and both have chat, sending pauses so a line can't come from the wrong one. It resumes about 5 minutes after only one has chat. If you dual-box, unload it on your other character with `/addon unload phonechat`.
+- One character at a time. If you dual-box, run phonechat on one character only. While it's running on two, sending pauses so a line can't come from the wrong one. Unload it on the other character with `/addon unload phonechat` and sending resumes a few seconds later.
 - No emoji in game. A few common ones turn into text as you type; any others get a note above the box and are left out.
 - Home Wi-Fi only. The link and chat aren't encrypted, so on public Wi-Fi anyone on the network could see them, and anyone with your link could read and send.
 
@@ -171,7 +171,7 @@ If the game closes or freezes, or the addon is unloaded, the bridge window and t
 | Phone says "No response from the game" | The game closed or froze, or the addon was unloaded. The bridge closes itself about 90 seconds later unless the game comes back (this is normal after quitting the game). |
 | A line says "The game didn't confirm this one" | The game didn't echo it back within a few seconds. Check in game before sending it again. |
 | A line shows a red error from the game | The game rejected it, usually a tell to someone offline or a party line with no party. The phone shows the game's own message. |
-| "Sending is paused" | Two of your characters are logged in with phonechat. Log one out, or unload it there with `/addon unload phonechat`. Sending resumes about 5 minutes after the other one last had chat. |
+| "Sending is paused" | phonechat is running on two of your characters. Log one out, or unload it there with `/addon unload phonechat`. Sending resumes a few seconds later. |
 | "Emotes and ! commands have their own tabs" | Chat lines can't start with `/` or `!` (apart from a lone `/`, `!`, `!!` or `!?`). Use the Emotes or Server tab. |
 | Someone saw your link or QR code | Make a new link (see below). The old one stops working right away. |
 | Page says "This link was replaced" | Scan the new QR code, then replace your Home Screen shortcut. |

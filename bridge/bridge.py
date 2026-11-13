@@ -76,7 +76,8 @@ SEND_QUEUE_MAX = 8              # lines waiting; more than this is refused
 CONFIRM_SECONDS = 8.0          # no echo from the game after this = "unconfirmed"
 FAIL_LINK_SECONDS = 5.0        # a mode 123 line this soon after a send = that send failed
 LINE_BYTES = 130                # FFXI's chat line limit; counted on the whole typed line, prefix included
-LIVE_SECONDS = 300              # a character with chat in this window counts as logged in
+LIVE_SECONDS = 300              # a character with chat in this window counts as logged in (older addons only)
+BEAT_FRESH_SECONDS = 8          # a character whose own heartbeat file is this fresh is running phonechat
 TELLS_KEEP = 50                 # saved lines per person
 
 TARGETS = {"ls1": "/l", "ls2": "/l2", "party": "/p", "tell": "/t", "say": "/s", "shout": "/sh"}
@@ -321,10 +322,40 @@ class Sender(threading.Thread):
         self.char = None               # character the outbox belongs to
         self.heard = {}                # character -> when their feed last had new lines
 
+    def beating(self, now):
+        """Characters running phonechat right now: each addon rewrites game.heartbeat-<name> every 2 seconds."""
+        live = []
+        for path in glob.glob(os.path.join(self.folder, "game.heartbeat-*")):
+            name = os.path.basename(path)[len("game.heartbeat-"):]
+            if not re.fullmatch(r"[A-Za-z0-9_-]{1,24}", name):
+                continue
+            try:
+                with open(path, "r", encoding="utf-8", errors="replace") as f:
+                    parts = f.read().split()
+                beat = int(parts[0])
+            except (OSError, ValueError, IndexError):
+                continue
+            self.beats_seen = True
+            if len(parts) > 1 and parts[1] == name and abs(now - beat) < BEAT_FRESH_SECONDS:
+                live.append(name)
+        return sorted(live)
+
     def check_one_char(self):
-        """Refuse to send while more than one character has had chat recently, so a line
-        can never be typed by a different character than the one you're reading."""
+        """Refuse to send while more than one character is running phonechat, so a line can never be
+        typed by a different character than the one you're reading. Returns the one character that is
+        running it, when that's known."""
         now = time.time()
+        beats = self.beating(now)
+        if getattr(self, "beats_seen", False):
+            if len(beats) > 1:
+                if beats != getattr(self, "paused_for", None):
+                    self.paused_for = beats
+                    say("Sending paused: phonechat is running on %s." % " and ".join(beats))
+                raise SendError("Sending is paused: phonechat is running on two of your characters. Unload it on one "
+                                "(/addon unload phonechat). Sending resumes a few seconds later.")
+            self.paused_for = None
+            return beats[0] if beats else None
+        # An addon from before 1.1.1 writes no per-character heartbeat: go by recent chat, as 1.1.0 did.
         live = sorted(c for c, t in list(self.heard.items()) if now - t < LIVE_SECONDS)
         if len(live) > 1:
             if live != getattr(self, "paused_for", None):
@@ -332,12 +363,14 @@ class Sender(threading.Thread):
                 say("Sending paused: %s are both logged in." % " and ".join(live))
             raise SendError("Sending is paused: two of your characters are logged in. It resumes about %d minutes "
                             "after only one has chat." % (LIVE_SECONDS // 60))
+        return None
 
     def outbox(self):
         if not self.char:
             raise SendError("The game is not connected yet (no character seen).")
-        self.check_one_char()
-        return os.path.join(self.folder, "outbox-%s.log" % self.char)
+        only = self.check_one_char()
+        # With exactly one character running phonechat, that's who types it, whichever feed was written last.
+        return os.path.join(self.folder, "outbox-%s.log" % (only or self.char))
 
     def enqueue(self, items):
         with self.lock:
