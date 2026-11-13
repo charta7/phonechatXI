@@ -939,8 +939,18 @@ function getJSON(path) {
   return fetch(path + (path.indexOf("?") < 0 ? "?" : "&") + "t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}})
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
 }
+// After an update the bridge serves a new page, but an open page (a Home Screen shortcut can stay open for days)
+// keeps running the old one. The first build this page hears is its own; a different one later means "reload".
+var pageBuild = null, pageStale = false;
 function refreshStatus() {
-  getJSON("/api/status").then(function (j) { status = j; render(); }).catch(function () {});
+  getJSON("/api/status").then(function (j) {
+    status = j;
+    if (j && typeof j.build === "string" && j.build !== "unknown") {
+      if (pageBuild === null) pageBuild = j.build;
+      else if (j.build !== pageBuild) pageStale = true;
+    }
+    render();
+  }).catch(function () {});
 }
 
 var lsName = {}, lsMotd = {};
@@ -2267,6 +2277,7 @@ function back() {
 }
 window.addEventListener("popstate", function () { if ($("sheet").classList.contains("on")) { closeSheet(); return; } if (stack.length) back(); });
 document.addEventListener("click", function (e) {
+  if (e.target.closest("[data-reload]")) { location.reload(); return; }
   if (e.target.closest("[data-tipok]")) { S.tipSeen = true; save(); render(); return; }
   if (e.target.closest("[data-bandis]")) { S.tellsBan = true; save(); render(); return; }
   var g = e.target.closest("[data-go]");
@@ -2387,6 +2398,9 @@ function banner() {
   }
   if (!connected && !everConnected && Date.now() - offlineSince > 4000) {
     return '<div class="banner bad"><b>Can\'t reach the bridge</b>Same Wi-Fi as the Deck or PC? Is the bridge on?</div>';
+  }
+  if (connected && pageStale) {
+    return '<div class="banner info"><b>phonechatXI was updated</b>Reload to get the new version. Unsent text is cleared. <button class="linkbtn" data-reload>Reload</button></div>';
   }
   if (connected && gameQuiet) return gameBanner();
   if (connected && !status.char) {
