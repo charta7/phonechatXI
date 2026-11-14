@@ -225,4 +225,4 @@ phonechatXI is for chat: reading it on your phone and typing messages without fi
 - Yunas skin: Based on YunaUI by Yunas - https://github.com/YunasXI/yunaui
   Inspired by YunaUI and used with his OK. It's unofficial, so send any issues to Charta, **not Yunas**. It copies the look only and uses none of YunaUI's code or images.
 - Fonts: Cinzel, Atkinson Hyperlegible and JetBrains Mono on the phone page, and Cormorant SC in the logo image, all under the SIL Open Font License. TeX Gyre Adventor, used in the Yunas skin, is under the GUST Font License and shipped unchanged. License files for the bundled fonts are in `bridge/fonts/`.
-- The server command list and the game mode icons come from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki (as of October 2026).
+- The server command list and the game mode icons come from the [CatsEyeXI Commands](https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands) page on BG-Wiki and the server's patch notes (as of November 2026).
