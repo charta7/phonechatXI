@@ -1,5 +1,5 @@
 {
-  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-18; the !box store change is from the server's November 2026 patch notes, not on the page yet). Server commands are sent as /say !name. Adding a command changes what can be sent: it needs a staff review first, and the addon's own list (SERVER in phonechat.lua) must match this one (a test checks).",
+  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-18; !moolix and the !box store change are from the server's November 2026 patch notes, not on the page yet). Server commands are sent as /say !name. Adding a command changes what can be sent: it needs a staff review first, and the addon's own list (SERVER in phonechat.lua) must match this one (a test checks).",
   "info": {
     "artifacts": "Stronghold artifact info",
     "currency": "Dynamis, Alexandrite, H-P Bayld and Incursion currency and where it is",
@@ -14,6 +14,7 @@
     "lsstats": "Top linkshell Summit contributors (add a number)",
     "maat": "Jobs you used to beat Maat",
     "mog": "Opens the Mog House menu (cities only)",
+    "moolix": "This week's targets and which ones you've defeated",
     "pass": "Garrison pop items stored with Picklox",
     "pf": "Players looking for a party",
     "points": "Currency, Venture and Crystal Warrior points",

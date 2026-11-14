@@ -608,7 +608,7 @@ local SUBTARGETS = { 'st', 'stpc', 'stnpc', 'stpt', 'stal', 'lastst' }
 -- CatsEye ! commands (same list as the bridge's commands.json, info and action together).
 local SERVER = {}
 for c in ([[artifacts currency dailies dailykills essences fatigue help hunter incursion keys lsstats maat
-    mog pass pf points pops prestige quest re rifts rubyweather scroll skills summitcalc trials vault
+    mog moolix pass pf points pops prestige quest re rifts rubyweather scroll skills summitcalc trials vault
     ventures wspoints box chef config dawnunstuck delexp newadventurer sanction sigil signet skipfloor
     summit summitnotify summitreward venture]]):gmatch('%S+') do SERVER[c] = true end
 
