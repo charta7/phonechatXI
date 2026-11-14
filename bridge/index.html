@@ -1783,12 +1783,15 @@ $("modeseg").addEventListener("click", function (e) {
   if (!b) return;
   S.cmdMode = b.dataset.cmode; save(); renderModeSeg(); renderCmdList();
 });
-function cmdDesc(n) { return commands.info[n] || commands.action[n] || ""; }
+// Looks only: a few commands with a fixed second word get their own row, so they take one tap. The bridge already
+// allows "!box" with a word after it, so nothing new can be sent.
+var SUBCMDS = { "!box store": "Store your items in the Ephemeral Box, from anywhere in your inventory. Stand within 5 yalms of the box. Run it again if you have a lot" };
+function cmdDesc(n, t) { return SUBCMDS[t] || commands.info[n] || commands.action[n] || ""; }
 function renderCmdList() {
   var q = ($("cmdsearch").value || "").trim().toLowerCase().replace(/^!/, "");
   // The mode filter only hides rows in this list. Favorites always show, and any command can still be typed.
   function row(t, fav) {
-    var n = cmdName(t), d = cmdDesc(n), ms = cmdModes(n);
+    var n = cmdName(t), d = cmdDesc(n, t), ms = cmdModes(n);
     if (!fav && !inMode(n)) return "";
     if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
     return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
@@ -1797,7 +1800,7 @@ function renderCmdList() {
   }
   var favs = S.favs.map(function (f) { return row(f, true); }).join("");
   var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
-  var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n); }).join("");
+  var act = Object.keys(commands.action).sort().map(function (n) { return row("!" + n) + (n === "box" ? row("!box store") : ""); }).join("");
   $("cmdlist").innerHTML = (favs ? '<div class="sect">FAVORITES</div>' + favs : "") +
     (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
     (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page and the server\'s patch notes' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes. The filter only tidies this list; you can still type any command." : "") + "</div>");
@@ -1805,7 +1808,7 @@ function renderCmdList() {
 // Tapping a command always asks first. One tap on Send = one command.
 function askSend(t) {
   var n = cmdName(t), act = !!commands.action[n];
-  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(t) + '</div><div class="sfoot">' + esc(cmdDesc(n) || "CatsEye server command.") + (act ? " This one changes something in the game." : "") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(t) + '</div><div class="sfoot">' + esc(cmdDesc(n, t) || "CatsEye server command.") + (act ? (/[.!?]$/.test(cmdDesc(n, t)) ? "" : ".") + " This one changes something in the game." : "") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
     var b = e.target.closest("[data-sb]");
     if (!b) return;
     closeSheet();
