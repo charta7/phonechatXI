@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 builds on it with fixes, looks and a few phone-side features. It sends the same lines and reads nothing new, so it hasn't been back to staff. It's the version to use. See the [changelog](CHANGELOG.md).
+> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 builds on it with fixes, looks and a few phone-side features. It reads nothing new and sends the same lines, plus one new read-only command from the server's own list (`!moolix`), so it hasn't been back to staff. It's the version to use. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
