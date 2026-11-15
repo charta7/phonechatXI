@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="phonechatXI">
 <meta name="theme-color" content="#0b1020">
 <title>phonechatXI</title>
@@ -907,6 +907,9 @@ function applyLook() {
   ["skin-midnight", "skin-classic", "skin-onyx", "skin-yuna", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
   if (S.font !== "classic") S.font = "readable";
   document.body.classList.add("skin-" + (S.skin || "classic"), "font-" + S.font);
+  // Looks only: iOS colors the Home Screen app's status bar from theme-color, so it follows the skin's background.
+  var tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
+  if (tc && bg) tc.setAttribute("content", bg);
   document.body.classList.toggle("compact", S.density === "compact");
   document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-S", "size-M", "size-L");

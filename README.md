@@ -174,6 +174,7 @@ If the game closes or freezes, or the addon is unloaded, the bridge window and t
 | "Sending is paused" | phonechat is running on two of your characters. Log one out, or unload it there with `/addon unload phonechat`. Sending resumes a few seconds later. |
 | "Emotes and ! commands have their own tabs" | Chat lines can't start with `/` or `!` (apart from a lone `/`, `!`, `!!` or `!?`). Use the Emotes or Server tab. |
 | Someone saw your link or QR code | Make a new link (see below). The old one stops working right away. |
+| Top of the page is blurry in the Home Screen app (iOS 26 or later) | Remove the Home Screen shortcut and add it again from Safari. iOS keeps the old status bar setting until you do. |
 | Page says "This link was replaced" | Scan the new QR code, then replace your Home Screen shortcut. |
 | Something else | In Settings, tap Copy debug info and paste it into a [bug report](../../issues/new/choose) or the phonechatXI thread on the CatsEyeXI Discord. |
 
