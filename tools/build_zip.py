@@ -18,7 +18,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), 
 ADDON = os.path.join(ROOT, "addon", "phonechat")
 BRIDGE = os.path.join(ROOT, "bridge")
 NEVER = re.compile(r"(^|/)(config\.json|phone-settings\.json|status\.json|stop\.request|newlink\.request|"
-                   r"game\.heartbeat|addon-settings\.txt|dir\.txt|tells/.*|.*\.log|.*\.exe|.*\.dll|.*\.pyc|"
+                   r"game\.heartbeat(-.*)?|addon-settings\.txt|dir\.txt|tells/.*|.*\.log|.*\.exe|.*\.dll|.*\.pyc|"
                    r".*staff.*)$", re.I)
 
 

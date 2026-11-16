@@ -332,11 +332,16 @@ class Sender(threading.Thread):
             try:
                 with open(path, "r", encoding="utf-8", errors="replace") as f:
                     parts = f.read().split()
-                beat = int(parts[0])
-            except (OSError, ValueError, IndexError):
+                if len(parts) < 2:
+                    # Caught mid-rewrite (the addon empties the file, then writes it). Go by when it was
+                    # last touched, so a character is never missed and a send let through by mistake.
+                    beat, said = os.path.getmtime(path), name
+                else:
+                    beat, said = int(parts[0]), parts[1]
+            except (OSError, ValueError):
                 continue
             self.beats_seen = True
-            if len(parts) > 1 and parts[1] == name and abs(now - beat) < BEAT_FRESH_SECONDS:
+            if said == name and abs(now - beat) < BEAT_FRESH_SECONDS:
                 live.append(name)
         return sorted(live)
 
