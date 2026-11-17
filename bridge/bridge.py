@@ -827,9 +827,9 @@ def strip_private(prefs):
     return {k: v for k, v in prefs.items() if k not in PHONE_ONLY}
 
 
-def load_prefs(folder):
+def load_prefs(folder, name="phone-settings.json"):
     try:
-        with open(os.path.join(folder, "phone-settings.json"), "r", encoding="utf-8") as f:
+        with open(os.path.join(folder, name), "r", encoding="utf-8") as f:
             data = json.load(f)
         return strip_private(data) if isinstance(data, dict) else None
     except (OSError, ValueError):
@@ -842,6 +842,39 @@ def save_prefs(folder, prefs):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(strip_private(prefs), f)
     os.replace(tmp, path)
+
+
+PREFS_PREVIOUS = "phone-settings.previous.json"
+
+
+def keep_previous_prefs(folder, build):
+    """The first time a new build starts, keep a copy of the phone settings as they were before the update.
+
+    Settings carry over on their own; this copy is only for "Restore settings from before the update" on the
+    phone. A small marker file remembers which build last ran, so the copy is made once per update and
+    not on every start. Both files live in the phonechat folder, like the settings themselves.
+    """
+    if not build or build == "unknown":
+        return False
+    mark = os.path.join(folder, "phone-settings.build")
+    try:
+        with open(mark, "r", encoding="utf-8") as f:
+            seen = f.read().strip()
+    except OSError:
+        seen = ""
+    if seen == build:
+        return False
+    copied = False
+    try:
+        src = os.path.join(folder, "phone-settings.json")
+        if os.path.isfile(src):
+            shutil.copyfile(src, os.path.join(folder, PREFS_PREVIOUS))
+            copied = True
+        with open(mark, "w", encoding="utf-8") as f:
+            f.write(build)
+    except OSError:
+        pass
+    return copied
 
 
 def lan_ip():
@@ -1012,9 +1045,13 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/api/status":
             self.send_json(200, {"version": VERSION, "build": build_id(), "url": self.url, "boot": store.boot,
                                  "char": self.sender.char, "save_tells": self.tells.enabled,
-                                 "scrollback": store.mult})
+                                 "scrollback": store.mult,
+                                 "prev_settings": os.path.isfile(os.path.join(self.folder, PREFS_PREVIOUS))})
         elif u.path == "/api/prefs":
             self.send_json(200, {"prefs": load_prefs(self.folder)})
+        elif u.path == "/api/prefs/previous":
+            # The copy kept when this build first started. Read only: the phone decides whether to use it.
+            self.send_json(200, {"prefs": load_prefs(self.folder, PREFS_PREVIOUS)})
         elif u.path == "/api/commands":
             self.send_json(200, self.commands.public())
         else:
@@ -1211,6 +1248,7 @@ def main():
             save_prefs(folder, old_prefs)      # rewrites an older file without names in it
         except OSError:
             pass
+    keep_previous_prefs(folder, build_id())
     port = int(cfg["port"])
     url = "http://%s:%d/?t=%s" % (lan_ip(), port, cfg["token"])
 

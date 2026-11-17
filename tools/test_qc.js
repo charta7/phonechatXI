@@ -87,3 +87,29 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.deepEqual(cls,['t','t rep','t rep','t','t']);
   console.log('PASS: compact layout shows the time once per minute and again after a divider');
 }
+
+// Update note: shown once per new build on a phone that already had settings; never on a new phone or with storage blocked.
+{
+  const u={}; vm.createContext(u); vm.runInContext(extract('function seenBuild(', 'function ackBuild('),u);
+  const mk=v=>{const d={pcxi_build:v};return {getItem:k=>k in d&&d[k]!==undefined?d[k]:null,setItem:(k,x)=>{d[k]=x},d};};
+  let st=mk(undefined); assert.equal(u.seenBuild('b2',true,st),false); assert.equal(st.d.pcxi_build,'b2');
+  st=mk(undefined); assert.equal(u.seenBuild('b2',false,st),true); assert.equal(st.d.pcxi_build,undefined);
+  assert.equal(u.seenBuild('b2',false,mk('b1')),true); assert.equal(u.seenBuild('b2',false,mk('b2')),false);
+  assert.equal(u.seenBuild('b2',false,{getItem(){throw new Error('blocked')}}),false);
+  console.log('PASS: update note shows once per new build, not on a new phone or when storage is blocked');
+}
+// Settings from 1.1.0 load into this page with nothing lost, and new options get their defaults.
+{
+  const s={localStorage:{getItem:()=>null},CHAT_CH:['ls1','ls2','party','tell','say','shout','unity','yell','emote','finder'],SENDABLE:['ls1','ls2','party','tell','say','shout'],MAX_VIEWS:5};
+  vm.createContext(s); vm.runInContext(extract('var DEFAULTS =', 'var saveTimer ='),s);
+  const old={density:'compact',size:'L',calls:'badge',clock:'24',skin:'onyx',font:'classic',view:'v1',
+    views:[{id:'all',name:'All',ch:{ls1:true,ls2:true,party:true,tell:true}},{id:'v1',name:'Mine',ch:{ls1:true}}],
+    master:{ls1:true,ls2:false,party:true,tell:true,say:false,shout:false},colors:{ls1:'#123456'},favs:['!mog'],watch:'Charta',savedAt:5};
+  const m=s.merged(JSON.parse(JSON.stringify(old)));
+  for (const k of ['density','size','calls','clock','skin','font','view','watch','savedAt']) assert.equal(m[k],old[k],k);
+  assert.equal(m.views.length,2); assert.equal(m.views[1].name,'Mine'); assert.equal(m.master.ls2,false); assert.equal(m.colors.ls1,'#123456'); assert.deepEqual(Array.from(m.favs),['!mog']);
+  for (const k of Object.keys(s.DEFAULTS)) assert.notEqual(m[k],undefined,'default for '+k);
+  assert.equal(m.master.finder,s.DEFAULTS.master.finder);
+  const fresh=s.merged(null); assert.equal(fresh.skin,'classic');
+  console.log('PASS: 1.1.0-era settings load with nothing lost; options added since get their defaults');
+}

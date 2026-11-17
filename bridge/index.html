@@ -877,6 +877,30 @@ function syncPrefs() {
     else if (!b || (S.savedAt || 0) > (b.savedAt || 0)) save();
   }).catch(function () { prefsReady = true; });
 }
+// Back to how a new install starts. Mention names and tell read marks stay (they never leave this phone anyway).
+function resetPrefs() { adopt({savedAt: Date.now()}); save(); toast("Settings reset."); }
+function askReset(after) {
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">RESET SETTINGS?</div></div><div class="sfoot">Views, channels, colors, look, emoticons and starred commands go back to how a new install starts. Your mention names stay. Saved tells and your phone link aren\'t touched.</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok" style="background:var(--bad)">Reset</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    closeSheet();
+    if (b.dataset.sb === "ok") { resetPrefs(); if (after) after(); }
+  });
+}
+function askRestore() {
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">RESTORE SETTINGS?</div></div><div class="sfoot">This puts back the settings the bridge kept when it last updated, and replaces the ones you have now. Your mention names stay.</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Restore</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    closeSheet();
+    if (b.dataset.sb !== "ok") return;
+    getJSON("/api/prefs/previous").then(function (j) {
+      var o = j && j.prefs;
+      if (!o || typeof o !== "object" || !o.views) { toast("No earlier copy found."); return; }
+      o.savedAt = Date.now();
+      adopt(o); save(); toast("Settings restored.");
+    }).catch(function () { toast("The bridge didn't answer."); });
+  });
+}
 function exportPrefs() {
   var blob = new Blob([JSON.stringify(shareable(S), null, 1)], {type: "application/json"});
   var a = document.createElement("a");
@@ -981,11 +1005,25 @@ function getJSON(path) {
 // After an update the bridge serves a new page, but an open page (a Home Screen shortcut can stay open for days)
 // keeps running the old one. The first build this page hears is its own; a different one later means "reload".
 var pageBuild = null, pageStale = false;
+// A one-time note after an update: "your settings were kept". This phone remembers the last build it has
+// seen under its own key, outside the settings, so it's never exported or sent to the bridge.
+var updateNote = false;
+function seenBuild(build, freshPhone, store) {
+  var seen;
+  try { seen = store.getItem("pcxi_build"); } catch (e) { return false; }   // storage blocked: never nag
+  if (seen === build) return false;
+  if (seen === null && freshPhone) { try { store.setItem("pcxi_build", build); } catch (e) {} return false; }   // a new phone has nothing to keep
+  return true;
+}
+function ackBuild() {
+  updateNote = false;
+  try { if (pageBuild) localStorage.setItem("pcxi_build", pageBuild); } catch (e) {}
+}
 function refreshStatus() {
   getJSON("/api/status").then(function (j) {
     status = j;
     if (j && typeof j.build === "string" && j.build !== "unknown") {
-      if (pageBuild === null) pageBuild = j.build;
+      if (pageBuild === null) { pageBuild = j.build; updateNote = seenBuild(j.build, freshLocal, localStorage); }
       else if (j.build !== pageBuild) pageStale = true;
     }
     render();
@@ -2308,6 +2346,8 @@ function renderSettings() {
     '<div class="sect">BACKUP</div>' +
     srow("Your settings", "Also saved on the bridge, so a new shortcut or phone picks them up.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
     '<input type="file" id="importin" accept="application/json,.json" hidden>' +
+    (status.prev_settings ? srow("From before the last update", "The bridge kept a copy of your settings when it updated.", '<button class="linkbtn" data-act="restoreprev">Restore</button>') : "") +
+    srow("Reset settings", "Back to how a new install starts.", '<button class="dangerbtn" data-act="resetall">Reset</button>') +
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta", "") +
     srow("Build", esc(status.build || "Unknown"), "") +
@@ -2376,6 +2416,8 @@ $("settings").addEventListener("click", function (e) {
   if (a.dataset.act === "emoreset") { S.emoticons = ""; save(); refreshEmo(); render(); return; }
   if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
   if (a.dataset.act === "export") { exportPrefs(); return; }
+  if (a.dataset.act === "resetall") { askReset(); return; }
+  if (a.dataset.act === "restoreprev") { askRestore(); return; }
   if (a.dataset.act === "debug") { showDebug(); return; }
   if (a.dataset.act === "import") { $("importin").click(); return; }
   if (a.dataset.act === "qr") { showQr = !showQr; loadQr(render); render(); }
@@ -2446,6 +2488,8 @@ function back() {
 window.addEventListener("popstate", function () { if ($("sheet").classList.contains("on")) { closeSheet(); return; } if (stack.length) back(); });
 document.addEventListener("click", function (e) {
   if (e.target.closest("[data-reload]")) { location.reload(); return; }
+  if (e.target.closest("[data-updok]")) { ackBuild(); render(); return; }
+  if (e.target.closest("[data-updfresh]")) { askReset(function () { ackBuild(); }); return; }
   if (e.target.closest("[data-tipok]")) { S.tipSeen = true; save(); render(); return; }
   if (e.target.closest("[data-bandis]")) { S.tellsBan = true; save(); render(); return; }
   var g = e.target.closest("[data-go]");
@@ -2574,6 +2618,9 @@ function banner() {
   }
   if (connected && pageStale) {
     return '<div class="banner info"><b>phonechatXI was updated</b>Reload to get the new version. Unsent text is cleared. <button class="linkbtn" data-reload>Reload</button></div>';
+  }
+  if (connected && updateNote) {
+    return '<div class="banner info"><b>Updated' + (status.version ? " to " + esc(status.version) : "") + '</b>Your settings were kept. <button class="linkbtn" data-updok>OK</button><button class="linkbtn" data-updfresh>Start fresh</button></div>';
   }
   if (connected && gameQuiet) return gameBanner();
   if (connected && !status.char) {

@@ -46,3 +46,16 @@ with tempfile.TemporaryDirectory(prefix='phonechat-bridge-qc-') as folder:
     assert sender.pending[parts[0]['pid']]['state']=='failed'
     assert sender.match_failure('Unrelated message') is False
     print('PASS: bridge queues a single send, matches echo, and changes sent to failed on party error')
+
+with tempfile.TemporaryDirectory(prefix='phonechat-prefs-qc-') as folder:
+    f=pathlib.Path(folder)
+    assert bridge.keep_previous_prefs(folder,'b1') is False and (f/'phone-settings.build').read_text()=='b1'   # nothing saved yet: no copy
+    bridge.save_prefs(folder,{'skin':'onyx','watch':'Name','views':[]})
+    assert bridge.keep_previous_prefs(folder,'b1') is False and not (f/bridge.PREFS_PREVIOUS).exists()          # same build: no copy
+    assert bridge.keep_previous_prefs(folder,'b2') is True
+    bridge.save_prefs(folder,{'skin':'yuna','views':[]})
+    assert bridge.keep_previous_prefs(folder,'b2') is False                                                    # once per update
+    prev=bridge.load_prefs(folder,bridge.PREFS_PREVIOUS)
+    assert prev['skin']=='onyx' and 'watch' not in prev and bridge.load_prefs(folder)['skin']=='yuna'
+    assert bridge.keep_previous_prefs(folder,'unknown') is False
+    print('PASS: bridge keeps one copy of the phone settings per update, without names, and leaves the current ones alone')
