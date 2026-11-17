@@ -8,7 +8,7 @@ assert.notEqual(old,c.motdKey('ls1')); console.log('PASS: changed MOTD gets a di
 let resolve;
 c={sending:false, compTarget:()=>({ch:'ls1'}), sjisLen:s=>s.length,lineRoom:()=>127,
  api:()=>new Promise(r=>resolve=r),pend:{},pendOrder:[],nowSec:()=>123,myName:()=> 'Tester',seenCount:{},schedule:()=>{},Event:class{},toast:console.log};
-vm.createContext(c); vm.runInContext(extract("var drafts =", "function buildComposers("),c); vm.runInContext(extract('function submit(', 'document.addEventListener("click", function (e) {\n  var r ='),c);
+vm.createContext(c); vm.runInContext(extract("var drafts =", "function buildComposers("),c); vm.runInContext(extract('function submit(', '// Retry keeps the failed line'),c);
 const inp={value:'first message',dispatchEvent:()=>{}}; c.submit('chat',inp); inp.value='next draft'; resolve({ok:true,parts:[{pid:'123',text:'first message'}]});
 setImmediate(()=>{assert.equal(inp.value,'next draft'); console.log('PASS: pending send preserves edited draft');});
 const script=html.match(/<script>([\s\S]*?)<\/script>/)[1]; new vm.Script(script); console.log('PASS: inline JavaScript syntax');
@@ -41,3 +41,17 @@ console.log('PASS: recipient-specific drafts restore and successful sends clear 
 vm.runInContext(extract('function readableColor(', 'function bodyHtml('),d);
 assert.notEqual(d.readableColor('#000000'),'#000000');assert.equal(d.readableColor('#ffffff'),'#ffffff');
 console.log('PASS: dark message colors lighten; white is preserved');
+
+// Retry: the failed line stays until the bridge accepts the new send, and comes back as failed if it doesn't.
+(async()=>{
+  let answer; const mk=()=>{const r={pend:{},pendOrder:[],nowSec:()=>1,myName:()=>'T',schedule:()=>{},toast:()=>{},NO_ANSWER:'x',api:()=>answer()};vm.createContext(r);
+    vm.runInContext(extract('function retrySend(', 'document.addEventListener("click", function (e) {\n  var r ='),r);
+    r.pend.p1={pid:'p1',pending:true,ch:'ls1',peer:'',body:'hi',state:'failed',reason:'Not in a linkshell',retry:{target:'ls1',peer:'',text:'hi'}};return r;};
+  let r=mk(); answer=()=>Promise.reject(new Error('down')); r.retrySend('p1'); assert.equal(r.pend.p1.state,'sending');
+  await new Promise(s=>setImmediate(s)); assert.equal(r.pend.p1.state,'failed'); assert.equal(r.pend.p1.reason,'Not in a linkshell');
+  r=mk(); answer=()=>Promise.resolve({ok:false,error:'Paused'}); r.retrySend('p1'); await new Promise(s=>setImmediate(s));
+  assert.equal(r.pend.p1.state,'failed'); assert.equal(r.pend.p1.reason,'Paused');
+  r=mk(); answer=()=>Promise.resolve({ok:true,parts:[{pid:'p2',text:'hi'}]}); r.retrySend('p1'); r.retrySend('p1'); await new Promise(s=>setImmediate(s));
+  assert.equal(r.pend.p1,undefined); assert.equal(r.pend.p2.state,'sending'); assert.equal(r.pendOrder.length,1);
+  console.log('PASS: Retry keeps the line until the bridge accepts it, restores it on failure, ignores a double tap');
+})();

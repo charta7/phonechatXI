@@ -1643,20 +1643,27 @@ function submit(ctx, inp) {
     schedule();
   }).catch(function () { sending = false; toast(NO_ANSWER); });
 }
-document.addEventListener("click", function (e) {
-  var r = e.target.closest("[data-retry]");
-  if (!r) return;
-  var p = pend[r.dataset.retry];
-  if (!p) return;
-  delete pend[p.pid];
+// Retry keeps the failed line on screen until the bridge takes the new send. If the retry fails too,
+// the line goes back to "failed" with its Retry button, so the text is never lost.
+function retrySend(pid) {
+  var p = pend[pid];
+  if (!p || p.state !== "failed") return;
+  var why = p.reason;
+  function failAgain(reason) { p.state = "failed"; p.reason = reason || why; schedule(); }
+  p.state = "sending"; schedule();
   api("/api/send", p.retry).then(function (j) {
-    if (!j.ok) { toast(j.error || "Could not send."); return; }
+    if (!j.ok) { toast(j.error || "Could not send."); failAgain(j.error); return; }
+    delete pend[pid];
     (j.parts || []).forEach(function (q) {
       pend[q.pid] = {pid: q.pid, pending: true, ch: p.ch, peer: p.peer, body: q.text, ts: nowSec(), state: "sending", dir: "out", name: myName(), retry: p.retry};
       pendOrder.push(q.pid);
     });
     schedule();
-  });
+  }).catch(function () { toast(NO_ANSWER); failAgain(); });
+}
+document.addEventListener("click", function (e) {
+  var r = e.target.closest("[data-retry]");
+  if (r) retrySend(r.dataset.retry);
 });
 
 // ------------------------------------------------------------------------------------------
