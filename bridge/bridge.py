@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-phonechatXI bridge v1.1.1
+phonechatXI bridge v1.1.2
 
 Tails feed-<Character>.log files written by the phonechat addon, keeps recent
 history in memory, serves the phone page on your home network, and passes
@@ -42,7 +42,7 @@ from collections import deque
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 def build_id():

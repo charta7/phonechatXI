@@ -7,7 +7,7 @@ const old = c.motdKey('ls1'); c.lsMotd.ls1='A'.repeat(80)+' NEW';
 assert.notEqual(old,c.motdKey('ls1')); console.log('PASS: changed MOTD gets a different dismissal key');
 let resolve;
 c={sending:false, compTarget:()=>({ch:'ls1'}), sjisLen:s=>s.length,lineRoom:()=>127,
- api:()=>new Promise(r=>resolve=r),pend:{},pendOrder:[],nowSec:()=>123,myName:()=> 'Tester',seenCount:{},schedule:()=>{},Event:class{},toast:console.log};
+ api:()=>new Promise(r=>resolve=r),$:()=>null,leaveWindow:()=>{},NO_ANSWER:'x',pend:{},pendOrder:[],nowSec:()=>123,myName:()=> 'Tester',seenCount:{},schedule:()=>{},Event:class{},toast:console.log};
 vm.createContext(c); vm.runInContext(extract("var drafts =", "function buildComposers("),c); vm.runInContext(extract('function submit(', '// Retry keeps the failed line'),c);
 const inp={value:'first message',dispatchEvent:()=>{}}; c.submit('chat',inp); inp.value='next draft'; resolve({ok:true,parts:[{pid:'123',text:'first message'}]});
 setImmediate(()=>{assert.equal(inp.value,'next draft'); console.log('PASS: pending send preserves edited draft');});
@@ -55,3 +55,24 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.equal(r.pend.p1,undefined); assert.equal(r.pend.p2.state,'sending'); assert.equal(r.pendOrder.length,1);
   console.log('PASS: Retry keeps the line until the bridge accepts it, restores it on failure, ignores a double tap');
 })();
+
+// Search: every channel at once, newest first, hidden channels left out, capped; and the pane window around a hit.
+{
+  const f={CHAT_CH:['ls1','ls2','party','tell','say'],S:{master:{ls1:true,ls2:false,party:true,tell:true,say:true}},esc:s=>String(s).replace(/</g,'&lt;')};
+  vm.createContext(f); vm.runInContext(extract('function findHits(', 'function findWho('),f);
+  const L=[{id:1,ch:'ls1',name:'Wren',dir:'in',body:'anyone seen a Kraken Club?'},{id:2,ch:'system',body:'kraken'},{id:3,ch:'ls2',name:'A',dir:'in',body:'kraken'},
+    {id:4,ch:'tell',name:'Kraken',dir:'out',body:'hello'},{id:5,ch:'party',name:'Me',dir:'out',body:'no match'},{id:6,ch:'party',name:'Bo',dir:'in',body:'KRAKEN pls'}];
+  let r=f.findHits(' kraken ',L,10); assert.deepEqual(r.hits.map(h=>h.m.id),[6,4,1]); assert.equal(r.hits[0].at,0); assert.equal(r.hits[1].at,-1); assert.equal(r.more,false);
+  assert.equal(f.findHits('k',L,10).hits.length,0);
+  r=f.findHits('kraken',L,2); assert.equal(r.hits.length,2); assert.equal(r.more,true);
+  assert.equal(f.findHits('me',L,10).hits.length,0);   // your own name on your own lines doesn't count
+  assert.equal(f.findSnippet('a <b> kraken',6,6),'a &lt;b> <mark class="fh">kraken</mark>');
+  console.log('PASS: search finds across channels newest first, skips hidden channels and system lines, caps results, escapes snippets');
+  const w={}; vm.createContext(w); vm.runInContext(extract('function paneWindow(', 'function leaveWindow('),w);
+  const items=[...Array(1000)].map((_,i)=>({id:i+1})).concat([{pid:'p'}]);
+  let win=w.paneWindow(items,500,350); assert.equal(win.length,350); assert.ok(win.some(x=>x.id===500)); assert.equal(win[0].id,325);
+  win=w.paneWindow(items,3,350); assert.equal(win[0].id,1); assert.equal(win.length,350);
+  win=w.paneWindow(items,'999',350); assert.equal(win[win.length-1].pid,'p');
+  assert.equal(w.paneWindow(items,5000,350),null);
+  console.log('PASS: jump window holds the picked line, clamps at both ends, gives up when the line is gone');
+}

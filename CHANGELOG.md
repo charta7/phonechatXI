@@ -2,6 +2,21 @@
 
 Versioning: a patch (like 1.1.1) is fixes, looks, phone-side changes and new `!` commands from the server's own command list. It reads nothing new from the game. A minor version (like 1.2.0) changes what phonechatXI reads from the game, or sends something that isn't on the server's command list, and goes to staff for review first; it isn't released until they sign off.
 
+## 1.1.2 (in progress, not released)
+
+Phone-side changes and fixes. It reads nothing new from the game and sends the same lines as 1.1.1. The addon changes only its version number.
+
+### Search
+- A magnifier on the Chat and Tells pages opens Search. Type a name or a word (2 letters or more) and every match shows in one list, newest first, across all your channels: which channel, who said it, when, and the line with the match in gold. Channels you've hidden everywhere in Settings are left out. It shows the newest 100 matches.
+- Tap a result to go to that moment. A linkshell, party or other channel line opens that channel with the line in view and a brief highlight; a tell opens that person's conversation the same way. The back button returns to your results.
+- While you're looking at older chat, the view stays put and new lines don't move it. "Back to live" under the feed returns to the newest line, and counts what came in meanwhile. Sending a line from there also returns to live.
+- Search only looks through chat this page has already loaded. Nothing is asked of the game or the bridge and nothing is saved. After a reload that's what the bridge keeps: the last 500 lines each for LS1, LS2 and party, 600 tells, and 300 each for say, shout, unity, yell and Party Finder (times 2 or 4 with Scrollback in Settings). The Search page says how far back it goes.
+
+### Fixes
+- A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
+- Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
+- Changing Save tells or Scrollback, or clearing saved tells, now says so if the bridge doesn't answer.
+
 ## 1.1.1 (November 2026)
 
 Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM cards, the Yunas skin). It reads nothing new and sends the same lines as 1.1.0, plus `!moolix` from the server's command list: one kind of line it now reads less of (the first item under Fixes), and LS1's message of the day is sorted differently.

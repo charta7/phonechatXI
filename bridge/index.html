@@ -151,6 +151,25 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .run.mine .ln{text-align:right}
 .jump{flex:none;align-self:center;background:none;color:var(--gold);font-weight:600;font-size:12px;min-height:32px;padding:5px 16px;display:none}
 .jump.show{display:block}
+/* search this session */
+#scr-search{transition:none}
+.findbox{display:flex;align-items:center;gap:8px;padding:8px 12px 2px}
+.findbox .sinput{margin:0;flex:1;min-width:0}
+.findbox .linkbtn{flex:none;font-size:13.5px;padding:6px 10px;border:1px solid var(--edge);border-radius:8px}
+#findlist{padding:2px 12px 12px}
+.hit{display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;padding:9px 2px;border-bottom:1px solid var(--line)}
+.hit>.i{flex:none;margin-top:2px}
+.hit .hm{flex:1;min-width:0}
+.hit .hh{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--mute)}
+.hit .hh b{color:var(--c);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hit .hh .t{flex:none}
+.hit .hs{font-size:14.5px;line-height:1.35;color:var(--soft);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.findnote{font-size:12.5px;color:var(--mute);padding:8px 2px 2px;line-height:1.4}
+mark.fh{background:none;color:var(--gold);font-weight:700}
+/* the line a search result jumped to */
+@keyframes hitline{0%,40%{background:color-mix(in srgb,var(--gold) 30%,transparent)}100%{background:transparent}}
+.hitline{animation:hitline 2.4s ease-out;border-radius:4px}
+@media (prefers-reduced-motion:reduce){.hitline{animation:none;box-shadow:inset 2px 0 0 var(--gold)}}
 .pills[hidden]{display:none}
 .views .seg{min-width:0}
 .views .pencil{flex:none}
@@ -579,6 +598,7 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
 <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" style="fill:var(--ico,#8e9ac0)" transform="translate(0 -1)"/></symbol>
 <symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 10l14-7-5 14-3-6z" fill="#1a1405"/></symbol>
+<symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="2"/><path d="M12.8 12.8L17 17" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-pen" viewBox="0 0 20 20"><path d="M3 14.5V17h2.5L15 7.5 12.5 5zM16.7 5.8a1 1 0 000-1.4l-1.1-1.1a1 1 0 00-1.4 0l-1.2 1.2 2.5 2.5z" style="fill:var(--ico,#8e9ac0)"/></symbol>
 </svg>
 
@@ -586,7 +606,7 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
   <!-- main tabs -->
   <div class="screen" id="main">
     <section class="tab on" id="tab-chat">
-      <div class="top"><div class="big">Chat</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div class="top"><div class="big">Chat</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="search" aria-label="Search this session"><svg class="i" width="20" height="20"><use href="#i-search"/></svg></button><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
       <div class="views"><div class="seg" id="viewseg"></div><button class="pencil" id="editview" aria-label="Edit view"><svg class="i" width="18" height="18"><use href="#i-pen"/></svg></button></div>
       <div class="pills" id="pills"></div>
       <div id="ban-chat"></div>
@@ -595,7 +615,7 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
       <div class="comp" data-comp="chat"></div>
     </section>
     <section class="tab" id="tab-tells">
-      <div class="top"><div class="big">Tells</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
+      <div class="top"><div class="big">Tells</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="search" aria-label="Search this session"><svg class="i" width="20" height="20"><use href="#i-search"/></svg></button><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
       <div id="ban-tells"></div>
       <div class="list" id="tells-list"></div>
       <div class="center"><button class="btnline" id="newtell">+ New tell</button></div>
@@ -623,7 +643,7 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
 
   <!-- focus on one channel -->
   <div class="screen overlay tabs" id="scr-focus">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Chat</button><div class="mid"><div class="row" style="gap:8px" id="focus-title"></div><small id="focus-sub"></small></div><div class="end"><span class="pill-on off" data-bridge style="border:0;padding:0"><i></i><span>OFF</span></span></div></div>
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg><span id="focus-back">Chat</span></button><div class="mid"><div class="row" style="gap:8px" id="focus-title"></div><small id="focus-sub"></small></div><div class="end"><span class="pill-on off" data-bridge style="border:0;padding:0"><i></i><span>OFF</span></span></div></div>
     <div class="pills" id="focus-filters"></div>
     <div id="motd-focus"></div>
     <div class="panewrap"><div class="pane" id="pane-focus"><div class="inner"></div></div></div><button class="jump" data-jump="pane-focus"></button>
@@ -632,9 +652,16 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
 
   <!-- tell thread -->
   <div class="screen overlay" id="scr-thread">
-    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Tells</button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell</small></div><div class="end"></div></div>
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg><span id="thread-back">Tells</span></button><div class="mid"><div class="row" style="gap:8px"><svg class="i" width="22" height="22"><use href="#i-tell"/></svg><b id="thread-name" style="color:var(--tell)"></b></div><small>Tell</small></div><div class="end"></div></div>
     <div class="panewrap" style="margin-top:10px"><div class="pane" id="pane-thread"><div class="inner"></div></div></div><button class="jump" data-jump="pane-thread"></button>
     <div class="comp" data-comp="thread"></div>
+  </div>
+
+  <!-- search this session (phone-side: looks through lines the page already has) -->
+  <div class="screen overlay tabs" id="scr-search">
+    <div class="bar"><button class="back" data-back><svg class="i" width="22" height="22"><use href="#i-back"/></svg>Back</button><div class="mid"><b style="font-family:var(--serif);font-size:19px">Search</b></div><div class="end"></div></div>
+    <div class="findbox"><input class="sinput" id="findq" type="text" inputmode="search" enterkeyhint="search" placeholder="Search this session" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Search this session"><button class="linkbtn" id="findx" hidden>Clear</button></div>
+    <div class="list" id="findlist"></div>
   </div>
 
   <!-- command list -->
@@ -1179,8 +1206,10 @@ function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.bod
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
   // Tells: the normal layout puts the game's arrows in the header (Wren>> / >>Wren), so the line is just the message.
-  return '<div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + b + stateHtml(m) + "</div>" + failHtml(m);
+  return '<div class="ln' + (m.ch === "emote" ? " emote" : "") + '"' + lineAttr(m) + ">" + b + stateHtml(m) + "</div>" + failHtml(m);
 }
+// Each drawn line carries its id, so a search result can scroll to it.
+function lineAttr(m) { return m.id != null && !m.pending ? ' data-m="' + esc(m.id) + '"' : ""; }
 function isCallOnly(m) { return false; }   // roll-call folding removed in 1.1
 
 function blocks(items, ctx) {
@@ -1257,7 +1286,7 @@ function renderBlocks(list, ctx) {
       b.ms.forEach(function (m) {
         var pre = compactPrefix(m);
         var cw = m.ch === "tell" ? (m.pending ? m.peer : m.name) : (m.dir === "out" || m.pending || m.ch === "emote" ? "" : (m.name || ""));
-        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + '><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
       });
       return;
     }
@@ -1272,33 +1301,57 @@ function renderBlocks(list, ctx) {
   return html.join("");
 }
 var seenCount = {};
+// A pane normally draws its newest lines. After a search jump it draws the lines around the one you picked
+// (pane._win holds that line's id) until "Back to live". Returns null when the line is no longer loaded.
+function paneWindow(items, key, cap) {
+  var at = -1;
+  for (var i = items.length - 1; i >= 0; i--) if (items[i].id != null && String(items[i].id) === String(key)) { at = i; break; }
+  if (at < 0) return null;
+  var from = Math.max(0, Math.min(at - Math.floor(cap / 2), items.length - cap));
+  return items.slice(from, from + cap);
+}
+function leaveWindow(pane) { if (pane && pane._win != null) { pane._win = null; pane._goto = null; pane._stick = true; pane._html = null; } }
+function liveJump(pane, id, items) {
+  var jump = document.querySelector('[data-jump="' + id + '"]'), nw = items.length - (seenCount[id] || 0);
+  if (jump) { jump.textContent = "Back to live" + (nw > 0 ? " (" + nw + " new)" : ""); jump.classList.add("show"); }
+}
 function renderPane(id, items, ctx, emptyText) {
   var pane = $(id), inner = pane.firstElementChild;
+  var goto = pane._goto != null ? String(pane._goto).replace(/[^\w-]/g, "") : null;
   // "At the bottom" is what the reader last did (set by scroll events), not a fresh measurement:
   // fonts and banners can change the height after a redraw without the reader moving.
-  var atBottom = pane._stick !== false;
+  var atBottom = pane._stick !== false && pane._win == null;
   var first = pane._count === undefined;
   if (seenCount[id] === undefined) seenCount[id] = first ? items.length : (pane._count || 0);
   // Never redraw a pane the reader is holding or flicking, even at the bottom: the redraw
   // snaps it back down, which is what made the feed shake when you started scrolling up.
-  if (!first && (pane._touch || Date.now() - (pane._scrolled || 0) < 450)) {
+  if (!first && !goto && (pane._touch || Date.now() - (pane._scrolled || 0) < 450)) {
     clearTimeout(pane._later);
     pane._later = setTimeout(schedule, 500);
     return;
   }
   // Remember which line is at the top so it stays put after the redraw.
   var anchor = null, anchorOff = 0;
-  if (!first && !atBottom) {
+  if (!first && !atBottom && !goto) {
     var kids = inner.querySelectorAll("[data-k]");
     for (var i = 0; i < kids.length; i++) {
       if (kids[i].offsetTop + kids[i].offsetHeight > pane.scrollTop) { anchor = kids[i].dataset.k; anchorOff = kids[i].offsetTop - pane.scrollTop; break; }
     }
   }
   var before = pane._count || 0;
-  var shown = items.slice(-350 * (S.scrollback || 1));
+  var cap = 350 * (S.scrollback || 1), shown = null;
+  if (pane._win != null) {
+    shown = paneWindow(items, pane._win, cap);
+    if (!shown) { pane._win = null; pane._goto = null; goto = null; pane._stick = true; atBottom = true; }   // that line is gone: back to live
+  }
+  if (!shown) shown = items.slice(-cap);
   var mode = ctx === "thread" ? "thread" : (S.density === "compact" ? "compact" : ctx);
   var html = shown.length ? renderBlocks(blocks(shown, mode), mode) : '<div class="empty">' + emptyText + "</div>";
-  if (html === pane._html && !first) { pane._count = items.length; return; }   // nothing changed: leave the DOM (and the scroll) alone
+  if (html === pane._html && !first && !goto) {   // nothing changed: leave the DOM (and the scroll) alone
+    pane._count = items.length;
+    if (pane._win != null) liveJump(pane, id, items);
+    return;
+  }
   pane._html = html;
   inner.innerHTML = html;
   pane._count = items.length;
@@ -1310,7 +1363,27 @@ function renderPane(id, items, ctx, emptyText) {
     pane._lastNew = Date.now();
   }
   var jump = document.querySelector('[data-jump="' + id + '"]');
-  if (atBottom || first) {
+  if (goto) {
+    // Came from a search result: put that line a third of the way down and flash it.
+    pane._goto = null; pane._stick = false;
+    var hit = inner.querySelector('[data-m="' + goto + '"]');
+    if (hit) {
+      pane.scrollTop += hit.getBoundingClientRect().top - pane.getBoundingClientRect().top - pane.clientHeight / 3;
+      hit.classList.add("hitline");
+    }
+    seenCount[id] = items.length;
+    if (shown.length && shown[shown.length - 1] === items[items.length - 1] && pane.scrollHeight - pane.scrollTop - pane.clientHeight < 12) {
+      // The line is on the newest screen already, so this is live chat: nothing to go back to.
+      pane._win = null; pane._stick = true;
+      if (jump) jump.classList.remove("show");
+    } else liveJump(pane, id, items);
+  } else if (pane._win != null) {
+    if (anchor) {
+      var ael = inner.querySelector('[data-k="' + anchor + '"]');
+      if (ael) pane.scrollTop = ael.offsetTop - anchorOff;
+    }
+    liveJump(pane, id, items);
+  } else if (atBottom || first) {
     pane.scrollTop = pane.scrollHeight;
     seenCount[id] = items.length;
     if (jump) jump.classList.remove("show");
@@ -1329,7 +1402,7 @@ document.querySelectorAll(".pane").forEach(function (p) {
   p.addEventListener("touchcancel", function () { p._touch = false; }, {passive: true});
   p.addEventListener("scroll", function () {
     p._scrolled = Date.now();
-    p._stick = p.scrollHeight - p.scrollTop - p.clientHeight < 12;
+    p._stick = p._win == null && p.scrollHeight - p.scrollTop - p.clientHeight < 12;
     if (p._stick) {
       // Back at the bottom: everything is read. Don't redraw from here (that fought the scroll).
       var j = document.querySelector('[data-jump="' + p.id + '"]');
@@ -1344,7 +1417,11 @@ document.querySelectorAll(".pane").forEach(function (p) {
 });
 document.addEventListener("click", function (e) {
   var j = e.target.closest("[data-jump]");
-  if (j) { var p = $(j.dataset.jump); p.scrollTop = p.scrollHeight; j.classList.remove("show"); }
+  if (j) {
+    var p = $(j.dataset.jump);
+    if (p._win != null) { leaveWindow(p); p._scrolled = 0; render(); }   // "Back to live": draw the newest lines again
+    p.scrollTop = p.scrollHeight; j.classList.remove("show");
+  }
 });
 
 // ------------------------------------------------------------------------------------------
@@ -1640,6 +1717,7 @@ function submit(ctx, inp) {
       pendOrder.push(p.pid);
     });
     seenCount["pane-" + ctx] = undefined;
+    leaveWindow($("pane-" + ctx));   // you sent a line from a pane that was showing older chat: go back to live to see it
     schedule();
   }).catch(function () { sending = false; toast(NO_ANSWER); });
 }
@@ -1950,13 +2028,77 @@ $("tells-list").addEventListener("click", function (e) {
   if (b) openThread(b.dataset.thread);
 });
 $("newtell").addEventListener("click", function () { pickPeer(openThread); });
-function openThread(peer) {
+function openThread(peer, line) {
   thread.peer = peer;
   S.read[peer.toLowerCase()] = nowSec(); save();
   $("thread-name").textContent = peer;
   seenCount["pane-thread"] = undefined;
+  aimPane("pane-thread", line);
   go("thread");
 }
+
+// ------------------------------------------------------------------------------------------
+// Search this session. Phone-side only: it looks through the lines this page already holds (the ones
+// the chat panes draw from). Nothing is asked of the bridge or the game, and nothing is sent or saved.
+// ------------------------------------------------------------------------------------------
+var FIND_MAX = 100, findQ = "";
+function findHits(q, list, max) {
+  q = (q || "").trim().toLowerCase();
+  var hits = [], more = false;
+  if (q.length < 2) return {hits: hits, more: more};
+  for (var i = list.length - 1; i >= 0; i--) {   // newest first
+    var m = list[i];
+    if (CHAT_CH.indexOf(m.ch) < 0 || !S.master[m.ch]) continue;
+    var at = (m.body || "").toLowerCase().indexOf(q);
+    var who = m.ch === "tell" || m.dir !== "out" ? (m.name || "") : "";
+    if (at < 0 && who.toLowerCase().indexOf(q) < 0) continue;
+    if (hits.length >= max) { more = true; break; }
+    hits.push({m: m, at: at});
+  }
+  return {hits: hits, more: more};
+}
+function findSnippet(body, at, n) {
+  body = body || "";
+  if (at < 0) return esc(body.length > 110 ? body.slice(0, 110) + "\u2026" : body);
+  var from = at > 45 ? at - 30 : 0, to = Math.min(body.length, Math.max(at + n + 60, from + 110));
+  return (from ? "\u2026" : "") + esc(body.slice(from, at)) + '<mark class="fh">' + esc(body.slice(at, at + n)) + "</mark>" + esc(body.slice(at + n, to)) + (to < body.length ? "\u2026" : "");
+}
+function findWho(m) {
+  if (m.ch === "tell") return m.dir === "out" ? "&gt;&gt;" + esc(m.name || "") : esc(m.name || "") + "&gt;&gt;";
+  return esc(senderOf(m));
+}
+function findReach() {
+  for (var i = 0; i < msgs.length; i++) if (CHAT_CH.indexOf(msgs[i].ch) >= 0) return "It covers the chat this page has loaded, back to " + dayLabel(msgs[i].ts) + ".";
+  return "No chat has come in yet.";
+}
+function renderFind() {
+  var q = findQ.trim(), box = $("findlist"), html;
+  $("findx").hidden = !findQ;
+  if (q.length < 2) {
+    html = '<div class="empty">Type a name or a word to find it in every channel at once.<br>Tap a result to go to that moment.<br><br>' + findReach() + "</div>";
+  } else {
+    var r = findHits(q, msgs, FIND_MAX);
+    if (!r.hits.length) html = '<div class="empty">Nothing found for &ldquo;' + esc(q) + "&rdquo;.<br><br>" + findReach() + "</div>";
+    else html = '<div class="findnote">' + (r.more ? "Newest " + FIND_MAX + " results. Type more to narrow it down." : r.hits.length + (r.hits.length === 1 ? " result" : " results") + ", newest first.") + "</div>" +
+      r.hits.map(function (h) {
+        var m = h.m, c = CH[m.ch], who = findWho(m);
+        return '<button class="hit" data-hit="' + esc(m.id) + '" style="--c:' + c.c + '">' + ico(c.icon, 18) + '<div class="hm"><div class="hh"><b>' + c.label + (who ? " &middot; " + who : "") + '</b><span class="t">' + dayLabel(m.ts) + '</span></div><div class="hs">' + findSnippet(m.body, h.at, q.length) + "</div></div></button>";
+      }).join("");
+  }
+  if (html !== box._html) { box._html = html; box.innerHTML = html; }
+}
+function findGo(id) {
+  var m = byId[id];
+  if (!m) { toast("That line is no longer loaded."); renderFind(); return; }
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  if (m.ch === "tell") openThread(m.name || "", m.id); else openFocus(m.ch, m.id);
+}
+$("findq").addEventListener("input", function () { findQ = this.value; $("findlist").scrollTop = 0; renderFind(); });
+$("findq").addEventListener("keydown", function (e) { if (e.key === "Enter") this.blur(); });
+$("findq").addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); });
+$("findq").addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) document.body.classList.remove("typing"); fitViewport(); }, 80); });
+$("findx").addEventListener("click", function () { findQ = $("findq").value = ""; renderFind(); $("findq").focus(); });
+$("findlist").addEventListener("click", function (e) { var h = e.target.closest("[data-hit]"); if (h) findGo(h.dataset.hit); });
 
 // ------------------------------------------------------------------------------------------
 // Ventures and notices
@@ -2288,6 +2430,8 @@ function go(name) {
   el.classList.add("open");
   try { history.pushState({s: stack.length}, ""); } catch (e) { histOK = false; }
   render();
+  // Opened inside the tap, so the phone brings the keyboard up. Not when coming back to results you already have.
+  if (name === "search" && !findQ) $("findq").focus();
 }
 function back() {
   var name = stack.pop();
@@ -2328,9 +2472,14 @@ document.addEventListener("click", function (e) {
     if (SENDABLE.indexOf(rc) >= 0) replyTo({ch: rc, peer: ""}, r, false);
   }
 });
-function openFocus(ch) {
+function aimPane(id, line) {
+  var p = $(id);
+  p._win = line != null ? line : null; p._goto = p._win; p._html = null;
+  if (line == null) p._stick = true;
+}
+function openFocus(ch, line) {
   if (!CH[ch]) return;
-  focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; go("focus");
+  focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; aimPane("pane-focus", line); go("focus");
 }
 function replyTo(t, lineEl, typeNow) {
   var same = S.target && S.target.ch === t.ch && (S.target.peer || "") === (t.peer || "");
@@ -2346,7 +2495,7 @@ function replyTo(t, lineEl, typeNow) {
 $("focus-filters").addEventListener("click", function (e) {
   var b = e.target.closest("[data-f]");
   if (!b) return;
-  focus.filter = b.dataset.f; seenCount["pane-focus"] = undefined; render();
+  focus.filter = b.dataset.f; seenCount["pane-focus"] = undefined; leaveWindow($("pane-focus")); render();
 });
 var sheetHandler = null;
 // Debug info for bug reports. Leaves out the link, the token, watch words and all chat text.
@@ -2451,7 +2600,10 @@ function render() {
   if (curTab === "tells" && b) $("ban-tells").innerHTML = b + $("ban-tells").innerHTML;
   renderMotd();
   renderAlerts();
-  var top = stack[stack.length - 1];
+  var top = stack[stack.length - 1], under = stack[stack.length - 2];
+  if (top === "search") renderFind();
+  $("focus-back").textContent = under === "search" ? "Search" : "Chat";
+  $("thread-back").textContent = under === "search" ? "Search" : "Tells";
   if (top === "focus") {
     var c = CH[focus.ch];
     $("focus-title").innerHTML = ico(c.icon, 22) + "<b>" + c.full + "</b>";
@@ -2506,7 +2658,7 @@ function pinPanes() {
   // Keyboard opened or closed: keep the newest line in view, but only where the reader was at the bottom.
   ["pane-chat", "pane-focus", "pane-thread", "pane-cmd"].forEach(function (id) {
     var p = $(id);
-    if (p && (p._count === undefined || p.scrollHeight - p.scrollTop - p.clientHeight < 200)) p.scrollTop = p.scrollHeight;
+    if (p && p._win == null && (p._count === undefined || p.scrollHeight - p.scrollTop - p.clientHeight < 200)) p.scrollTop = p.scrollHeight;
   });
 }
 if (window.visualViewport) {
