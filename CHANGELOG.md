@@ -14,7 +14,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - Search only looks through chat this page has already loaded. Nothing is asked of the game or the bridge and nothing is saved. After a reload that's what the bridge keeps: the last 500 lines each for LS1, LS2 and party, 600 tells, and 300 each for say, shout, unity, yell and Party Finder (times 2 or 4 with Scrollback in Settings). The Search page says how far back it goes.
 
 ### Catching up
-- A "New" line marks where you left off. It shows on a channel's own page and in a tell conversation (since you last opened it), and in Chat when you come back to the page after 30 seconds or more away. If more came in than fits on screen, the page opens at the "New" line instead of the bottom.
+- A "New" line marks where you left off. It shows on a channel's own page and in a tell conversation (since you last opened it), and in Chat when you come back to the page after 30 seconds or more away. If more came in than fits on screen, the page opens at the "New" line instead of the bottom. It goes away once you send a line from that page.
 - Long-press a chat line for a small menu: Copy text, Copy name, and Search for that person. Copied item links come out as plain names, without the {{ }}. A short tap still replies as before. On a computer, select text with the mouse as usual.
 - Tap a mention in Alerts to go to that moment in chat, the same as a search result. The newest mention is at the top, so it's one tap to your last one. Back returns to Alerts.
 
@@ -30,6 +30,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - The two Yunas skin fonts ship as WOFF2, not .otf. They're the same fonts with every character kept, and the phone has about 200 KB less to load the first time you pick Yunas.
 
 ### Fixes
+- On iPhone, the Home Screen app's status bar now matches the skin. It stayed in Midnight's color on Onyx, Yunas and Classic.
 - A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
 - Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
 - Changing Save tells or Scrollback, or clearing saved tells, now says so if the bridge doesn't answer.
