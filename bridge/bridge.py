@@ -916,7 +916,7 @@ FONTS = ("cinzel-latin-600-normal.woff2", "cinzel-latin-700-normal.woff2",
          "atkinson-hyperlegible-latin-400-normal.woff2", "atkinson-hyperlegible-latin-700-normal.woff2",
          "atkinson-hyperlegible-latin-400-italic.woff2",
          "jetbrains-mono-latin-400-normal.woff2", "jetbrains-mono-latin-700-normal.woff2",
-         "texgyreadventor-regular.otf", "texgyreadventor-bold.otf")
+         "texgyreadventor-regular.woff2", "texgyreadventor-bold.woff2")
 
 SETUP_PAGE = """<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>phonechatXI setup</title><script src="/qr.js"></script><link rel="icon" href="/icons/favicon-32.png">
@@ -990,7 +990,7 @@ class Handler(BaseHTTPRequestHandler):
             self.static("icons/" + u.path[7:], "image/png")
             return
         if u.path.startswith("/fonts/") and u.path[7:] in FONTS:
-            self.static("fonts/" + u.path[7:], "font/otf" if u.path.endswith(".otf") else "font/woff2")
+            self.static("fonts/" + u.path[7:], "font/woff2")
             return
         if u.path == "/qr.js":
             self.static("qrcode.js", "application/javascript; charset=utf-8")

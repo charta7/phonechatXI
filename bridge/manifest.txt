@@ -13,8 +13,8 @@ fonts/cinzel-latin-600-normal.woff2
 fonts/cinzel-latin-700-normal.woff2
 fonts/jetbrains-mono-latin-400-normal.woff2
 fonts/jetbrains-mono-latin-700-normal.woff2
-fonts/texgyreadventor-bold.otf
-fonts/texgyreadventor-regular.otf
+fonts/texgyreadventor-bold.woff2
+fonts/texgyreadventor-regular.woff2
 icons/apple-touch-icon.png
 icons/favicon-32.png
 icons/icon-512.png

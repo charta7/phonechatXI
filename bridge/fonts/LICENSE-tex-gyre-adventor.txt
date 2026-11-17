@@ -1,4 +1,6 @@
-TeX Gyre Adventor v2.501 (texgyreadventor-regular.otf and texgyreadventor-bold.otf), shipped unchanged.
+TeX Gyre Adventor v2.501 (texgyreadventor-regular.woff2 and texgyreadventor-bold.woff2).
+These are the original .otf files repacked as WOFF2, a compressed web format, to make the download smaller.
+Every glyph and table is kept and nothing in the design is changed. The original .otf files are at the link below.
 Downloads: http://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor
 
 Copyright 2007-2018 for TeX Gyre extensions by B. Jackowski, J.M. Nowacki, et al. (on behalf of TeX Users Groups).
