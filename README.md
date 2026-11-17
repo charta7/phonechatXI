@@ -1,7 +1,9 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026). v1.1.1 builds on it with fixes, looks and a few phone-side features. It reads nothing new and sends the same lines, plus one new read-only command from the server's own list (`!moolix`), so it hasn't been back to staff. It's the version to use. See the [changelog](CHANGELOG.md).
+> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026).
+>
+> **v1.1.1 is waiting on CatsEyeXI approval.** Staff are setting up a new process for approving addons, and 1.1.1 will go through it. It builds on 1.1.0 with fixes, looks and a few phone-side features, reads nothing new from the game, and sends the same lines plus one read-only command from the server's own list (`!moolix`). Until it's approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -213,7 +215,7 @@ Not sure if a change counts? Ask staff first.
 
 ## Bugs and requests
 
-phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0, and that list isn't growing. There are no plans for more commands, addon controls or macros unless CatsEyeXI staff ask for them.
+phonechatXI is for chat: reading it on your phone and typing messages without fighting a controller. The emotes and server commands are there because staff reviewed them with 1.0.0. The command list only grows with read-only commands from the server's own list, like `!moolix`. There are no plans for other commands, addon controls or macros unless CatsEyeXI staff ask for them.
 
 - Bugs: open a [bug report](../../issues/new/choose) or post in the phonechatXI thread on the CatsEyeXI Discord, and paste the text from Settings, Copy debug info. It doesn't include your phone link or any chat.
 - Phone bugs come first. Something that only happens in a desktop or tablet browser may wait, so say which device and browser you're on.
