@@ -2348,10 +2348,10 @@ function renderSettings() {
     srow("Color message text", "Off: only names are colored.", tog(S.channelText, "channelText")) +
     srow("Reset colors", "", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
     '<div class="sect">BACKUP</div>' +
-    srow("Your settings", "Also saved on the bridge, so a new shortcut or phone picks them up.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
+    srow("Your settings", "Saved on the bridge too, so a new phone gets them.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
     '<input type="file" id="importin" accept="application/json,.json" hidden>' +
-    (status.prev_settings ? srow("From before the last update", "The bridge kept a copy of your settings when it updated.", '<button class="linkbtn" data-act="restoreprev">Restore</button>') : "") +
-    srow("Reset settings", "Back to how a new install starts.", '<button class="dangerbtn" data-act="resetall">Reset</button>') +
+    (status.prev_settings ? srow("Before the last update", "Your settings as they were before updating.", '<button class="linkbtn" data-act="restoreprev">Restore</button>') : "") +
+    srow("Reset settings", "Start over with the defaults.", '<button class="dangerbtn" data-act="resetall">Reset</button>') +
     '<div class="sect">ABOUT</div>' +
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta", "") +
     srow("Build", esc(status.build || "Unknown"), "") +

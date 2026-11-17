@@ -14,7 +14,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 
 ### Settings across updates
 - Your settings still carry over by themselves. After an update the phone now says so once: "Updated to 1.1.2. Your settings were kept.", with OK and Start fresh.
-- The first time a new version starts, the bridge keeps a copy of your phone settings as they were before the update. Settings > Backup shows "From before the last update" with a Restore button when there's a copy. It's one copy, replaced at the next update, kept in the phonechat folder next to the settings.
+- The first time a new version starts, the bridge keeps a copy of your phone settings as they were before the update. Settings > Backup shows "Before the last update" with a Restore button when there's a copy. It's one copy, replaced at the next update, kept in the phonechat folder next to the settings.
 - "Reset settings" in Settings > Backup goes back to how a new install starts. Your mention names stay, and saved tells and your phone link aren't touched.
 
 ### Looks

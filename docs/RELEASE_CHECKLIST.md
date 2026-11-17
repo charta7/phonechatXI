@@ -28,7 +28,7 @@ Three rules for every change, so nobody loses their setup:
 
 ## Install and upgrade
 - Ask a new tester to follow the README without assistance; record unclear steps.
-- Upgrade an existing install, preserving custom colors/settings and opt-in tell history. The phone shows "Updated to <version>. Your settings were kept." once; Settings > Backup offers "From before the last update" and the restore brings the old settings back.
+- Upgrade an existing install, preserving custom colors/settings and opt-in tell history. The phone shows "Updated to <version>. Your settings were kept." once; Settings > Backup offers "Before the last update" and the restore brings the old settings back.
 - Confirm the new build identifier appears after restarting the addon/bridge and reloading the phone page.
 - Retain the previous known-good ZIP and back up local settings privately before testing rollback; verify the previous version starts and preferences remain usable.
 - Share only the generated release ZIP. Do not include phone links, QR codes, configuration, or real chat logs in reports.
