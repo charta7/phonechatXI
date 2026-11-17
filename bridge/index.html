@@ -984,8 +984,17 @@ function applyLook() {
   if (S.font !== "classic") S.font = "readable";
   document.body.classList.add("skin-" + (S.skin || "classic"), "font-" + S.font);
   // Looks only: iOS colors the Home Screen app's status bar from theme-color, so it follows the skin's background.
+  // iOS often ignores a change to the existing tag, so swap in a fresh one. It can also take the color from the page
+  // background behind everything, so that follows the skin too.
   var tc = document.querySelector('meta[name="theme-color"]'), bg = getComputedStyle(document.body).getPropertyValue("--bg").trim();
-  if (tc && bg) tc.setAttribute("content", bg);
+  if (bg) {
+    if (!tc || tc.getAttribute("content") !== bg) {
+      var nt = document.createElement("meta");
+      nt.name = "theme-color"; nt.content = bg;
+      if (tc) tc.parentNode.replaceChild(nt, tc); else document.head.appendChild(nt);
+    }
+    document.documentElement.style.backgroundColor = bg;
+  }
   document.body.classList.toggle("compact", S.density === "compact");
   document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-XS", "size-S", "size-M", "size-L", "size-XL");
@@ -1800,6 +1809,7 @@ function submit(ctx, inp) {
     });
     seenCount["pane-" + ctx] = undefined;
     leaveWindow($("pane-" + ctx));   // you sent a line from a pane that was showing older chat: go back to live to see it
+    var sp = $("pane-" + ctx); if (sp && sp._newAfter) { sp._newAfter = 0; sp._html = null; }   // you've replied, so you're caught up: the "New" line goes
     schedule();
   }).catch(function () { sending = false; toast(NO_ANSWER); });
 }

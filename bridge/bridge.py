@@ -820,7 +820,7 @@ def new_link():
 
 PREFS_MAX = 64 * 1024
 # Phone settings that stay on the phone: mention names, tell history, last tell target.
-PHONE_ONLY = ("watch", "read", "target", "hidden")
+PHONE_ONLY = ("watch", "read", "readCh", "target", "hidden")
 
 
 def strip_private(prefs):
