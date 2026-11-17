@@ -212,6 +212,10 @@ mark.fh{background:none;color:var(--gold);font-weight:700}
 .tabbar button.on{color:var(--gold)}
 .tabbar .bdg{position:absolute;top:-4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
 body.typing .tabbar{display:none}
+/* Keyboard up while writing in chat: the title row, view tabs, filter chips and pinned MOTD step aside so more chat fits above the keys.
+   Warnings (bridge offline and so on) stay. Everything comes back when the keyboard closes. Looks only. */
+body.kb #tab-chat>:is(.top,.views,.pills,#motd-chat),body.kb #scr-focus>:is(.pills,#motd-focus){display:none}
+body.kb #tab-chat>.panewrap{margin-top:6px}
 .tabbar .bdg[hidden]{display:none}
 
 /* banners and lists */
@@ -2702,7 +2706,7 @@ function fitViewport() {
   }
   if (window.scrollY) window.scrollTo(0, 0);
   var up = typing && shrunk;
-  if (up !== kbUp) { kbUp = up; pinPanes(); }
+  if (up !== kbUp) { kbUp = up; document.body.classList.toggle("kb", up); pinPanes(); }   // "kb": the keyboard really is up (CSS gives chat the room)
 }
 function pinPanes() {
   // Keyboard opened or closed: keep the newest line in view, but only where the reader was at the bottom.
