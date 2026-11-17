@@ -174,6 +174,11 @@ body.compact .pane .inner{gap:5px}
 .lmitem .opt{flex:1;min-width:0}
 .lmitem .opt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lmitem .opt{text-decoration:none;color:inherit}
+.extnote{font-weight:500;font-size:12.5px;color:var(--warn,#e0b050);margin-left:4px}
+.extlink{margin:4px 4px 10px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--warn,#e0b050) 55%,transparent);border-radius:10px;background:color-mix(in srgb,var(--warn,#e0b050) 8%,transparent)}
+.exthost{font-weight:800;font-size:19px;overflow-wrap:anywhere}
+.extcopy{margin-top:8px;font-size:13.5px;padding:5px 10px;border:1px solid var(--edge);border-radius:8px}
+.exturl{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--mute);margin-top:4px;overflow-wrap:anywhere}
 .lmitem .linkbtn{flex:none;font-size:13.5px;padding:6px 12px;border:1px solid var(--edge);border-radius:8px}
 .tapcard:active{filter:brightness(1.15)}
 .findpills .chipb svg{opacity:.85}
@@ -623,6 +628,8 @@ body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;f
 <symbol id="i-gear" viewBox="0 0 20 20"><path d="M10 6.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm7.3 4.7l-1.7-.3a5.9 5.9 0 00-.5-1.2l1-1.4-1.2-1.2-1.4 1a5.9 5.9 0 00-1.2-.5l-.3-1.7H9.1l-.3 1.7c-.4.1-.8.3-1.2.5l-1.4-1L5 8.3l1 1.4c-.2.4-.4.8-.5 1.2l-1.7.3v1.8l1.7.3c.1.4.3.8.5 1.2l-1 1.4L6.2 17l1.4-1c.4.2.8.4 1.2.5l.3 1.7h1.8l.3-1.7c.4-.1.8-.3 1.2-.5l1.4 1 1.2-1.2-1-1.4c.2-.4.4-.8.5-1.2l1.7-.3z" style="fill:var(--ico,#8e9ac0)" transform="translate(0 -1)"/></symbol>
 <symbol id="i-back" viewBox="0 0 20 20"><path d="M12.5 3.5L6 10l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 <symbol id="i-send" viewBox="0 0 20 20"><path d="M3 10l14-7-5 14-3-6z" fill="#1a1405"/></symbol>
+<symbol id="i-ext" viewBox="0 0 20 20"><path d="M11 3.5h5.5V9M16.3 3.7L9.5 10.5" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M14.5 12v3.2a1.3 1.3 0 0 1-1.3 1.3H4.8a1.3 1.3 0 0 1-1.3-1.3V6.8a1.3 1.3 0 0 1 1.3-1.3H8" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-warn" viewBox="0 0 20 20"><path d="M10 2.8L18 17H2Z" fill="none" style="stroke:var(--ico,#e0b050)" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 8v4.2" style="stroke:var(--ico,#e0b050)" stroke-width="1.9" stroke-linecap="round"/><circle cx="10" cy="14.6" r="1.1" style="fill:var(--ico,#e0b050)"/></symbol>
 <symbol id="i-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="2"/><path d="M12.8 12.8L17 17" fill="none" style="stroke:var(--ico,#8e9ac0)" stroke-width="2" stroke-linecap="round"/></symbol>
 <symbol id="i-pen" viewBox="0 0 20 20"><path d="M3 14.5V17h2.5L15 7.5 12.5 5zM16.7 5.8a1 1 0 000-1.4l-1.1-1.1a1 1 0 00-1.4 0l-1.2 1.2 2.5 2.5z" style="fill:var(--ico,#8e9ac0)"/></symbol>
 </svg>
@@ -2221,25 +2228,57 @@ function lineItems(b) {
   while ((m = re.exec(String(b || ""))) && out.length < 3) { var n = m[1].trim(); if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; out.push(n); } }
   return out;
 }
+// Web addresses in a line, for the long-press menu. Only http(s):// and www. addresses, no logins in the address,
+// each once, at most 3. In chat they stay plain text: nothing opens on a tap.
+function lineLinks(b) {
+  var out = [], seen = {}, re = /\b(?:https?:\/\/|www\.)[^\s<>"'{}\[\]`]{2,300}/gi, m;
+  while ((m = re.exec(String(b || ""))) && out.length < 3) {
+    var raw = m[0].replace(/[.,;:!?)\]]+$/, ""), u;
+    try { u = new URL(/^www\./i.test(raw) ? "https://" + raw : raw); } catch (e) { continue; }
+    if ((u.protocol !== "https:" && u.protocol !== "http:") || !u.hostname || u.username || u.password || u.hostname.indexOf(".") < 0) continue;
+    if (seen[u.href]) continue;
+    seen[u.href] = 1;
+    out.push({href: u.href, host: u.hostname.replace(/^www\./, ""), text: raw});
+  }
+  return out;
+}
+// Opening a link from chat always asks first and shows the whole address with the site in bold, so a look-alike stands out.
+function askOpenLink(l) {
+  clearTimeout(toastTimer); $("toast").classList.remove("on");   // nothing may cover the warning
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">OPEN AN OUTSIDE LINK?</div></div>' +
+    '<div class="extlink"><div class="exthost">' + esc(l.host) + '</div><div class="exturl">' + esc(l.href) + '</div><button class="linkbtn extcopy" data-sb="copy">Copy address</button></div>' +
+    '<div class="sfoot">This opens a site outside phonechatXI. Only open links from people you trust, and check the site name above. Never type your game or Discord password on a site from chat.</div>' +
+    '<div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Open</button></div>', function (e) {
+    var b = e.target.closest("[data-sb]");
+    if (!b) return;
+    if (b.dataset.sb === "copy") { if (copyText(l.href, true)) b.textContent = "Copied"; return; }   // copy and stay; the button says so, no toast over the warning
+    closeSheet();
+    if (b.dataset.sb === "ok") window.open(l.href, "_blank", "noopener,noreferrer");
+  });
+}
 function plainBody(b) { return String(b || "").replace(/\{\{([^{}]{1,40})\}\}/g, "$1"); }
-function copyText(t) {
+function copyText(t, quiet) {
   var ok = false, ta = document.createElement("textarea");
   ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
   document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
   try { ok = document.execCommand("copy"); } catch (e) {}
   ta.remove();
-  if (!ok && navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(function () { toast("Copied."); }, function () { toast("Couldn't copy."); }); return; }
-  toast(ok ? "Copied." : "Couldn't copy.");
+  if (!ok && navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(function () { if (!quiet) toast("Copied."); }, function () { toast("Couldn't copy."); }); return true; }
+  if (!quiet || !ok) toast(ok ? "Copied." : "Couldn't copy.");
+  return ok;
 }
 function lineMenu(id) {
   var m = byId[id];
   if (!m) return;
   var who = m.ch === "tell" ? (m.name || "") : (m.dir === "out" ? "" : (m.name || "")), c = CH[m.ch] || {c: "var(--soft)", icon: "bell", full: ""};
   var mine = !who || who.toLowerCase() === myName().toLowerCase();
-  var body = plainBody(m.body), items = lineItems(m.body);
+  var body = plainBody(m.body), items = lineItems(m.body), links = lineLinks(m.body);
   openSheet('<div class="grab"></div><div class="lmhead" style="--c:' + c.c + '">' + ico(c.icon, 16) + "<b>" + esc(who || c.full) + '</b><span class="vt">' + dayLabel(m.ts) + '</span></div><div class="lmbody">' + esc(body.length > 160 ? body.slice(0, 160) + "\u2026" : body) + "</div>" +
     '<div class="lmacts">' + items.map(function (n, i) {
       return '<div class="lmitem"><a class="opt" href="' + wikiUrl(n) + '" target="_blank" rel="noopener noreferrer" data-lm="wiki">' + ico("search", 18) + "<b>Search BG-Wiki for " + esc(n) + '</b></a><button class="linkbtn" data-lm="item" data-i="' + i + '">Copy</button></div>';
+    }).join("") +
+    links.map(function (l, i) {
+      return '<button class="opt" data-lm="link" data-i="' + i + '">' + ico("ext", 18) + "<b>Open " + esc(l.host) + ' <span class="extnote">outside link</span></b></button>';
     }).join("") +
     '<button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
     (who ? '<button class="opt" data-lm="name">' + ico("tell", 18) + "<b>Copy name</b></button>" : "") +
@@ -2253,6 +2292,7 @@ function lineMenu(id) {
     if (a === "name") copyText(who);
     closeSheet();
     if (a === "find") findFor(who);
+    if (a === "link" && links[+b.dataset.i]) setTimeout(function () { askOpenLink(links[+b.dataset.i]); }, 260);
   });
 }
 var lp = null, lpEat = 0, lastPtr = "mouse";

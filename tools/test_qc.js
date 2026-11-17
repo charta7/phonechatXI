@@ -143,3 +143,15 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.equal(r.plainBody('WTB {{Kraken Club}} {Pull}'),'WTB Kraken Club {Pull}');
   console.log('PASS: long-press menu lists each item once (max 3) and copies text without {{ }}');
 }
+
+// Links for the long-press menu: http(s) and www. only, trailing punctuation trimmed, no logins in the address, max 3.
+{
+  const r={URL}; vm.createContext(r); vm.runInContext(extract('function lineLinks(', 'function askOpenLink('),r);
+  const L=r.lineLinks('see https://www.bg-wiki.com/ffxi/Kraken_Club. or www.catseyexi.com/db, and https://user:pw@evil.example/x javascript:alert(1) ftp://x.org http://localhost:8080 https://a.io https://b.io https://c.io');
+  assert.deepEqual(L.map(l=>l.host),['bg-wiki.com','catseyexi.com','a.io']);
+  assert.equal(L[0].href,'https://www.bg-wiki.com/ffxi/Kraken_Club');
+  assert.equal(L[1].href,'https://www.catseyexi.com/db');
+  assert.equal(r.lineLinks('nothing here {{Ridill}}').length,0);
+  assert.equal(r.lineLinks('https://xn--ctseyexi-6ya.com/login')[0].host,'xn--ctseyexi-6ya.com');   // look-alike names show in their raw form
+  console.log('PASS: chat links: http(s)/www only, punctuation trimmed, no logins, no localhost, max 3, raw host shown');
+}

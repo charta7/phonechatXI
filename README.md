@@ -41,7 +41,8 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
 - Search (1.1.2, not released yet): the magnifier on Chat or Tells finds a name or a word in every channel at once, with a chip per channel to narrow it down. Tap a result to go to that moment, then "Back to live". It only looks through chat the page has already loaded.
 - Catching up (1.1.2, not released yet): a "New" line marks where you left off. Long-press a line to copy it or search for who said it. Tap a mention in Alerts to go to it.
-- Linked items (`{{Suppanomimi}}`): long-press the line and pick "Search BG-Wiki for Suppanomimi" (a tap on the line replies, as usual). On a computer, click the item. Web addresses in chat show as plain text.
+- Linked items (`{{Suppanomimi}}`): long-press the line and pick "Search BG-Wiki for Suppanomimi" (a tap on the line replies, as usual). On a computer, click the item.
+- Web addresses in chat show as plain text and never open on a tap. Long-press the line for "Open <site>". It always asks first and shows the site name in bold with the full address under it, so a look-alike stands out. Only `http://`, `https://` and `www.` addresses are offered, never ones with a login in them.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
 - The LS message of the day is pinned above chat, with an × to hide it.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
@@ -74,7 +75,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - Split messages. One tap sends one line of 130 bytes at most, counted on the whole typed line (so about 127 letters on a linkshell, fewer for a tell or Japanese text), and no more than one line per second.
 - Read the combat log.
 - Read other addons. Lines they print are ignored, the ventures addon's included.
-- Go online. There's no cloud or outside server. The only outside page is BG-Wiki, when you tap an item.
+- Go online. There's no cloud or outside server. The only outside pages are a BG-Wiki search for an item, and a web address from chat when you long-press it, pick Open and confirm.
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again against the same list right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
