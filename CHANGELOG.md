@@ -18,6 +18,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - Long-press a chat line for a small menu: Copy text, Copy name, and Find that person in chat. Copied item links come out as plain names, without the {{ }}.
 - Web addresses in chat can be opened. They still show as plain text and do nothing on a tap. Long-press the line: each address (up to 3) gets an "Open <site>" row. It always asks first ("Leaving phonechatXI"), showing the site name in bold and the full address with a Copy button, and a one-line reminder to check the site name and not enter a password on a link from chat. Only http, https and www. addresses are offered, and never ones with a login in the address (a common phishing trick). Look-alike names with accented letters show in their raw "xn--" form.
 - Item links (`{{Item}}`) in chat no longer open BG-Wiki on a tap, because a tap on a line means reply and the small link was easy to hit by mistake. Long-press the line instead: each item gets a "Search BG-Wiki for ..." row. On a computer, clicking an item still opens BG-Wiki, and so does tapping one in a message of the day or a notice. A short tap still replies as before. On a computer, select text with the mouse as usual.
+- A one-time tip on touch screens: "Hold a line to copy it, look up items or open links." Got it hides it for good.
 - Tap a mention in Alerts to go to that moment in chat, the same as a search result. The newest mention is at the top, so it's one tap to your last one. Back returns to Alerts.
 
 ### Settings across updates

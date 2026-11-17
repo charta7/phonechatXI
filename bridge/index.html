@@ -782,7 +782,7 @@ function toast(text) {
 // Settings (per device). Storage can be blocked, so everything is wrapped.
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
-  density: "comfortable", size: "M", calls: "highlight", tipSeen: false, tellsBan: false, hidden: [],
+  density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
   clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, quickFilters: true, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: false, emote: true, finder: true},
   views: [
@@ -840,7 +840,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -2673,6 +2673,7 @@ document.addEventListener("click", function (e) {
   if (e.target.closest("[data-updok]")) { ackBuild(); render(); return; }
   if (e.target.closest("[data-updfresh]")) { askReset(function () { ackBuild(); }); return; }
   if (e.target.closest("[data-tipok]")) { S.tipSeen = true; save(); render(); return; }
+  if (e.target.closest("[data-holdok]")) { S.holdTip = true; save(); render(); return; }
   if (e.target.closest("[data-bandis]")) { S.tellsBan = true; save(); render(); return; }
   var g = e.target.closest("[data-go]");
   if (g) { go(g.dataset.go); return; }
@@ -2832,6 +2833,10 @@ function banner() {
   }
   if (connected && !S.tipSeen) {
     return '<div class="banner info">Tip: tap Share, then Add to Home Screen. <button class="linkbtn" data-tipok>Got it</button></div>';
+  }
+  // Long-press has nothing on screen that hints at it, so say it once (touch screens only; a mouse just clicks).
+  if (connected && !S.holdTip && window.matchMedia && matchMedia("(hover: none)").matches) {
+    return '<div class="banner info">Tip: hold a line to copy it, look up items or open links. <button class="linkbtn" data-holdok>Got it</button></div>';
   }
   return "";
 }
