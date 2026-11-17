@@ -76,3 +76,14 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.equal(w.paneWindow(items,5000,350),null);
   console.log('PASS: jump window holds the picked line, clamps at both ends, gives up when the line is gone');
 }
+
+// Compact layout: a line in the same minute as the one above it hides its time; a new minute or a divider shows it again.
+{
+  const r={CH:{ls1:{icon:'ls1',c:'x'}},S:{},esc:s=>String(s),hhmm:ts=>'T'+ts,ico:()=>'',compactPrefix:()=>'',bodyHtml:m=>m.body,stateHtml:()=>'',failHtml:()=>'',replyAttr:()=>'',lineAttr:()=>'',runHead:()=>''};
+  vm.createContext(r); vm.runInContext(extract('function renderBlocks(', 'var seenCount = {};'),r);
+  const run=ts=>({type:'run',ch:'ls1',dir:'in',ms:[{ch:'ls1',ts,body:'b'}]});
+  const out=r.renderBlocks([run(600),run(630),run(659),run(660),{type:'div',text:'x'},run(661)],'compact');
+  const cls=[...out.matchAll(/<span class="(t(?: rep)?)">/g)].map(m=>m[1]);
+  assert.deepEqual(cls,['t','t rep','t rep','t','t']);
+  console.log('PASS: compact layout shows the time once per minute and again after a divider');
+}

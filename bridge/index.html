@@ -138,6 +138,7 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .cl .rail{align-self:stretch}
 .cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px;white-space:nowrap}
 .clock-12 .cl .t{width:46px}
+.cl .t.rep{visibility:hidden}
 .ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
 .t,.vt{white-space:nowrap}
 .cl .ln{flex:1}
@@ -1267,8 +1268,10 @@ function compactPrefix(m) {
   }
 }
 function renderBlocks(list, ctx) {
-  var html = [];
+  var html = [], lastMin = null;   // compact layout: the time shows once per minute, not on every line
+  function tcls(ts) { var mk = Math.floor(ts / 60), same = mk === lastMin; lastMin = mk; return same ? "t rep" : "t"; }
   list.forEach(function (b) {
+    if (b.type === "div" || b.type === "note") lastMin = null;
     if (b.type === "div") { html.push('<div class="div">' + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
@@ -1276,7 +1279,7 @@ function renderBlocks(list, ctx) {
       var pills = b.grp.map(function (g) { return '<span class="callp">' + g.calls.join(" ") + "</span>"; }).join("");
       var head = ctx === "compact" ? "" : runHead({ms: [b.m], ch: b.m.ch, who: b.m.name, dir: b.m.dir}, ctx);
       if (ctx === "compact") {
-        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="t">' + hhmm(b.m.ts) + '</span><div class="ln">' + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
+        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="' + tcls(b.m.ts) + '">' + hhmm(b.m.ts) + '</span><div class="ln">' + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
       } else {
         html.push('<div class="run call" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + head + '<div class="burst"><span class="lbl">roll call</span>' + pills + "</div></div></div>");
       }
@@ -1286,7 +1289,7 @@ function renderBlocks(list, ctx) {
       b.ms.forEach(function (m) {
         var pre = compactPrefix(m);
         var cw = m.ch === "tell" ? (m.pending ? m.peer : m.name) : (m.dir === "out" || m.pending || m.ch === "emote" ? "" : (m.name || ""));
-        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="t">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="' + tcls(m.ts) + '">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
       });
       return;
     }
