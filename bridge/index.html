@@ -2245,10 +2245,10 @@ function lineLinks(b) {
 // Opening a link from chat always asks first and shows the whole address with the site in bold, so a look-alike stands out.
 function askOpenLink(l) {
   clearTimeout(toastTimer); $("toast").classList.remove("on");   // nothing may cover the warning
-  openSheet('<div class="grab"></div><div class="shead"><div class="sect">OPEN AN OUTSIDE LINK?</div></div>' +
-    '<div class="extlink"><div class="exthost">' + esc(l.host) + '</div><div class="exturl">' + esc(l.href) + '</div><button class="linkbtn extcopy" data-sb="copy">Copy address</button></div>' +
-    '<div class="sfoot">This opens a site outside phonechatXI. Only open links from people you trust, and check the site name above. Never type your game or Discord password on a site from chat.</div>' +
-    '<div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Open</button></div>', function (e) {
+  openSheet('<div class="grab"></div><div class="shead"><div class="sect">LEAVING PHONECHATXI</div></div>' +
+    '<div class="extlink"><div class="exthost">' + esc(l.host) + '</div><div class="exturl">' + esc(l.href) + '</div><button class="linkbtn extcopy" data-sb="copy">Copy</button></div>' +
+    '<div class="sfoot">Check the site name. Don\u2019t enter a password on a link from chat.</div>' +
+    '<div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Open site</button></div>', function (e) {
     var b = e.target.closest("[data-sb]");
     if (!b) return;
     if (b.dataset.sb === "copy") { if (copyText(l.href, true)) b.textContent = "Copied"; return; }   // copy and stay; the button says so, no toast over the warning
@@ -2278,7 +2278,7 @@ function lineMenu(id) {
       return '<div class="lmitem"><a class="opt" href="' + wikiUrl(n) + '" target="_blank" rel="noopener noreferrer" data-lm="wiki">' + ico("search", 18) + "<b>Search BG-Wiki for " + esc(n) + '</b></a><button class="linkbtn" data-lm="item" data-i="' + i + '">Copy</button></div>';
     }).join("") +
     links.map(function (l, i) {
-      return '<button class="opt" data-lm="link" data-i="' + i + '">' + ico("ext", 18) + "<b>Open " + esc(l.host) + ' <span class="extnote">outside link</span></b></button>';
+      return '<button class="opt" data-lm="link" data-i="' + i + '">' + ico("ext", 18) + "<b>Open " + esc(l.host) + "</b></button>";
     }).join("") +
     '<button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
     (who ? '<button class="opt" data-lm="name">' + ico("tell", 18) + "<b>Copy name</b></button>" : "") +

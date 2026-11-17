@@ -155,3 +155,10 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.equal(r.lineLinks('https://xn--ctseyexi-6ya.com/login')[0].host,'xn--ctseyexi-6ya.com');   // look-alike names show in their raw form
   console.log('PASS: chat links: http(s)/www only, punctuation trimmed, no logins, no localhost, max 3, raw host shown');
 }
+
+// The whole page script must parse (a stray quote in a string breaks everything).
+{
+  const code=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
+  new vm.Script(code);
+  console.log('PASS: page script parses');
+}
