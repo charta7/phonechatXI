@@ -18,6 +18,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - "Reset settings" in Settings > Backup goes back to how a new install starts. Your mention names stay, and saved tells and your phone link aren't touched.
 
 ### Looks
+- Text size has two more steps, XS and XL (Settings > Appearance). S, M and L are unchanged, so your current size stays as it is.
 - Compact layout: the time shows once per minute. Lines in the same minute as the one above keep the column but leave the time out.
 - While the keyboard is up in Chat or on a channel's page, the title row, view tabs, filter chips and pinned message of the day hide so more chat fits above the keys. They come back when the keyboard closes. Warnings such as "Bridge offline" stay.
 - The two Yunas skin fonts ship as WOFF2, not .otf. They're the same fonts with every character kept, and the phone has about 200 KB less to load the first time you pick Yunas.

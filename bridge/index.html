@@ -32,7 +32,7 @@
   --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
   --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
 }
-body.size-S{--fs:14px} body.size-L{--fs:17.5px}
+body.size-XS{--fs:12.5px} body.size-S{--fs:14px} body.size-L{--fs:17.5px} body.size-XL{--fs:19.5px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{color-scheme:dark}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
@@ -807,7 +807,7 @@ function cleanPrefs(o) {
   function list(v, max, ok) { return Array.isArray(v) ? v.filter(ok).slice(0, max) : []; }
   var ID = /^[A-Za-z0-9_-]{1,24}$/;
   o.density = pick(o.density, ["comfortable", "compact"], D.density);
-  o.size = pick(o.size, ["S", "M", "L"], D.size);
+  o.size = pick(o.size, ["XS", "S", "M", "L", "XL"], D.size);
   o.calls = pick(o.calls, ["off", "highlight", "badge"], D.calls);
   o.clock = pick(o.clock, ["12", "24"], D.clock);
   o.cmdMode = pick(o.cmdMode, ["all", "ace", "cw", "wew"], D.cmdMode);
@@ -968,7 +968,7 @@ function applyLook() {
   if (tc && bg) tc.setAttribute("content", bg);
   document.body.classList.toggle("compact", S.density === "compact");
   document.body.classList.toggle("clock-12", S.clock !== "24");
-  document.body.classList.remove("size-S", "size-M", "size-L");
+  document.body.classList.remove("size-XS", "size-S", "size-M", "size-L", "size-XL");
   document.body.classList.add("size-" + S.size);
 }
 
@@ -2340,7 +2340,7 @@ function renderSettings() {
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
-    srow("Text size", "", segs("size", [["S", "S"], ["M", "M"], ["L", "L"]], S.size)) +
+    srow("Text size", "", segs("size", [["XS", "XS"], ["S", "S"], ["M", "M"], ["L", "L"], ["XL", "XL"]], S.size)) +
     srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
     '<div class="subsect">Channel colors</div>' +
