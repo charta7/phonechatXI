@@ -12,6 +12,16 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - While you're looking at older chat, the view stays put and new lines don't move it. "Back to live" under the feed returns to the newest line, and counts what came in meanwhile. Sending a line from there also returns to live.
 - Search only looks through chat this page has already loaded. Nothing is asked of the game or the bridge and nothing is saved. After a reload that's what the bridge keeps: the last 500 lines each for LS1, LS2 and party, 600 tells, and 300 each for say, shout, unity, yell and Party Finder (times 2 or 4 with Scrollback in Settings). The Search page says how far back it goes.
 
+### Settings across updates
+- Your settings still carry over by themselves. After an update the phone now says so once: "Updated to 1.1.2. Your settings were kept.", with OK and Start fresh.
+- The first time a new version starts, the bridge keeps a copy of your phone settings as they were before the update. Settings > Backup shows "From before the last update" with a Restore button when there's a copy. It's one copy, replaced at the next update, kept in the phonechat folder next to the settings.
+- "Reset settings" in Settings > Backup goes back to how a new install starts. Your mention names stay, and saved tells and your phone link aren't touched.
+
+### Looks
+- Compact layout: the time shows once per minute. Lines in the same minute as the one above keep the column but leave the time out.
+- While the keyboard is up in Chat or on a channel's page, the title row, view tabs, filter chips and pinned message of the day hide so more chat fits above the keys. They come back when the keyboard closes. Warnings such as "Bridge offline" stay.
+- The two Yunas skin fonts ship as WOFF2, not .otf. They're the same fonts with every character kept, and the phone has about 200 KB less to load the first time you pick Yunas.
+
 ### Fixes
 - A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
 - Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
