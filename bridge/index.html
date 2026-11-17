@@ -104,6 +104,8 @@ body.compact .pane .inner{gap:5px}
 .empty{color:var(--mute);font-size:14px;text-align:center;padding:30px 10px;line-height:1.5}
 .div{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--mute);letter-spacing:1px}
 .div:before,.div:after{content:"";flex:1;height:1px;background:var(--line)}
+.div.newdiv{color:var(--gold);font-weight:700}
+.div.newdiv:before,.div.newdiv:after{background:color-mix(in srgb,var(--gold) 55%,transparent)}
 .run{display:flex;gap:10px}
 .rail{flex:none;width:3px;border-radius:2px;background:var(--c)}
 .rbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
@@ -158,6 +160,18 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .findbox .sinput{margin:0;flex:1;min-width:0}
 .findbox .linkbtn{flex:none;font-size:13.5px;padding:6px 10px;border:1px solid var(--edge);border-radius:8px}
 #findlist{padding:2px 12px 12px}
+.findpills{padding:6px 0 4px}
+.tapcard{cursor:pointer}
+/* long-press menu */
+@media (hover:none){.pane [data-m]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}}
+.lmhead{display:flex;align-items:center;gap:8px;padding:2px 4px 4px;color:var(--c)}
+.lmhead b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmbody{font-size:14.5px;line-height:1.4;color:var(--soft);padding:2px 4px 10px;overflow-wrap:anywhere}
+.lmacts{display:flex;flex-direction:column;gap:2px;padding-bottom:6px}
+.lmacts .opt b{font-size:15.5px}
+.tapcard:active{filter:brightness(1.15)}
+.findpills .chipb svg{opacity:.85}
+.chipb .fc{font-size:12px;opacity:.75}
 .hit{display:flex;gap:9px;align-items:flex-start;width:100%;text-align:left;padding:9px 2px;border-bottom:1px solid var(--line)}
 .hit>.i{flex:none;margin-top:2px}
 .hit .hm{flex:1;min-width:0}
@@ -771,7 +785,8 @@ var DEFAULTS = {
   target: {ch: "ls1", peer: ""},
   favs: ["!mog", "!points", "!dailies"],
   colors: {}, emoteMode: "", recentEmotes: [], skin: "classic", font: "readable",
-  read: {}
+  read: {},
+  readCh: {}
 };
 var freshLocal = false;
 var S = load();
@@ -826,6 +841,11 @@ function cleanPrefs(o) {
     if (/^[a-z]{1,15}$/.test(k) && typeof o.read[k] === "number" && isFinite(o.read[k])) read[k] = o.read[k];
   });
   o.read = read;
+  var readCh = {};   // when you last looked at each channel's own page, for the "New" line
+  if (o.readCh && typeof o.readCh === "object") CHAT_CH.forEach(function (c) {
+    if (typeof o.readCh[c] === "number" && isFinite(o.readCh[c]) && o.readCh[c] > 0) readCh[c] = o.readCh[c];
+  });
+  o.readCh = readCh;
   o.master = chans(o.master, D.master);
   var views = list(o.views, 20, function (v) { return v && typeof v === "object" && text(v.id, 24, ID) && typeof v.name === "string"; })
     .map(function (v) { return {id: v.id, name: v.name.slice(0, 30), ch: chans(v.ch, v.id === "all" ? D.views[0].ch : null)}; });
@@ -857,7 +877,7 @@ function save() {
 }
 // Names stay on this phone: your mention names, who you've had tells with, and the last tell
 // target are never sent to the bridge or put in an export file.
-var PHONE_ONLY = ["watch", "read", "target", "hidden"];
+var PHONE_ONLY = ["watch", "read", "readCh", "target", "hidden"];
 function shareable(s) {
   var out = JSON.parse(JSON.stringify(s));
   PHONE_ONLY.forEach(function (k) { delete out[k]; });
@@ -1255,13 +1275,20 @@ function bodyLine(m, ctx) {
 function lineAttr(m) { return m.id != null && !m.pending ? ' data-m="' + esc(m.id) + '"' : ""; }
 function isCallOnly(m) { return false; }   // roll-call folding removed in 1.1
 
-function blocks(items, ctx) {
+// "New" line: newAfter is when you last looked. The line goes above the first message from someone else
+// that came in after that, as long as there's older chat above it to set it apart.
+function isNewFor(m, newAfter) { return newAfter > 0 && m.ts > newAfter && !m.pending && m.dir !== "out" && CHAT_CH.indexOf(m.ch) >= 0; }
+function blocks(items, ctx, newAfter) {
   items = items.slice().sort(function (a, b) { return (a.ts - b.ts) || ((a.id || 1e12) - (b.id || 1e12)); });
-  var out = [], last = null, prevTs = 0;
+  var out = [], last = null, prevTs = 0, newDone = !(newAfter > 0);
   for (var i = 0; i < items.length; i++) {
     var m = items[i];
     if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", html: dayLabel(m.ts)});
     prevTs = m.ts;
+    if (!newDone && isNewFor(m, newAfter)) {
+      newDone = true;
+      if (i > 0) { out.push({type: "div", text: "New", cls: "newdiv"}); last = null; }
+    }
     if (m.ch === "zone") { out.push({type: "div", text: m.body}); last = null; continue; }
     if (m.ch === "system") { out.push({type: "note", m: m}); last = null; continue; }
     if (isCallOnly(m)) {
@@ -1314,7 +1341,7 @@ function renderBlocks(list, ctx) {
   function tcls(ts) { var mk = Math.floor(ts / 60), same = mk === lastMin; lastMin = mk; return same ? "t rep" : "t"; }
   list.forEach(function (b) {
     if (b.type === "div" || b.type === "note") lastMin = null;
-    if (b.type === "div") { html.push('<div class="div">' + (b.html || esc(b.text)) + "</div>"); return; }
+    if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
     if (b.type === "burst") {
@@ -1391,7 +1418,7 @@ function renderPane(id, items, ctx, emptyText) {
   }
   if (!shown) shown = items.slice(-cap);
   var mode = ctx === "thread" ? "thread" : (S.density === "compact" ? "compact" : ctx);
-  var html = shown.length ? renderBlocks(blocks(shown, mode), mode) : '<div class="empty">' + emptyText + "</div>";
+  var html = shown.length ? renderBlocks(blocks(shown, mode, pane._win == null ? pane._newAfter : 0), mode) : '<div class="empty">' + emptyText + "</div>";
   if (html === pane._html && !first && !goto) {   // nothing changed: leave the DOM (and the scroll) alone
     pane._count = items.length;
     if (pane._win != null) liveJump(pane, id, items);
@@ -1432,6 +1459,16 @@ function renderPane(id, items, ctx, emptyText) {
     pane.scrollTop = pane.scrollHeight;
     seenCount[id] = items.length;
     if (jump) jump.classList.remove("show");
+    var nd = pane._newScroll && inner.querySelector(".newdiv");
+    pane._newScroll = false;
+    if (nd) {
+      // Back after a while with more new chat than fits: start at the "New" line, not the bottom.
+      var off = nd.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+      if (off < 0) {
+        pane.scrollTop += off - 6; pane._stick = false;
+        if (jump) { jump.textContent = "Jump to latest"; jump.classList.add("show"); }
+      }
+    }
   } else {
     if (anchor) {
       var el = inner.querySelector('[data-k="' + anchor + '"]');
@@ -2075,6 +2112,8 @@ $("tells-list").addEventListener("click", function (e) {
 $("newtell").addEventListener("click", function () { pickPeer(openThread); });
 function openThread(peer, line) {
   thread.peer = peer;
+  var tp = $("pane-thread");
+  tp._newAfter = line == null ? (S.read[peer.toLowerCase()] || 0) : 0; tp._newScroll = line == null;
   S.read[peer.toLowerCase()] = nowSec(); save();
   $("thread-name").textContent = peer;
   seenCount["pane-thread"] = undefined;
@@ -2086,21 +2125,23 @@ function openThread(peer, line) {
 // Search this session. Phone-side only: it looks through the lines this page already holds (the ones
 // the chat panes draw from). Nothing is asked of the bridge or the game, and nothing is sent or saved.
 // ------------------------------------------------------------------------------------------
-var FIND_MAX = 100, findQ = "";
-function findHits(q, list, max) {
+var FIND_MAX = 100, findQ = "", findCh = "";
+function findHits(q, list, max, only) {
   q = (q || "").trim().toLowerCase();
-  var hits = [], more = false;
-  if (q.length < 2) return {hits: hits, more: more};
+  var hits = [], more = false, counts = {};
+  if (q.length < 2) return {hits: hits, more: more, counts: counts};
   for (var i = list.length - 1; i >= 0; i--) {   // newest first
     var m = list[i];
     if (CHAT_CH.indexOf(m.ch) < 0 || !S.master[m.ch]) continue;
     var at = (m.body || "").toLowerCase().indexOf(q);
     var who = m.ch === "tell" || m.dir !== "out" ? (m.name || "") : "";
     if (at < 0 && who.toLowerCase().indexOf(q) < 0) continue;
-    if (hits.length >= max) { more = true; break; }
+    counts[m.ch] = (counts[m.ch] || 0) + 1;   // every match counts, for the channel chips
+    if (only && m.ch !== only) continue;
+    if (hits.length >= max) { more = true; continue; }
     hits.push({m: m, at: at});
   }
-  return {hits: hits, more: more};
+  return {hits: hits, more: more, counts: counts};
 }
 function findSnippet(body, at, n) {
   body = body || "";
@@ -2122,9 +2163,15 @@ function renderFind() {
   if (q.length < 2) {
     html = '<div class="empty">Type a name or a word to find it in every channel at once.<br>Tap a result to go to that moment.<br><br>' + findReach() + "</div>";
   } else {
-    var r = findHits(q, msgs, FIND_MAX);
-    if (!r.hits.length) html = '<div class="empty">Nothing found for &ldquo;' + esc(q) + "&rdquo;.<br><br>" + findReach() + "</div>";
-    else html = '<div class="findnote">' + (r.more ? "Newest " + FIND_MAX + " results. Type more to narrow it down." : r.hits.length + (r.hits.length === 1 ? " result" : " results") + ", newest first.") + "</div>" +
+    var r = findHits(q, msgs, FIND_MAX, findCh);
+    var chs = CHAT_CH.filter(function (c) { return r.counts[c] || c === findCh; }), total = 0;
+    chs.forEach(function (c) { total += r.counts[c] || 0; });
+    var chips = chs.length > 1 || findCh ? '<div class="pills findpills">' + [["", "All", total]].concat(chs.map(function (c) { return [c, CH[c].label, r.counts[c] || 0]; })).map(function (x) {
+      return '<button class="chipb' + (findCh === x[0] ? " on" : "") + '" data-fch="' + x[0] + '"' + (x[0] ? ' style="--c:' + CH[x[0]].c + '"' : "") + ">" + (x[0] ? ico(CH[x[0]].icon, 14) : "") + esc(x[1]) + ' <span class="fc">' + x[2] + "</span></button>";
+    }).join("") + "</div>" : "";
+    if (!total) html = '<div class="empty">Nothing found for &ldquo;' + esc(q) + "&rdquo;.<br><br>" + findReach() + "</div>";
+    else if (!r.hits.length) html = chips + '<div class="empty">Nothing in ' + esc(CH[findCh].full) + ".</div>";
+    else html = chips + '<div class="findnote">' + (r.more ? "Newest " + FIND_MAX + " results. Type more to narrow it down." : r.hits.length + (r.hits.length === 1 ? " result" : " results") + ", newest first.") + "</div>" +
       r.hits.map(function (h) {
         var m = h.m, c = CH[m.ch], who = findWho(m);
         return '<button class="hit" data-hit="' + esc(m.id) + '" style="--c:' + c.c + '">' + ico(c.icon, 18) + '<div class="hm"><div class="hh"><b>' + c.label + (who ? " &middot; " + who : "") + '</b><span class="t">' + dayLabel(m.ts) + '</span></div><div class="hs">' + findSnippet(m.body, h.at, q.length) + "</div></div></button>";
@@ -2143,7 +2190,63 @@ $("findq").addEventListener("keydown", function (e) { if (e.key === "Enter") thi
 $("findq").addEventListener("focus", function () { document.body.classList.add("typing"); setTimeout(fitViewport, 50); });
 $("findq").addEventListener("blur", function () { setTimeout(function () { if (!document.activeElement || !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) document.body.classList.remove("typing"); fitViewport(); }, 80); });
 $("findx").addEventListener("click", function () { findQ = $("findq").value = ""; renderFind(); $("findq").focus(); });
-$("findlist").addEventListener("click", function (e) { var h = e.target.closest("[data-hit]"); if (h) findGo(h.dataset.hit); });
+$("findlist").addEventListener("click", function (e) {
+  var c = e.target.closest("[data-fch]");
+  if (c) { findCh = findCh === c.dataset.fch ? "" : c.dataset.fch; $("findlist").scrollTop = 0; renderFind(); return; }
+  var h = e.target.closest("[data-hit]"); if (h) findGo(h.dataset.hit);
+});
+// Open Search already filled in, without bringing the keyboard up (from "Search for" on a line).
+// Long-press a chat line (touch only; a mouse can select text as usual): a small menu to copy it or search for who said it.
+function plainBody(b) { return String(b || "").replace(/\{\{([^{}]{1,40})\}\}/g, "$1"); }
+function copyText(t) {
+  var ok = false, ta = document.createElement("textarea");
+  ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
+  document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, t.length);
+  try { ok = document.execCommand("copy"); } catch (e) {}
+  ta.remove();
+  if (!ok && navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(function () { toast("Copied."); }, function () { toast("Couldn't copy."); }); return; }
+  toast(ok ? "Copied." : "Couldn't copy.");
+}
+function lineMenu(id) {
+  var m = byId[id];
+  if (!m) return;
+  var who = m.ch === "tell" ? (m.name || "") : (m.dir === "out" ? "" : (m.name || "")), c = CH[m.ch] || {c: "var(--soft)", icon: "bell", full: ""};
+  var mine = !who || who.toLowerCase() === myName().toLowerCase();
+  var body = plainBody(m.body);
+  openSheet('<div class="grab"></div><div class="lmhead" style="--c:' + c.c + '">' + ico(c.icon, 16) + "<b>" + esc(who || c.full) + '</b><span class="vt">' + dayLabel(m.ts) + '</span></div><div class="lmbody">' + esc(body.length > 160 ? body.slice(0, 160) + "\u2026" : body) + "</div>" +
+    '<div class="lmacts"><button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
+    (who ? '<button class="opt" data-lm="name">' + ico("tell", 18) + "<b>Copy name</b></button>" : "") +
+    (who && !mine ? '<button class="opt" data-lm="find">' + ico("search", 18) + "<b>Search for " + esc(who) + "</b></button>" : "") +
+    '</div><div class="sbtns"><button class="sec" data-lm="x">Cancel</button></div>', function (e) {
+    var b = e.target.closest("[data-lm]");
+    if (!b) return;
+    var a = b.dataset.lm;
+    if (a === "copy") copyText(body);
+    if (a === "name") copyText(who);
+    closeSheet();
+    if (a === "find") findFor(who);
+  });
+}
+var lp = null, lpEat = 0;
+function lpCancel() { if (lp) { clearTimeout(lp.t); lp = null; } }
+document.addEventListener("pointerdown", function (e) {
+  lpCancel();
+  if (e.pointerType === "mouse") return;
+  var el = e.target.closest && e.target.closest(".pane [data-m]");
+  if (!el || e.target.closest("a,.chico,.who")) return;
+  lp = {x: e.clientX, y: e.clientY, t: setTimeout(function () {
+    lp = null; lpEat = Date.now();
+    el.classList.remove("picked"); void el.offsetWidth; el.classList.add("picked");
+    lineMenu(el.dataset.m);
+  }, 480)};
+}, true);
+document.addEventListener("pointermove", function (e) { if (lp && Math.abs(e.clientX - lp.x) + Math.abs(e.clientY - lp.y) > 10) lpCancel(); }, true);
+["pointerup", "pointercancel"].forEach(function (t) { document.addEventListener(t, lpCancel, true); });
+document.addEventListener("scroll", lpCancel, true);
+// The finger lifting after a long-press would also count as a tap on the line (reply). Swallow that one click.
+document.addEventListener("click", function (e) { if (lpEat && Date.now() - lpEat < 1200) { lpEat = 0; e.stopPropagation(); e.preventDefault(); } else lpEat = 0; }, true);
+document.addEventListener("contextmenu", function (e) { if (e.target.closest && e.target.closest(".pane [data-m]") && (lp || Date.now() - lpEat < 1200)) e.preventDefault(); }, true);
+function findFor(q) { findQ = $("findq").value = q; findCh = ""; $("findlist").scrollTop = 0; go("search"); }
 
 // ------------------------------------------------------------------------------------------
 // Ventures and notices
@@ -2239,9 +2342,10 @@ function renderAlerts() {
   $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
-  $("mentions").innerHTML = '<div class="sect">MENTIONS</div>' + (!watchRe ? '<div class="empty sm">Add your name in Settings.</div>' :
+  // Tap a mention to go to that moment in chat, the same as a search result.
+  $("mentions").innerHTML = '<div class="shead"><div class="sect">MENTIONS</div>' + (men.length ? '<span class="vt">Tap to go there</span>' : "") + "</div>" + (!watchRe ? '<div class="empty sm">Add your name in Settings.</div>' :
     (men.length ? men.map(function (m) {
-      return card(CH[m.ch].icon, "var(--" + m.ch + ", var(--soft))", esc(m.name || CH[m.ch].full), m.ts, '<div class="abody">' + bodyHtml(m) + "</div>");
+      return card(CH[m.ch].icon, "var(--" + m.ch + ", var(--soft))", esc(m.name || CH[m.ch].full), m.ts, '<div class="abody">' + bodyHtml(m) + "</div>").replace('<div class="acard"', '<div class="acard tapcard" data-goto="' + esc(m.id) + '"');
     }).join("") : '<div class="empty sm">Nothing yet.</div>'));
 
   // The x hides the visits shown (remembered on the phone); a new visit shows again.
@@ -2483,6 +2587,7 @@ function go(name) {
   if (name === "search" && !findQ) $("findq").focus();
 }
 function back() {
+  markOpenRead();
   var name = stack.pop();
   if (!name) return;
   $("scr-" + name).classList.remove("open");
@@ -2500,6 +2605,8 @@ document.addEventListener("click", function (e) {
   if (g) { go(g.dataset.go); return; }
   if (e.target.closest("[data-back]")) { if (stack.length) { if (histOK) history.back(); else back(); } }
   if (e.target.closest("a")) return;
+  var gt = e.target.closest("[data-goto]");
+  if (gt && !e.target.closest("a")) { findGo(gt.dataset.goto); return; }
   var fc = e.target.closest("[data-focus]");
   if (fc && fc.closest(".pane")) { openFocus(fc.dataset.focus); return; }
   var w = e.target.closest("[data-who]");
@@ -2530,8 +2637,28 @@ function aimPane(id, line) {
 }
 function openFocus(ch, line) {
   if (!CH[ch]) return;
+  var p = $("pane-focus");
+  p._newAfter = line == null ? (S.readCh[ch] || 0) : 0; p._newScroll = line == null;
+  if (CHAT_CH.indexOf(ch) >= 0) { S.readCh[ch] = nowSec(); save(); }
   focus.ch = ch; focus.filter = "all"; seenCount["pane-focus"] = undefined; aimPane("pane-focus", line); go("focus");
 }
+// You're reading whatever is on screen: when you leave it, it counts as read.
+function markOpenRead() {
+  var top = stack[stack.length - 1];
+  if (top === "focus" && CHAT_CH.indexOf(focus.ch) >= 0) { S.readCh[focus.ch] = nowSec(); save(); }
+  if (top === "thread" && thread.peer) { S.read[thread.peer.toLowerCase()] = nowSec(); save(); }
+}
+var awayAt = 0;
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState !== "visible") { awayAt = nowSec(); markOpenRead(); return; }
+  // Back after 30 seconds or more: mark where you left off in what's on screen.
+  if (!awayAt || nowSec() - awayAt < 30) return;
+  var top = stack[stack.length - 1], ids = top === "focus" ? ["pane-focus"] : top === "thread" ? ["pane-thread"] : curTab === "chat" ? ["pane-chat"] : [];
+  if (curTab === "chat" && ids[0] !== "pane-chat") ids.push("pane-chat");
+  ids.forEach(function (id) { var p = $(id); if (p._win == null) { p._newAfter = awayAt; p._newScroll = true; p._html = null; } });
+  awayAt = 0;
+  schedule();
+});
 function replyTo(t, lineEl, typeNow) {
   var same = S.target && S.target.ch === t.ch && (S.target.peer || "") === (t.peer || "");
   S.target = t; save(); updateComposers();
@@ -2656,8 +2783,8 @@ function render() {
   renderAlerts();
   var top = stack[stack.length - 1], under = stack[stack.length - 2];
   if (top === "search") renderFind();
-  $("focus-back").textContent = under === "search" ? "Search" : "Chat";
-  $("thread-back").textContent = under === "search" ? "Search" : "Tells";
+  $("focus-back").textContent = under === "search" ? "Search" : !under && curTab === "alerts" ? "Alerts" : "Chat";
+  $("thread-back").textContent = under === "search" ? "Search" : !under && curTab === "alerts" ? "Alerts" : "Tells";
   if (top === "focus") {
     var c = CH[focus.ch];
     $("focus-title").innerHTML = ico(c.icon, 22) + "<b>" + c.full + "</b>";

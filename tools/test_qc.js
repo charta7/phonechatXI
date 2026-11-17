@@ -113,3 +113,25 @@ console.log('PASS: dark message colors lighten; white is preserved');
   const fresh=s.merged(null); assert.equal(fresh.skin,'classic');
   console.log('PASS: 1.1.0-era settings load with nothing lost; options added since get their defaults');
 }
+
+// "New" line: above the first message from someone else after you last looked, only with older chat above it.
+{
+  const r={CHAT_CH:['ls1','tell'],dayLabel:()=>'D',senderOf:m=>m.name,isCallOnly:()=>false,S:{calls:'off'}};
+  vm.createContext(r); vm.runInContext(extract('function isNewFor(', 'function runHead('),r);
+  const L=[{id:1,ts:100,ch:'ls1',name:'A',dir:'in'},{id:2,ts:200,ch:'ls1',name:'Me',dir:'out'},{id:3,ts:300,ch:'ls1',name:'B',dir:'in'},{id:4,ts:310,ch:'ls1',name:'B',dir:'in'}];
+  const kinds=b=>b.map(x=>x.cls||x.type);
+  assert.deepEqual(kinds(r.blocks(L,'chat',150)),['div','run','run','newdiv','run']);   // own line after the mark isn't "new"
+  assert.deepEqual(kinds(r.blocks(L,'chat',0)),['div','run','run','run']);
+  assert.deepEqual(kinds(r.blocks(L,'chat',50)),['div','run','run','run']);              // everything new: no line at the very top
+  assert.deepEqual(kinds(r.blocks(L,'chat',400)),['div','run','run','run']);
+  console.log('PASS: New line sits above the first unread message from someone else, not at the top or after your own lines');
+}
+// Search chips: counts cover every match; picking a channel narrows the list.
+{
+  const f={CHAT_CH:['ls1','party','tell'],S:{master:{ls1:true,party:true,tell:true}}};
+  vm.createContext(f); vm.runInContext(extract('function findHits(', 'function findSnippet('),f);
+  const L=[{id:1,ch:'ls1',name:'A',dir:'in',body:'kraken'},{id:2,ch:'party',name:'B',dir:'in',body:'kraken'},{id:3,ch:'party',name:'C',dir:'in',body:'Kraken'}];
+  let r=f.findHits('kraken',L,1,'party'); assert.equal(r.counts.ls1,1); assert.equal(r.counts.party,2); assert.deepEqual(r.hits.map(h=>h.m.id),[3]); assert.equal(r.more,true);
+  r=f.findHits('kraken',L,10,''); assert.equal(r.hits.length,3);
+  console.log('PASS: search channel chips count every match and narrow the list');
+}

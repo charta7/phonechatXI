@@ -10,7 +10,13 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - A magnifier on the Chat and Tells pages opens Search. Type a name or a word (2 letters or more) and every match shows in one list, newest first, across all your channels: which channel, who said it, when, and the line with the match in gold. Channels you've hidden everywhere in Settings are left out. It shows the newest 100 matches.
 - Tap a result to go to that moment. A linkshell, party or other channel line opens that channel with the line in view and a brief highlight; a tell opens that person's conversation the same way. The back button returns to your results.
 - While you're looking at older chat, the view stays put and new lines don't move it. "Back to live" under the feed returns to the newest line, and counts what came in meanwhile. Sending a line from there also returns to live.
+- Above the results, chips show how many matches each channel has (All, LS1, Party, Tells and so on). Tap one to see only that channel, tap it again for all.
 - Search only looks through chat this page has already loaded. Nothing is asked of the game or the bridge and nothing is saved. After a reload that's what the bridge keeps: the last 500 lines each for LS1, LS2 and party, 600 tells, and 300 each for say, shout, unity, yell and Party Finder (times 2 or 4 with Scrollback in Settings). The Search page says how far back it goes.
+
+### Catching up
+- A "New" line marks where you left off. It shows on a channel's own page and in a tell conversation (since you last opened it), and in Chat when you come back to the page after 30 seconds or more away. If more came in than fits on screen, the page opens at the "New" line instead of the bottom.
+- Long-press a chat line for a small menu: Copy text, Copy name, and Search for that person. Copied item links come out as plain names, without the {{ }}. A short tap still replies as before. On a computer, select text with the mouse as usual.
+- Tap a mention in Alerts to go to that moment in chat, the same as a search result. The newest mention is at the top, so it's one tap to your last one. Back returns to Alerts.
 
 ### Settings across updates
 - Your settings still carry over by themselves. After an update the phone now says so once: "Updated to 1.1.2. Your settings were kept.", with OK and Start fresh.
