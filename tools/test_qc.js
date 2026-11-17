@@ -135,3 +135,11 @@ console.log('PASS: dark message colors lighten; white is preserved');
   r=f.findHits('kraken',L,10,''); assert.equal(r.hits.length,3);
   console.log('PASS: search channel chips count every match and narrow the list');
 }
+
+// Long-press menu items: each {{Item}} once, at most 3, and plain text without the braces.
+{
+  const r={}; vm.createContext(r); vm.runInContext(extract('function lineItems(', 'function copyText('),r);
+  assert.deepEqual(Array.from(r.lineItems('WTB {{Kraken Club}} and {{kraken club}} or {{Ridill}} {{A}} {{B}}')),['Kraken Club','Ridill','A']);
+  assert.equal(r.plainBody('WTB {{Kraken Club}} {Pull}'),'WTB Kraken Club {Pull}');
+  console.log('PASS: long-press menu lists each item once (max 3) and copies text without {{ }}');
+}

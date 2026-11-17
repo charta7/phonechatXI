@@ -169,6 +169,10 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .lmbody{font-size:14.5px;line-height:1.4;color:var(--soft);padding:2px 4px 10px;overflow-wrap:anywhere}
 .lmacts{display:flex;flex-direction:column;gap:2px;padding-bottom:6px}
 .lmacts .opt b{font-size:15.5px}
+.lmitem{display:flex;align-items:center;gap:8px}
+.lmitem .opt{flex:1;min-width:0}
+.lmitem .opt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmitem .linkbtn{flex:none;font-size:13.5px;padding:6px 10px;border:1px solid var(--edge);border-radius:8px;text-decoration:none;color:var(--soft)}
 .tapcard:active{filter:brightness(1.15)}
 .findpills .chipb svg{opacity:.85}
 .chipb .fc{font-size:12px;opacity:.75}
@@ -2207,6 +2211,12 @@ $("findlist").addEventListener("click", function (e) {
 });
 // Open Search already filled in, without bringing the keyboard up (from "Search for" on a line).
 // Long-press a chat line (touch only; a mouse can select text as usual): a small menu to copy it or search for who said it.
+// Item links in a line ({{Item}}), each once, at most 3, for the long-press menu.
+function lineItems(b) {
+  var seen = {}, out = [], re = /\{\{([^{}<>\n]{1,40})\}\}/g, m;
+  while ((m = re.exec(String(b || ""))) && out.length < 3) { var n = m[1].trim(); if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; out.push(n); } }
+  return out;
+}
 function plainBody(b) { return String(b || "").replace(/\{\{([^{}]{1,40})\}\}/g, "$1"); }
 function copyText(t) {
   var ok = false, ta = document.createElement("textarea");
@@ -2222,9 +2232,12 @@ function lineMenu(id) {
   if (!m) return;
   var who = m.ch === "tell" ? (m.name || "") : (m.dir === "out" ? "" : (m.name || "")), c = CH[m.ch] || {c: "var(--soft)", icon: "bell", full: ""};
   var mine = !who || who.toLowerCase() === myName().toLowerCase();
-  var body = plainBody(m.body);
+  var body = plainBody(m.body), items = lineItems(m.body);
   openSheet('<div class="grab"></div><div class="lmhead" style="--c:' + c.c + '">' + ico(c.icon, 16) + "<b>" + esc(who || c.full) + '</b><span class="vt">' + dayLabel(m.ts) + '</span></div><div class="lmbody">' + esc(body.length > 160 ? body.slice(0, 160) + "\u2026" : body) + "</div>" +
-    '<div class="lmacts"><button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
+    '<div class="lmacts">' + items.map(function (n, i) {
+      return '<div class="lmitem"><button class="opt" data-lm="item" data-i="' + i + '">' + ico("pen", 18) + "<b>Copy " + esc(n) + '</b></button><a class="linkbtn" href="https://www.bg-wiki.com/ffxi/Special:Search?search=' + encodeURIComponent(n) + '" target="_blank" rel="noopener noreferrer" data-lm="wiki">BG-Wiki</a></div>';
+    }).join("") +
+    '<button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
     (who ? '<button class="opt" data-lm="name">' + ico("tell", 18) + "<b>Copy name</b></button>" : "") +
     (who && !mine ? '<button class="opt" data-lm="find">' + ico("search", 18) + "<b>Search for " + esc(who) + "</b></button>" : "") +
     '</div><div class="sbtns"><button class="sec" data-lm="x">Cancel</button></div>', function (e) {
@@ -2232,6 +2245,7 @@ function lineMenu(id) {
     if (!b) return;
     var a = b.dataset.lm;
     if (a === "copy") copyText(body);
+    if (a === "item") copyText(items[+b.dataset.i] || "");
     if (a === "name") copyText(who);
     closeSheet();
     if (a === "find") findFor(who);
@@ -2243,7 +2257,7 @@ document.addEventListener("pointerdown", function (e) {
   lpCancel();
   if (e.pointerType === "mouse") return;
   var el = e.target.closest && e.target.closest(".pane [data-m]");
-  if (!el || e.target.closest("a,.chico,.who")) return;
+  if (!el || e.target.closest(".chico,.who") || (e.target.closest("a") && !e.target.closest("a.item"))) return;
   lp = {x: e.clientX, y: e.clientY, t: setTimeout(function () {
     lp = null; lpEat = Date.now();
     el.classList.remove("picked"); void el.offsetWidth; el.classList.add("picked");
