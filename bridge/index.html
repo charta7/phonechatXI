@@ -929,15 +929,23 @@ var status = {char: "", save_tells: false, url: ""};
 var connected = false, everConnected = false, lastBoot = null, offlineSince = Date.now(), linkDead = false;
 var commands = {info: {}, action: {}};
 
+// A request that gets no answer gives up after 10 seconds, so one hung request can't leave sending stuck until a reload.
+// The bridge may still have got it: the callers say "check the chat" and never send it again by themselves.
+var API_TIMEOUT_MS = 10000;
 function api(path, body) {
+  var ctl = window.AbortController ? new AbortController() : null;
+  var timer = ctl ? setTimeout(function () { ctl.abort(); }, API_TIMEOUT_MS) : 0;
+  function done() { clearTimeout(timer); }
   return fetch(path, {
     method: "POST",
     headers: {"Content-Type": "application/json", "X-Token": TOKEN},
-    body: JSON.stringify(body || {})
+    body: JSON.stringify(body || {}),
+    signal: ctl ? ctl.signal : undefined
   }).then(function (r) {
     return r.json().catch(function () { return {ok: false, error: "Bridge error " + r.status}; }).then(function (j) { j._status = r.status; return j; });
-  });
+  }).then(function (j) { done(); return j; }, function (e) { done(); throw e; });
 }
+var NO_ANSWER = "The bridge didn't answer. Check the chat before you send it again.";
 function getJSON(path) {
   return fetch(path + (path.indexOf("?") < 0 ? "?" : "&") + "t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}})
     .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
@@ -1633,7 +1641,7 @@ function submit(ctx, inp) {
     });
     seenCount["pane-" + ctx] = undefined;
     schedule();
-  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+  }).catch(function () { sending = false; toast(NO_ANSWER); });
 }
 document.addEventListener("click", function (e) {
   var r = e.target.closest("[data-retry]");
@@ -1666,7 +1674,7 @@ function sendCommand(text, confirmed, inp) {
     lastCmdAt = Date.now();
     if (inp && submittedValue.trim() === text.trim()) finishDraft(inp, submittedKey, submittedValue);
     schedule();
-  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+  }).catch(function () { sending = false; toast(NO_ANSWER); });
 }
 function confirmCommand(text, inp) {
   var name = text.split(/\s+/)[0].slice(1).toLowerCase();
@@ -1896,7 +1904,7 @@ $("emotes").addEventListener("click", function (e) {
     var r = (S.recentEmotes || []).filter(function (x) { return x !== base; });
     r.unshift(base); S.recentEmotes = r.slice(0, 8); save();
     setTimeout(function () { b.textContent = was; renderEmotes(); }, 900);
-  }).catch(function () { sending = false; toast("The bridge didn't answer."); });
+  }).catch(function () { sending = false; toast(NO_ANSWER); });
 });
 
 // ------------------------------------------------------------------------------------------
@@ -2197,7 +2205,7 @@ $("settings").addEventListener("click", function (e) {
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
     else if (k === "save_tells") {
-      api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); });
+      api("/api/settings", {save_tells: !status.save_tells}).then(function (j) { if (j.ok) { status.save_tells = j.save_tells; render(); } else toast(j.error || "Could not change that."); }).catch(function () { toast("The bridge didn't answer."); });
       return;
     }
     save(); render(); return;
@@ -2207,7 +2215,7 @@ $("settings").addEventListener("click", function (e) {
     var key = s.dataset.seg, val = s.dataset.val;
     if (key === "scrollback") {
       S.scrollback = +val;
-      api("/api/settings", {scrollback: +val}).then(function (j) { if (!j.ok) toast(j.error || "Could not change that."); });
+      api("/api/settings", {scrollback: +val}).then(function (j) { if (!j.ok) toast(j.error || "Could not change that."); }).catch(function () { toast("The bridge didn't answer."); });
     } else S[key] = val;
     save(); applyLook(); seenCount = {}; render(); return;
   }
@@ -2224,7 +2232,7 @@ $("settings").addEventListener("click", function (e) {
       var b = e2.target.closest("[data-sb]");
       if (!b) return;
       closeSheet();
-      if (b.dataset.sb === "ok") api("/api/tells/clear", {}).then(function (j) { toast(j.ok ? "Saved tells cleared." : (j.error || "Could not clear.")); });
+      if (b.dataset.sb === "ok") api("/api/tells/clear", {}).then(function (j) { toast(j.ok ? "Saved tells cleared." : (j.error || "Could not clear.")); }).catch(function () { toast("The bridge didn't answer."); });
     });
   }
 });
