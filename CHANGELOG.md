@@ -15,7 +15,8 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 
 ### Catching up
 - A "New" line marks where you left off. It shows on a channel's own page and in a tell conversation (since you last opened it), and in Chat when you come back to the page after 30 seconds or more away. If more came in than fits on screen, the page opens at the "New" line instead of the bottom. It goes away once you send a line from that page.
-- Long-press a chat line for a small menu: Copy text, Copy name, and Search for that person. Copied item links come out as plain names, without the {{ }}. If the line has item links, each one gets its own row: Copy the item name (handy for the auction house), or BG-Wiki. Long-pressing right on an item works too; a quick tap on it still opens BG-Wiki. A short tap still replies as before. On a computer, select text with the mouse as usual.
+- Long-press a chat line for a small menu: Copy text, Copy name, and Find that person in chat. Copied item links come out as plain names, without the {{ }}.
+- Item links (`{{Item}}`) in chat no longer open BG-Wiki on a tap, because a tap on a line means reply and the small link was easy to hit by mistake. Long-press the line instead: each item gets a "Search BG-Wiki for ..." row with a Copy button for the name (handy for the auction house). On a computer, clicking an item still opens BG-Wiki, and so does tapping one in a message of the day or a notice. A short tap still replies as before. On a computer, select text with the mouse as usual.
 - Tap a mention in Alerts to go to that moment in chat, the same as a search result. The newest mention is at the top, so it's one tap to your last one. Back returns to Alerts.
 
 ### Settings across updates

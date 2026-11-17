@@ -14,7 +14,7 @@ Record device, OS, browser, browser/Home Screen mode, build, and pass/fail.
 - Color picker remains open while messages arrive and while choosing multiple colors.
 - Filters, jump-to-latest, channel text colors, long drafts, and MOTD dismissal work.
 - Search: opens with the keyboard up and results stay above the keys; tapping a result closes the keyboard and lands on the right line; "Back to live" returns to the newest chat; back returns to the results.
-- Long-press a line: the menu opens and stays open when you lift your finger; Copy text pastes into Notes; Search for opens Search with the name. A short tap still replies. Page scrolling isn't caught as a long-press.
+- Long-press a line: the menu opens and stays open when you lift your finger; Copy text pastes into Notes; Find in chat opens Search with the name. A line with an item: "Search BG-Wiki for" opens BG-Wiki, Copy pastes the bare name, and a plain tap on the item replies instead of opening BG-Wiki. A short tap still replies. Page scrolling isn't caught as a long-press.
 - New line: leave LS1's page, let lines come in, open it again: "New" sits above them. Lock the phone for a minute and come back: Chat shows "New".
 - Alerts: tapping a mention lands on that line; back says Alerts.
 - Keyboard up in Chat: the title row, view tabs, chips and MOTD hide and come back when the keyboard closes; the newest line stays in view.

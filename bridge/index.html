@@ -127,7 +127,8 @@ body.compact .pane .inner{gap:5px}
 .burst{display:flex;flex-wrap:wrap;align-items:center;margin-top:2px}
 .burst .lbl{font-size:12px;color:var(--mute);margin-right:6px}
 .top .big::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.3em;vertical-align:-.08em;background:url(/icons/pearl-96.png) center/contain no-repeat}
-a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px}
+@media (hover:hover){.item[data-wiki]{cursor:pointer}}
 [data-who],[data-reply],[data-focus]{cursor:pointer;-webkit-tap-highlight-color:transparent}
 .rhead .chico{display:flex;align-items:center;padding:4px 4px 4px 0;margin:-4px 0}
 .rhead .who{display:flex;align-items:center}
@@ -172,7 +173,8 @@ a.item{color:inherit;text-decoration:underline;text-decoration-color:rgba(255,25
 .lmitem{display:flex;align-items:center;gap:8px}
 .lmitem .opt{flex:1;min-width:0}
 .lmitem .opt b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lmitem .linkbtn{flex:none;font-size:13.5px;padding:6px 10px;border:1px solid var(--edge);border-radius:8px;text-decoration:none;color:var(--soft)}
+.lmitem .opt{text-decoration:none;color:inherit}
+.lmitem .linkbtn{flex:none;font-size:13.5px;padding:6px 12px;border:1px solid var(--edge);border-radius:8px}
 .tapcard:active{filter:brightness(1.15)}
 .findpills .chipb svg{opacity:.85}
 .chipb .fc{font-size:12px;opacity:.75}
@@ -1192,7 +1194,9 @@ function fmt(body) {
   h = h.replace(/\{\{([^{}<>\n]{1,40})\}\}/g, function (all, name) {
     var q = name.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
     if (!q) return all;
-    return '<a class="item" href="https://www.bg-wiki.com/ffxi/Special:Search?search=' + encodeURIComponent(q) + '" target="_blank" rel="noopener noreferrer">{' + name + "}</a>";
+    // Not a link: in chat a tap on the line means reply, so BG-Wiki lives in the long-press menu. A mouse click,
+    // or a tap outside the chat (a message of the day, a notice), still opens it.
+    return '<span class="item" data-wiki="' + esc(q) + '">{' + name + "}</span>";
   });
   h = h.replace(/\{([^{}<>\n]{1,60})\}/g, '<span class="at">{$1}</span>');
   if (watchRe) h = markWatch(h);
@@ -2235,11 +2239,11 @@ function lineMenu(id) {
   var body = plainBody(m.body), items = lineItems(m.body);
   openSheet('<div class="grab"></div><div class="lmhead" style="--c:' + c.c + '">' + ico(c.icon, 16) + "<b>" + esc(who || c.full) + '</b><span class="vt">' + dayLabel(m.ts) + '</span></div><div class="lmbody">' + esc(body.length > 160 ? body.slice(0, 160) + "\u2026" : body) + "</div>" +
     '<div class="lmacts">' + items.map(function (n, i) {
-      return '<div class="lmitem"><button class="opt" data-lm="item" data-i="' + i + '">' + ico("pen", 18) + "<b>Copy " + esc(n) + '</b></button><a class="linkbtn" href="https://www.bg-wiki.com/ffxi/Special:Search?search=' + encodeURIComponent(n) + '" target="_blank" rel="noopener noreferrer" data-lm="wiki">BG-Wiki</a></div>';
+      return '<div class="lmitem"><a class="opt" href="' + wikiUrl(n) + '" target="_blank" rel="noopener noreferrer" data-lm="wiki">' + ico("search", 18) + "<b>Search BG-Wiki for " + esc(n) + '</b></a><button class="linkbtn" data-lm="item" data-i="' + i + '">Copy</button></div>';
     }).join("") +
     '<button class="opt" data-lm="copy">' + ico("pen", 18) + "<b>Copy text</b></button>" +
     (who ? '<button class="opt" data-lm="name">' + ico("tell", 18) + "<b>Copy name</b></button>" : "") +
-    (who && !mine ? '<button class="opt" data-lm="find">' + ico("search", 18) + "<b>Search for " + esc(who) + "</b></button>" : "") +
+    (who && !mine ? '<button class="opt" data-lm="find">' + ico("search", 18) + "<b>Find " + esc(who) + " in chat</b></button>" : "") +
     '</div><div class="sbtns"><button class="sec" data-lm="x">Cancel</button></div>', function (e) {
     var b = e.target.closest("[data-lm]");
     if (!b) return;
@@ -2251,13 +2255,15 @@ function lineMenu(id) {
     if (a === "find") findFor(who);
   });
 }
-var lp = null, lpEat = 0;
+var lp = null, lpEat = 0, lastPtr = "mouse";
+function wikiUrl(n) { return "https://www.bg-wiki.com/ffxi/Special:Search?search=" + encodeURIComponent(n); }
 function lpCancel() { if (lp) { clearTimeout(lp.t); lp = null; } }
 document.addEventListener("pointerdown", function (e) {
+  lastPtr = e.pointerType || "mouse";
   lpCancel();
   if (e.pointerType === "mouse") return;
   var el = e.target.closest && e.target.closest(".pane [data-m]");
-  if (!el || e.target.closest(".chico,.who") || (e.target.closest("a") && !e.target.closest("a.item"))) return;
+  if (!el || e.target.closest(".chico,.who,a")) return;
   lp = {x: e.clientX, y: e.clientY, t: setTimeout(function () {
     lp = null; lpEat = Date.now();
     el.classList.remove("picked"); void el.offsetWidth; el.classList.add("picked");
@@ -2269,6 +2275,14 @@ document.addEventListener("pointermove", function (e) { if (lp && Math.abs(e.cli
 document.addEventListener("scroll", lpCancel, true);
 // The finger lifting after a long-press would also count as a tap on the line (reply). Swallow that one click.
 document.addEventListener("click", function (e) { if (lpEat && Date.now() - lpEat < 1200) { lpEat = 0; e.stopPropagation(); e.preventDefault(); } else lpEat = 0; }, true);
+// An item name opens BG-Wiki on a mouse click anywhere, and on a tap only outside chat lines and mention cards.
+document.addEventListener("click", function (e) {
+  var it = e.target.closest && e.target.closest(".item[data-wiki]");
+  if (!it) return;
+  if (lastPtr !== "mouse" && (it.closest(".pane") || it.closest("[data-goto]"))) return;   // a tap: let the line or card handle it
+  e.stopImmediatePropagation(); e.preventDefault();
+  window.open(wikiUrl(it.dataset.wiki), "_blank", "noopener");
+}, true);
 document.addEventListener("contextmenu", function (e) { if (e.target.closest && e.target.closest(".pane [data-m]") && (lp || Date.now() - lpEat < 1200)) e.preventDefault(); }, true);
 function findFor(q) { findQ = $("findq").value = q; findCh = ""; $("findlist").scrollTop = 0; go("search"); }
 
