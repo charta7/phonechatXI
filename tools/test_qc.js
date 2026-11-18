@@ -107,10 +107,10 @@ console.log('PASS: dark message colors lighten; white is preserved');
     master:{ls1:true,ls2:false,party:true,tell:true,say:false,shout:false},colors:{ls1:'#123456'},favs:['!mog'],watch:'Charta',savedAt:5};
   const m=s.merged(JSON.parse(JSON.stringify(old)));
   for (const k of ['density','size','calls','clock','skin','font','view','watch','savedAt']) assert.equal(m[k],old[k],k);
-  assert.equal(m.views.length,2); assert.equal(m.views[1].name,'Mine'); assert.equal(m.master.ls2,false); assert.equal(m.colors.ls1,'#123456'); assert.deepEqual(Array.from(m.favs),['!mog']);
+  assert.equal(m.views.length,2); assert.equal(m.views[1].name,'Mine'); assert.equal(m.master.ls2,true); assert.equal(m.views[0].ch.ls2,false); assert.equal(m.views[0].ch.say,false); assert.equal(m.views[1].ch.ls2,false); assert.equal(m.colors.ls1,'#123456'); assert.deepEqual(Array.from(m.favs),['!mog']);
   for (const k of Object.keys(s.DEFAULTS)) assert.notEqual(m[k],undefined,'default for '+k);
   assert.equal(m.master.finder,s.DEFAULTS.master.finder);
-  const fresh=s.merged(null); assert.equal(fresh.skin,'classic');
+  const fresh=s.merged(null); assert.equal(fresh.skin,'classic'); assert.equal(fresh.quickFilters,false); assert.equal(fresh.views[0].ch.yell,true); assert.equal(fresh.master.yell,true);
   console.log('PASS: 1.1.0-era settings load with nothing lost; options added since get their defaults');
 }
 

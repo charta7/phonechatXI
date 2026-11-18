@@ -32,6 +32,13 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - While the keyboard is up in Chat or on a channel's page, the title row, view tabs, filter chips and pinned message of the day hide so more chat fits above the keys. They come back when the keyboard closes. Warnings such as "Bridge offline" stay.
 - The two Yunas skin fonts ship as WOFF2, not .otf. They're the same fonts with every character kept, and the phone has about 200 KB less to load the first time you pick Yunas.
 
+### First-time use
+- The quick filter row (LS1, LS2, Party and so on) is off on a new install. Turn it on in Edit view if you want it. If you already had it on, it stays on.
+- Yell is on in the All view on a new install. If you already had it off, it stays off.
+- Settings no longer has a Channels list. Each view picks its own channels in Edit view, so there were two places to do the same thing. If you had switched a channel off in Settings, it's switched off in your views instead, so nothing comes back.
+- Alerts: the Mentions and Notices titles line up with Ventures and the cards. They sat a little to the right.
+- Search help is three short lines. The line about how far back it covers keeps the time together, so it no longer breaks in the middle of "Today 4:55 PM".
+
 ### Fixes
 - On iPhone, the Home Screen app's status bar now matches the skin. It stayed in Midnight's color on Onyx, Yunas and Classic.
 - A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
