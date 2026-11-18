@@ -832,7 +832,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, channelTextGame: true, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, names: "app", quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: true, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: true, emote: true, finder: true}},
@@ -880,6 +880,7 @@ function cleanPrefs(o) {
   function list(v, max, ok) { return Array.isArray(v) ? v.filter(ok).slice(0, max) : []; }
   var ID = /^[A-Za-z0-9_-]{1,24}$/;
   o.density = pick(o.density, ["comfortable", "compact"], D.density);
+  o.names = pick(o.names, ["app", "game"], D.names);
   o.size = pick(o.size, ["XS", "S", "M", "L", "XL"], D.size);
   o.calls = pick(o.calls, ["off", "highlight", "badge"], D.calls);
   o.clock = pick(o.clock, ["12", "24"], D.clock);
@@ -889,7 +890,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "channelTextGame", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -1012,7 +1013,7 @@ var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
 var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#D4F58A", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
 // Log prints every line the way the game does, so it always uses the compact rows.
-function isCompact() { return S.density === "compact" || S.skin === "game"; }
+function isCompact() { return S.density === "compact"; }
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
@@ -1341,8 +1342,7 @@ function readableColor(hex) {
   while ((lum(rgb) + .05) / (floor + .05) < 4.5 && rgb.some(function (v) { return v < 255; })) rgb = rgb.map(function (v) { return Math.min(255, v + 8); });
   return "#" + rgb.map(function (v) { return v.toString(16).padStart(2, "0"); }).join("");
 }
-// Color message text: Game has its own copy (on by default), every other skin shares one, so switching skins keeps each choice.
-function chText() { return S.skin === "game" ? S.channelTextGame : S.channelText; }
+function chText() { return S.channelText; }
 function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return chText() ? '<span style="color:' + readableColor(colorOf(m.ch)) + '">' + h + "</span>" : h; }
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
@@ -1394,6 +1394,7 @@ function runHead(b, ctx) {
   // Tells read like the game: "Wren>>" for one you got, ">>Wren" for one you sent.
   var label = esc(b.who || CH[b.ch].full);
   if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
+  else if (S.names === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
   if (ctx === "thread" && b.dir === "out") {
     return '<div class="rhead"><span class="t">' + extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
@@ -1411,8 +1412,8 @@ function compactPrefix(m) {
     case "unity": return "{" + who + "}";
     case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
     case "emote": case "finder": return "";
-    case "ls1": case "ls2": return S.skin === "game" ? "&lt;" + who + "&gt;" : who + ":";
-    default: return who + (S.skin === "game" ? " :" : ":");
+    case "ls1": case "ls2": return S.names === "game" ? "&lt;" + who + "&gt;" : who + ":";
+    default: return who + (S.names === "game" ? " :" : ":");
   }
 }
 function renderBlocks(list, ctx) {
@@ -1507,10 +1508,17 @@ function renderPane(id, items, ctx, emptyText) {
   inner.innerHTML = html;
   pane._count = items.length;
   if (!first && items.length > before && atBottom) {
-    var all = inner.querySelectorAll("[data-k]"), n = Math.min(items.length - before, 6);
-    for (var j = Math.max(0, all.length - n); j < all.length; j++) all[j].classList.add("fresh");
+    // Fade in only the new lines. A line that joins a run (same sender, a minute later) fades on its own, so the lines
+    // already on screen don't flash again; a line that starts a new run brings its header with it.
+    var all = inner.querySelectorAll("[data-k]"), n = Math.min(items.length - before, 6), last = null;
+    items.slice(-n).forEach(function (m) {
+      var el = m.id != null && !m.pending ? inner.querySelector('[data-m="' + String(m.id).replace(/[^\w-]/g, "") + '"]') : null;
+      if (el && el.classList.contains("ln")) { var run = el.closest(".run"); if (run && run.querySelector(".ln") === el) el = run; }
+      if (!el) el = all[all.length - 1];
+      if (el) { el.classList.add("fresh"); last = el; }
+    });
     // Looks only: the newest line is marked when chat had been quiet, so a skin can glow for it and stay calm in busy chat.
-    if (all.length && Date.now() - (pane._lastNew || 0) > 5000) all[all.length - 1].classList.add("lull");
+    if (last && Date.now() - (pane._lastNew || 0) > 5000) last.classList.add("lull");
     pane._lastNew = Date.now();
   }
   var jump = document.querySelector('[data-jump="' + id + '"]');
@@ -2574,7 +2582,8 @@ function renderSettings() {
     srow("Skin", "", segs("skin", [["classic", "Classic"], ["game", "Game"], ["onyx", "Night"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []), S.skin || "classic")) +
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
-    (S.skin === "game" ? "" : srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density))) +
+    srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
+    srow("Names", "Game: &lt;Name&gt; for linkshells, (Name) for party, Name : for the rest.", segs("names", [["app", "phonechatXI"], ["game", "Game"]], S.names)) +
     srow("Text size", "", segs("size", [["XS", "XS"], ["S", "S"], ["M", "M"], ["L", "L"], ["XL", "XL"]], S.size)) +
     srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
@@ -2631,7 +2640,7 @@ $("settings").addEventListener("click", function (e) {
   if (t) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
-    else if (k === "channelText") { if (S.skin === "game") S.channelTextGame = !S.channelTextGame; else S.channelText = !S.channelText; }
+    else if (k === "channelText") { S.channelText = !S.channelText; }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
