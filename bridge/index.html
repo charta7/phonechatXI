@@ -441,7 +441,7 @@ body.skin-classic .tabbar{background:linear-gradient(180deg,#1f2d72,#0b1236);bor
 body.skin-classic .send.on{background:linear-gradient(180deg,#f6ecbd,#d9c47a)}
 body.skin-classic .pill-on{border-radius:4px}
 
-/* Onyx: plain black like the in-game log, more lines on screen. */
+/* Night (stored as "onyx" so saved settings carry over): plain dark mode, true black, more lines on screen. */
 body.skin-onyx{--bg:#000;--pane:#000;--raise:#0b0b0f;--chip:#141418;--line:#1c1c22;--edge:#2c2c36;--edge2:#3a3a46;
   --text:#f2f2f2;--soft:#d6d6d6;--mute:#8a8a96;--gold:#e9d27a;--ink:#111;--serif:var(--sans)}
 body.skin-onyx .pane{border-radius:0;border-color:#26262e;box-shadow:none}
@@ -603,6 +603,44 @@ body.skin-yuna .pane{border-radius:var(--r-win)}
 body.skin-yuna .comp textarea,body.skin-yuna .comp input{border-radius:var(--r-ctl)}
 body.skin-yuna .vzone{background:none}
 body.skin-yuna :is(.seg,.segs) button.on.tap::before{border-left-color:#1a0d24;filter:none}
+/* Game: the game's own chat log. Every line in its channel color with a black outline, printed the way the game prints it
+   (compact rows, always on), framed windows with a thin light edge, square corners, a hand cursor. Original CSS, no game art. */
+body.skin-game{--bg:#03050b;--pane:#0d1330;--raise:#0d1330;--chip:#141b44;--line:#2a3260;--edge:#6c7598;--edge2:#aeb5d0;
+  --text:#f2f2f2;--soft:#e6e8f2;--mute:#8b91ab;--gold:#f2f2f2;--ink:#03050b;--serif:var(--sans);--hand:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='14' viewBox='0 0 20 14'%3E%3Cpath d='M1.5 4.3c0-.9.7-1.6 1.6-1.6h3.4l1-1.3c.4-.5 1-.7 1.6-.5l.3.1h8.8c.8 0 1.4.6 1.4 1.3s-.6 1.4-1.4 1.4h-5.5v.9h1.2c.7 0 1.2.5 1.2 1.2s-.5 1.2-1.2 1.2h-1.1v.9h.9c.6 0 1.1.5 1.1 1.1s-.5 1.1-1.1 1.1h-1v.8c.5.1.9.6.9 1.1 0 .6-.5 1.1-1.1 1.1H5.2C3.1 13 1.5 11.4 1.5 9.3z' fill='%23f4f1e8' stroke='%2316161e' stroke-width='1.1' stroke-linejoin='round'/%3E%3C/svg%3E")}
+body.skin-game :is(.pane,.win,.vcard,.acard,.motd,.top,.banner.info){border:1px solid var(--edge2);border-radius:5px;background:var(--pane);box-shadow:0 0 0 1px #000,inset 0 0 0 1px #000}
+body.skin-game .top{margin:8px 8px 4px;padding:8px 12px}
+body.skin-game .top .big::before{display:none}
+body.skin-game .big{font-weight:700;letter-spacing:.2px}
+body.skin-game #sheet{border-radius:6px 6px 0 0;border-top:1px solid var(--edge2)}
+body.skin-game :is(.ln,.rhead,.cl,.big,.bar,.lrow,.srow,.opt,.vcard,.acard,.motd,.tabbar button,.seg button,.segs button,.chipb,.tgt,.pill-on,.sect){
+  text-shadow:1px 0 0 #000,-1px 0 0 #000,0 1px 0 #000,0 -1px 0 #000,1px 1px 0 #000}
+body.skin-game .rail,body.skin-game .cl svg.i{display:none}
+body.skin-game .cl .ln{color:var(--c)}
+body.skin-game .cl .ln b{color:inherit;font-weight:400}
+body.skin-game .pane .inner{gap:3px}
+body.skin-game .cl.mention,body.skin-game .run.mention{background:rgba(255,230,128,.07);border-radius:0}
+body.skin-game .cl.out{background:color-mix(in srgb,var(--c) 7%,transparent);border-radius:0}
+body.skin-game .sect{font-family:var(--sans);font-weight:700;letter-spacing:.8px;color:var(--soft)}
+body.skin-game :is(.tgt,.chipb,.seg,.segs,.pencil,.iconbtn,.pill-on,.send,.field,.sinput,.search){border-radius:3px}
+body.skin-game .pill-on{border:0;padding:4px 2px}
+body.skin-game .pill-on i{display:none}
+body.skin-game .chipb{background:var(--pane);border-color:var(--edge)}
+body.skin-game .chipb.on{border-color:var(--edge2);background:var(--chip)}
+body.skin-game :is(.seg,.segs) button.on{background:var(--chip);color:#fff;box-shadow:inset 0 0 0 1px var(--edge2)}
+body.skin-game .comp input,body.skin-game .comp textarea{border-radius:3px;background:#070b20;border-color:var(--edge2)}
+body.skin-game .send.on{background:#1b2350;box-shadow:inset 0 0 0 1px var(--edge2)}
+body.skin-game .tabbar{background:var(--pane);border-top:1px solid var(--edge2);box-shadow:0 -1px 0 #000}
+body.skin-game .tabbar button.on{color:#fff;font-weight:700}
+body.skin-game .tabbar button.on::before{display:none}
+body.skin-game .tabbar .bdg{border-radius:2px;background:var(--bg);color:var(--gold);border:1px solid currentColor;height:16px;min-width:16px;padding:0 4px}
+body.skin-game .opt.sel::before,body.skin-game .tabbar button.on::after{content:"";width:20px;height:14px;background:var(--hand) center/contain no-repeat;flex:none}
+body.skin-game .tabbar button.on::after{position:absolute;top:5px;left:calc(50% - 36px)}
+/* The linkpearl icons go flat: a plain dot in the channel color with a black edge, no gloss. */
+body.skin-game #gG stop{stop-color:var(--ls1)!important}
+body.skin-game #gT stop{stop-color:var(--ls2)!important}
+body.skin-game :is(#i-ls1,#i-ls2) ellipse{display:none}
+body.skin-game :is(#i-ls1,#i-ls2) circle{r:6.5px;stroke:#000;stroke-width:1.5px}
+body.skin-game #cursor{width:20px;height:14px;border:0;background:var(--hand) center/contain no-repeat;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6))}
 </style>
 </head>
 <body class="size-M">
@@ -840,7 +878,7 @@ function cleanPrefs(o) {
   o.clock = pick(o.clock, ["12", "24"], D.clock);
   o.cmdMode = pick(o.cmdMode, ["all", "ace", "cw", "wew"], D.cmdMode);
   o.cseg = pick(o.cseg, ["emote", "server"], D.cseg);
-  o.skin = pick(o.skin, ["midnight", "classic", "onyx", "yuna"], D.skin);
+  o.skin = pick(o.skin, ["midnight", "classic", "game", "onyx", "yuna"], D.skin);
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
@@ -965,14 +1003,16 @@ function importPrefs(file) {
 }
 var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
-var SKIN_COLORS = {yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
+var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#D4F58A", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
+// Log prints every line the way the game does, so it always uses the compact rows.
+function isCompact() { return S.density === "compact" || S.skin === "game"; }
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
 }
 var cursorEl = null, cursorT = 0;
 function cursorAt(el) {
-  if (!document.body.classList.contains("skin-classic")) return;
+  if (!document.body.classList.contains("skin-classic") && !document.body.classList.contains("skin-game")) return;
   if (!cursorEl) { cursorEl = document.createElement("div"); cursorEl.id = "cursor"; document.body.appendChild(cursorEl); }
   cursorFor = el;
   var r = el.getBoundingClientRect();
@@ -998,7 +1038,7 @@ document.addEventListener("pointerdown", function (e) {
 document.addEventListener("scroll", cursorHide, true);
 function applyLook() {
   applyColors();
-  ["skin-midnight", "skin-classic", "skin-onyx", "skin-yuna", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
+  ["skin-midnight", "skin-classic", "skin-game", "skin-onyx", "skin-yuna", "font-readable", "font-classic"].forEach(function (c) { document.body.classList.remove(c); });
   if (S.font !== "classic") S.font = "readable";
   document.body.classList.add("skin-" + (S.skin || "classic"), "font-" + S.font);
   // Looks only: iOS colors the Home Screen app's status bar from theme-color, so it follows the skin's background.
@@ -1013,7 +1053,7 @@ function applyLook() {
     }
     document.documentElement.style.backgroundColor = bg;
   }
-  document.body.classList.toggle("compact", S.density === "compact");
+  document.body.classList.toggle("compact", isCompact());
   document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-XS", "size-S", "size-M", "size-L", "size-XL");
   document.body.classList.add("size-" + S.size);
@@ -1446,7 +1486,7 @@ function renderPane(id, items, ctx, emptyText) {
     if (!shown) { pane._win = null; pane._goto = null; goto = null; pane._stick = true; atBottom = true; }   // that line is gone: back to live
   }
   if (!shown) shown = items.slice(-cap);
-  var mode = ctx === "thread" ? "thread" : (S.density === "compact" ? "compact" : ctx);
+  var mode = ctx === "thread" ? "thread" : (isCompact() ? "compact" : ctx);
   var html = shown.length ? renderBlocks(blocks(shown, mode, pane._win == null ? pane._newAfter : 0), mode) : '<div class="empty">' + emptyText + "</div>";
   if (html === pane._html && !first && !goto) {   // nothing changed: leave the DOM (and the scroll) alone
     pane._count = items.length;
@@ -2520,10 +2560,11 @@ function renderSettings() {
     srow("Remember tells", "Last 50 lines per person, on the bridge.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
-    srow("Skin", "", segs("skin", [["classic", "Classic"], ["midnight", "Midnight"], ["onyx", "Onyx"], ["yuna", "Yunas"]], S.skin || "classic")) +
+    // Midnight is out of the picker but still works for anyone who has it saved, so it shows only for them.
+    srow("Skin", "", segs("skin", [["classic", "Classic"], ["game", "Game"], ["onyx", "Night"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []), S.skin || "classic")) +
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
-    srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
+    (S.skin === "game" ? "" : srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density))) +
     srow("Text size", "", segs("size", [["XS", "XS"], ["S", "S"], ["M", "M"], ["L", "L"], ["XL", "XL"]], S.size)) +
     srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
