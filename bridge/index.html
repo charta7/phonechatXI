@@ -1454,9 +1454,9 @@ function runHead(b, ctx) {
   if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
   else if (S.names === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
   if (ctx === "thread" && b.dir === "out") {
-    return '<div class="rhead"><span class="t">' + (S.times === "column" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
+    return '<div class="rhead"><span class="t">' + (S.times !== "off" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
-  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + (S.times === "column" ? hhmm(m.ts) + extra : extra.replace(/^ &middot; /, "")) + "</span></div>";
+  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + (S.times !== "off" ? hhmm(m.ts) + extra : extra.replace(/^ &middot; /, "")) + "</span></div>";
 }
 function replyAttr(m) {
   var peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";
