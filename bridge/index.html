@@ -157,7 +157,6 @@ body.compact .pane .inner{gap:5px}
 body:not(.times-col) .cl .t{display:none}
 .ti{float:right;margin:2px 0 0 10px;font-size:10.5px;color:var(--mute);font-weight:400;font-style:normal;white-space:nowrap}
 .div.zone{color:var(--soft);font-weight:700;letter-spacing:.6px;font-size:12px}
-.div.zone .pin{flex:none;margin-right:-2px;color:var(--gold)}
 .preview{border:1px solid var(--line);border-radius:10px;margin:6px 16px 10px;padding:8px 10px;pointer-events:none;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
 .lookdot::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:4px;vertical-align:2px}
 .ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
@@ -1475,7 +1474,6 @@ function compactPrefix(m) {
     default: return who + (S.names === "game" ? " :" : ":");
   }
 }
-var PIN = '<svg class="pin" width="11" height="13" viewBox="0 0 11 13" aria-hidden="true"><path d="M5.5 12.5S1 7.9 1 5a4.5 4.5 0 019 0c0 2.9-4.5 7.5-4.5 7.5z" fill="currentColor"/><circle cx="5.5" cy="5" r="1.6" fill="var(--bg)"/></svg>';
 function renderBlocks(list, ctx) {
   var html = [], lastMin = null, tc = "";   // compact layout: the time shows once per minute, not on every line
   function tcls(ts) { var mk = Math.floor(ts / 60), same = mk === lastMin; lastMin = mk; return same ? "t rep" : "t"; }
@@ -1483,7 +1481,7 @@ function renderBlocks(list, ctx) {
   function inl(ts) { return S.times === "inline" && tc === "t" ? '<span class="ti">' + hhmm(ts) + "</span>" : ""; }
   list.forEach(function (b) {
     if (b.type === "div" || b.type === "note") lastMin = null;
-    if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.cls === "zone" ? PIN : "") + (b.html || esc(b.text)) + "</div>"); return; }
+    if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
     if (b.type === "burst") {

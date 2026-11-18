@@ -32,7 +32,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - A preview at the top of Appearance shows a few sample lines and redraws as you change things, in place of the old descriptions.
 - New Names setting: phonechatXI (Name:) or Game (<Name> for linkshells, (Name) for party, Name : for the rest). Tells already read like the game.
 - New Times setting: Column (as before), Inline (a small time at the right end of the first line of each minute, so lines use the full width) or Off (the exact time is still in the long-press menu). Game ships with Inline.
-- Zone changes get a map pin and bold name, so they no longer look like a time line.
+- Zone changes are in bold, so they no longer look like a time line.
 - When a new line joins a run of lines from the same person, only that line fades in. Before, the whole run flashed again.
 - Onyx is now called Night in the skin list. It's the same plain black look, and your saved choice carries over.
 - Auto-translate braces now look like the game on every skin: green open brace, red close brace, and the words keep the line's color. Items and phrases match.
