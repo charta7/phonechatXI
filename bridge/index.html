@@ -8,7 +8,18 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="phonechatXI">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#060a1c">
+<script>
+/* iOS reads the status bar color when the Home Screen app opens, before the page script runs, so set it from the saved skin right away. */
+(function () {
+  try {
+    var o = JSON.parse(localStorage.getItem("pcxi") || "null") || {}, k = o.skin || "classic";
+    var c = {classic: "#060a1c", game: "#0d1330", onyx: "#000", yuna: "#161925", midnight: "#0b1020"}[k] || "#060a1c";
+    document.querySelector('meta[name="theme-color"]').setAttribute("content", c);
+    document.documentElement.style.backgroundColor = c;
+  } catch (e) {}
+})();
+</script>
 <title>phonechatXI</title>
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/icons/favicon-32.png">

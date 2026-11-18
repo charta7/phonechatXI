@@ -44,7 +44,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - Search help is three short lines. The line about how far back it covers keeps the time together, so it no longer breaks in the middle of "Today 4:55 PM".
 
 ### Fixes
-- On iPhone, the Home Screen app's status bar now matches the skin. It stayed in Midnight's color on Onyx, Yunas and Classic.
+- On iPhone, the Home Screen app's status bar now matches the skin. It stayed in Midnight's color on Onyx, Yunas and Classic. It is also set from your saved skin as the app opens, so it no longer starts in the wrong color.
 - A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
 - Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
 - Changing Save tells or Scrollback, or clearing saved tells, now says so if the bridge doesn't answer.
