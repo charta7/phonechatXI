@@ -821,7 +821,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, channelTextGame: true, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: true, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: true, emote: true, finder: true}},
@@ -878,7 +878,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "channelTextGame", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -1330,7 +1330,9 @@ function readableColor(hex) {
   while ((lum(rgb) + .05) / (floor + .05) < 4.5 && rgb.some(function (v) { return v < 255; })) rgb = rgb.map(function (v) { return Math.min(255, v + 8); });
   return "#" + rgb.map(function (v) { return v.toString(16).padStart(2, "0"); }).join("");
 }
-function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return S.channelText ? '<span style="color:' + readableColor(colorOf(m.ch)) + '">' + h + "</span>" : h; }
+// Color message text: Game has its own copy (on by default), every other skin shares one, so switching skins keeps each choice.
+function chText() { return S.skin === "game" ? S.channelTextGame : S.channelText; }
+function bodyHtml(m) { var h = m.ch === "finder" ? fmtFinder(m.body) : fmt(m.body); return chText() ? '<span style="color:' + readableColor(colorOf(m.ch)) + '">' + h + "</span>" : h; }
 function bodyLine(m, ctx) {
   var b = bodyHtml(m);
   // Tells: the normal layout puts the game's arrows in the header (Wren>> / >>Wren), so the line is just the message.
@@ -1398,7 +1400,8 @@ function compactPrefix(m) {
     case "unity": return "{" + who + "}";
     case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
     case "emote": case "finder": return "";
-    default: return who + ":";
+    case "ls1": case "ls2": return S.skin === "game" ? "&lt;" + who + "&gt;" : who + ":";
+    default: return who + (S.skin === "game" ? " :" : ":");
   }
 }
 function renderBlocks(list, ctx) {
@@ -2566,7 +2569,7 @@ function renderSettings() {
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
     '<div class="subsect">Channel colors</div>' +
     CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
-    srow("Color message text", "Off: only names are colored.", tog(S.channelText, "channelText")) +
+    srow("Color message text", "Off: only names are colored.", tog(chText(), "channelText")) +
     srow("Reset colors", "", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
     '<div class="sect">BACKUP</div>' +
     srow("Your settings", "Saved on the bridge too, so a new phone gets them.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
@@ -2617,7 +2620,7 @@ $("settings").addEventListener("click", function (e) {
   if (t) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
-    else if (k === "channelText") { S.channelText = !S.channelText; }
+    else if (k === "channelText") { if (S.skin === "game") S.channelTextGame = !S.channelTextGame; else S.channelText = !S.channelText; }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
