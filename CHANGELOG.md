@@ -29,6 +29,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 ### Looks
 - A new skin, Game. It looks like the game's own chat log: every line in its channel color with a black outline, framed windows with a thin light edge, square corners and a hand pointer. It always uses the compact layout, so Density is hidden while it's on.
 - Onyx is now called Night in the skin list. It's the same plain black look, and your saved choice carries over.
+- Auto-translate braces now look like the game on every skin: green open brace, red close brace, and the words keep the line's color. Items and phrases match.
 - Midnight is no longer in the skin list. Nothing was removed: if you already have it selected it stays, and it shows in the list for you.
 - Text size has two more steps, XS and XL (Settings > Appearance). S, M and L are unchanged, so your current size stays as it is.
 - Compact layout: the time shows once per minute. Lines in the same minute as the one above keep the column but leave the time out.

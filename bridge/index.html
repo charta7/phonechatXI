@@ -54,8 +54,9 @@ input{font:inherit}
 /* mentions */
 .mention{background:color-mix(in srgb,var(--gold) 9%,transparent);border-radius:8px}
 mark.mw{background:none;color:var(--gold);font-weight:700}
-/* auto-translate phrases (not links) */
-.at{color:#9fe3a6;color:color-mix(in srgb,var(--ok) 75%,var(--text))}
+/* auto-translate braces, as in game: green open, red close; the words keep the line's color */
+.bo{color:#6fe07a}
+.bc{color:#ff6b6b}
 /* LS message of the day, pinned */
 .motd{margin:6px 10px 0;padding:7px 10px;border:1px solid var(--edge);border-radius:10px;background:var(--raise);font-size:13.5px;color:var(--soft);display:flex;gap:8px;align-items:flex-start}
 .motd b{color:var(--c);flex:none}
@@ -1248,9 +1249,9 @@ function fmt(body) {
     if (!q) return all;
     // Not a link: in chat a tap on the line means reply, so BG-Wiki lives in the long-press menu. A mouse click,
     // or a tap outside the chat (a message of the day, a notice), still opens it.
-    return '<span class="item" data-wiki="' + esc(q) + '">{' + name + "}</span>";
+    return '<span class="item" data-wiki="' + esc(q) + '"><span class="bo">{</span>' + name + '<span class="bc">}</span></span>';
   });
-  h = h.replace(/\{([^{}<>\n]{1,60})\}/g, '<span class="at">{$1}</span>');
+  h = h.replace(/\{([^{}<>\n]{1,60})\}/g, '<span class="bo">{</span>$1<span class="bc">}</span>');
   if (watchRe) h = markWatch(h);
   return h;
 }
