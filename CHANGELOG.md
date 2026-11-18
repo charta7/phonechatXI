@@ -27,8 +27,11 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - "Reset settings" in Settings > Backup goes back to how a new install starts. Your mention names stay, and saved tells and your phone link aren't touched.
 
 ### Looks
-- A new skin, Game. It looks like the game's own chat log: a black outline on the text, framed windows with a thin light edge and square corners. It's a look only; every setting works the same on it as on the other skins.
-- New Names setting, for any skin: phonechatXI (Name:) or Game (<Name> for linkshells, (Name) for party, Name : for the rest). Tells already read like the game.
+- A new skin, Game. It looks like the game's own chat log: a black outline on the text, framed windows with a thin light edge and square corners. It ships with compact rows, game-style names, time dividers and colored message text.
+- Each skin now keeps its own look. Change font, density, names, times, message text color or channel colors and it's saved to the skin you're on; switch skins and each comes back the way you left it. A dot marks a skin you've changed, and "Reset <skin> to default" puts it back how it shipped. Text size, clock and scrollback stay the same on every skin. Your current settings carry over to the skin you have on now.
+- A preview at the top of Appearance shows a few sample lines and redraws as you change things, in place of the old descriptions.
+- New Names setting: phonechatXI (Name:) or Game (<Name> for linkshells, (Name) for party, Name : for the rest). Tells already read like the game.
+- New Times setting: Column (as before), Dividers (a small time line each minute, so lines use the full width) or Off (the exact time is still in the long-press menu).
 - When a new line joins a run of lines from the same person, only that line fades in. Before, the whole run flashed again.
 - Onyx is now called Night in the skin list. It's the same plain black look, and your saved choice carries over.
 - Auto-translate braces now look like the game on every skin: green open brace, red close brace, and the words keep the line's color. Items and phrases match.

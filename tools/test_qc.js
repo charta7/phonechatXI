@@ -113,6 +113,24 @@ console.log('PASS: dark message colors lighten; white is preserved');
   const fresh=s.merged(null); assert.equal(fresh.skin,'classic'); assert.equal(fresh.quickFilters,false); assert.equal(fresh.views[0].ch.yell,true); assert.equal(fresh.master.yell,true);
   console.log('PASS: 1.1.0-era settings load with nothing lost; options added since get their defaults');
 }
+// Looks per skin: older settings become changes to the skin you had on; other skins ship as they are;
+// switching skins brings back each skin's own changes; reset drops them.
+{
+  const s={localStorage:{getItem:()=>null},CHAT_CH:['ls1','ls2','party','tell','say','shout','unity','yell','emote','finder'],SENDABLE:['ls1','ls2','party','tell','say','shout'],MAX_VIEWS:5};
+  vm.createContext(s); vm.runInContext(extract('var DEFAULTS =', 'var saveTimer ='),s);
+  const m=s.merged({skin:'onyx',density:'compact',font:'classic',colors:{ls1:'#123456'},channelText:false});
+  assert.deepEqual(m.looks,{onyx:{font:'classic',density:'compact',colors:{ls1:'#123456'}}});
+  assert.equal(m.density,'compact'); assert.equal(m.colors.ls1,'#123456');
+  m.skin='game'; s.lookLoad(m); assert.equal(m.density,'compact'); assert.equal(m.names,'game'); assert.equal(m.times,'dividers'); assert.equal(m.channelText,true); assert.deepEqual(m.colors,{});
+  m.channelText=false; s.lookSave(m); assert.deepEqual(m.looks.game,{channelText:false});
+  m.skin='classic'; s.lookLoad(m); assert.equal(m.density,'comfortable'); assert.equal(m.names,'app'); assert.equal(m.font,'readable');
+  m.skin='onyx'; s.lookLoad(m); assert.equal(m.font,'classic'); assert.equal(m.colors.ls1,'#123456');
+  delete m.looks.onyx; s.lookLoad(m); assert.equal(m.font,'readable'); assert.deepEqual(m.colors,{});
+  const again=s.merged(JSON.parse(JSON.stringify(m))); assert.deepEqual(again.looks,{game:{channelText:false}}); assert.equal(again.skin,'onyx');
+  const g=s.merged({skin:'game',size:'L'}); assert.deepEqual(g.looks,{}); assert.equal(g.names,'game'); assert.equal(g.density,'compact'); assert.equal(g.size,'L');
+  const bad=s.merged({skin:'game',looks:{game:{names:'x',times:'off',colors:{ls1:'red'}},nope:{font:'classic'}}}); assert.deepEqual(bad.looks,{game:{times:'off'}}); assert.equal(bad.names,'game');
+  console.log('PASS: each skin keeps only its own changes, older settings carry over, reset goes back to how it shipped');
+}
 
 // "New" line: above the first message from someone else after you last looked, only with older chat above it.
 {

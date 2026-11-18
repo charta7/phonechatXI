@@ -154,6 +154,10 @@ body.compact .pane .inner{gap:5px}
 .cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px;white-space:nowrap}
 .clock-12 .cl .t{width:46px}
 .cl .t.rep{visibility:hidden}
+body:not(.times-col) .cl .t{display:none}
+.div.tdiv{font-size:10px;letter-spacing:.5px;opacity:.75;margin:2px 0}
+.preview{border:1px solid var(--line);border-radius:10px;margin:6px 16px 10px;padding:8px 10px;pointer-events:none;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.lookdot::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:4px;vertical-align:2px}
 .ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
 .t,.vt{white-space:nowrap}
 .cl .ln{flex:1}
@@ -832,7 +836,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, names: "app", quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, names: "app", times: "column", looks: {}, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: true, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: true, emote: true, finder: true}},
@@ -846,6 +850,40 @@ var DEFAULTS = {
   read: {},
   readCh: {}
 };
+// ------------------------------------------------------------------------------------------
+// Looks per skin. A skin ships with its own look (below). What you change is saved to that skin as a
+// difference from how it shipped, so a later update can adjust a skin's defaults and anything you didn't
+// touch follows along. Text size, clock and scrollback are yours on every skin and aren't part of a look.
+// ------------------------------------------------------------------------------------------
+var SKINS = ["midnight", "classic", "game", "onyx", "yuna"];
+var LOOK_KEYS = ["font", "density", "names", "times", "channelText", "colors"];
+var LOOK_BASE = {font: "readable", density: "comfortable", names: "app", times: "column", channelText: false, colors: {}};
+var SKIN_LOOK = {game: {density: "compact", names: "game", times: "dividers", channelText: true}};
+var LOOK_OK = {font: ["readable", "classic"], density: ["comfortable", "compact"], names: ["app", "game"], times: ["column", "dividers", "off"]};
+var SKIN_LABEL = {classic: "Classic", game: "Game", onyx: "Night", yuna: "Yunas", midnight: "Midnight"};
+function lookDefault(skin) { return Object.assign(JSON.parse(JSON.stringify(LOOK_BASE)), JSON.parse(JSON.stringify(SKIN_LOOK[skin] || {}))); }
+function cleanLook(v) {
+  var out = {};
+  if (!v || typeof v !== "object") return out;
+  Object.keys(LOOK_OK).forEach(function (k) { if (LOOK_OK[k].indexOf(v[k]) >= 0) out[k] = v[k]; });
+  if (typeof v.channelText === "boolean") out.channelText = v.channelText;
+  if (v.colors && typeof v.colors === "object") {
+    var c = {};
+    CHAT_CH.forEach(function (ch) { if (typeof v.colors[ch] === "string" && /^#[0-9A-Fa-f]{6}$/.test(v.colors[ch])) c[ch] = v.colors[ch]; });
+    if (Object.keys(c).length) out.colors = c;
+  }
+  return out;
+}
+function lookLoad(o) {   // the skin's look, with your changes on top
+  var d = lookDefault(o.skin), mine = o.looks[o.skin] || {};
+  LOOK_KEYS.forEach(function (k) { o[k] = JSON.parse(JSON.stringify(mine[k] !== undefined ? mine[k] : d[k])); });
+}
+function lookSave(o) {   // keep only what differs from how the skin shipped
+  var d = lookDefault(o.skin), mine = {};
+  LOOK_KEYS.forEach(function (k) { if (JSON.stringify(o[k]) !== JSON.stringify(d[k])) mine[k] = JSON.parse(JSON.stringify(o[k])); });
+  if (Object.keys(mine).length) o.looks[o.skin] = mine; else delete o.looks[o.skin];
+}
+function lookEdited(skin) { return !!(S.looks && S.looks[skin]); }
 var freshLocal = false;
 var S = load();
 function load() {
@@ -858,6 +896,7 @@ function merged(s) {
   var out = JSON.parse(JSON.stringify(DEFAULTS));
   if (s && typeof s === "object") {
     for (var k in out) if (s[k] !== undefined) out[k] = s[k];
+    if (s.looks === undefined) out.looks = null;   // saved before skins kept their own looks
     out.master = Object.assign({}, DEFAULTS.master, s.master || {});
     // Keep when these settings were last changed, so a fresh change here beats an older copy on the bridge.
     if (typeof s.savedAt === "number" && isFinite(s.savedAt)) out.savedAt = s.savedAt;
@@ -925,6 +964,21 @@ function cleanPrefs(o) {
   });
   o.colors = colors;
   o.recentEmotes = list(o.recentEmotes, 8, function (r) { return text(r, 30, /^\/[A-Za-z]+( [A-Za-z0-9]+)?$/); });
+  o.times = pick(o.times, ["column", "dividers", "off"], D.times);
+  // Each skin keeps only what you changed. Settings saved before skins kept their own looks are taken as
+  // changes to the skin you had on, so nothing moves.
+  if (!o.looks || typeof o.looks !== "object" || Array.isArray(o.looks)) {
+    // Only what you'd changed from the old defaults counts as yours; the rest takes the skin's own look.
+    var sd = lookDefault(o.skin);
+    LOOK_KEYS.forEach(function (k) { if (JSON.stringify(o[k]) === JSON.stringify(LOOK_BASE[k])) o[k] = sd[k]; });
+    o.looks = {}; lookSave(o);
+  }
+  else {
+    var looks = {};
+    SKINS.forEach(function (k) { var v = cleanLook(o.looks[k]); if (Object.keys(v).length) looks[k] = v; });
+    o.looks = looks;
+    lookLoad(o);
+  }
   return o;
 }
 var saveTimer = null, pushTimer = null, prefsReady = false;
@@ -1062,6 +1116,7 @@ function applyLook() {
     document.documentElement.style.backgroundColor = bg;
   }
   document.body.classList.toggle("compact", isCompact());
+  document.body.classList.toggle("times-col", S.times === "column");
   document.body.classList.toggle("clock-12", S.clock !== "24");
   document.body.classList.remove("size-XS", "size-S", "size-M", "size-L", "size-XL");
   document.body.classList.add("size-" + S.size);
@@ -1361,7 +1416,7 @@ function blocks(items, ctx, newAfter) {
   var out = [], last = null, prevTs = 0, newDone = !(newAfter > 0);
   for (var i = 0; i < items.length; i++) {
     var m = items[i];
-    if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", html: dayLabel(m.ts)});
+    if (!prevTs || m.ts - prevTs > 1800) out.push({type: "div", html: dayLabel(m.ts), ts: m.ts});
     prevTs = m.ts;
     if (!newDone && isNewFor(m, newAfter)) {
       newDone = true;
@@ -1396,9 +1451,9 @@ function runHead(b, ctx) {
   if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
   else if (S.names === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
   if (ctx === "thread" && b.dir === "out") {
-    return '<div class="rhead"><span class="t">' + extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
+    return '<div class="rhead"><span class="t">' + (S.times === "column" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
-  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + hhmm(m.ts) + extra + "</span></div>";
+  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + (S.times === "column" ? hhmm(m.ts) + extra : extra.replace(/^ &middot; /, "")) + "</span></div>";
 }
 function replyAttr(m) {
   var peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";
@@ -1417,10 +1472,17 @@ function compactPrefix(m) {
   }
 }
 function renderBlocks(list, ctx) {
-  var html = [], lastMin = null;   // compact layout: the time shows once per minute, not on every line
+  var html = [], lastMin = null, divMin = null;   // compact layout: the time shows once per minute, not on every line
   function tcls(ts) { var mk = Math.floor(ts / 60), same = mk === lastMin; lastMin = mk; return same ? "t rep" : "t"; }
   list.forEach(function (b) {
     if (b.type === "div" || b.type === "note") lastMin = null;
+    if (b.type === "div" && b.ts) divMin = Math.floor(b.ts / 60);   // a day line already shows this minute
+    // Times as dividers: a small time line each minute instead of a time on every row.
+    var bm = b.type === "burst" || b.type === "note" ? b.m : (b.ms ? b.ms[0] : null);
+    if (S.times === "dividers" && bm && bm.ts) {
+      var mk = Math.floor(bm.ts / 60);
+      if (mk !== divMin) { divMin = mk; html.push('<div class="div tdiv">' + hhmm(bm.ts) + "</div>"); }
+    }
     if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
@@ -2546,6 +2608,23 @@ document.addEventListener("click", function (e) {
 // Settings
 // ------------------------------------------------------------------------------------------
 function tog(on, key) { return '<button class="tog' + (on ? " on" : "") + '" data-set="' + key + '"></button>'; }
+function skinSegs() {
+  var opts = [["classic", "Classic"], ["game", "Game"], ["onyx", "Night"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []);
+  return '<div class="segs">' + opts.map(function (o) {
+    return '<button data-seg="skin" data-val="' + o[0] + '" class="' + (o[0] === S.skin ? "on " : "") + (lookEdited(o[0]) ? "lookdot" : "") + '">' + o[1] + "</button>";
+  }).join("") + "</div>";
+}
+// A few made-up lines drawn the way chat draws them, so a setting shows what it does.
+function previewHtml() {
+  var t2 = Math.floor(Date.now() / 60000) * 60, t1 = t2 - 60, mode = isCompact() ? "compact" : "chat";
+  var ms = [
+    {id: "pv1", ch: "ls1", dir: "in", name: "Marlow", body: "anyone up for Dynamis tonight?", ts: t1},
+    {id: "pv2", ch: "ls1", dir: "in", name: "Quenby", body: "need {{Shadow Cuisses}} first", ts: t1 + 20},
+    {id: "pv3", ch: "party", dir: "in", name: "Mara", body: "pulling in 10", ts: t2},
+    {id: "pv4", ch: "tell", dir: "in", name: "Wren", body: "got a sec?", ts: t2 + 5}
+  ];
+  return renderBlocks(blocks(ms, mode, 0).filter(function (b) { return !(b.type === "div" && b.ts); }), mode);
+}
 function segs(key, opts, cur) { return '<div class="segs">' + opts.map(function (o) { return '<button data-seg="' + key + '" data-val="' + o[0] + '"' + (o[0] === cur ? ' class="on"' : "") + ">" + o[1] + "</button>"; }).join("") + "</div>"; }
 function srow(title, sub, right) { return '<div class="srow"><div class="m"><div>' + title + "</div>" + (sub ? "<small>" + sub + "</small>" : "") + "</div>" + right + "</div>"; }
 var showQr = false, colorPicking = false;
@@ -2579,18 +2658,22 @@ function renderSettings() {
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
     '<div class="sect">APPEARANCE</div>' +
     // Midnight is out of the picker but still works for anyone who has it saved, so it shows only for them.
-    srow("Skin", "", segs("skin", [["classic", "Classic"], ["game", "Game"], ["onyx", "Night"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []), S.skin || "classic")) +
+    // A changed skin gets a dot. The preview stands in for descriptions: it redraws as you change things.
+    srow("Skin", "", skinSegs()) +
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
-    srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font || "readable")) +
+    '<div class="preview">' + previewHtml() + "</div>" +
+    srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font)) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
-    srow("Names", "Game: &lt;Name&gt; for linkshells, (Name) for party, Name : for the rest.", segs("names", [["app", "phonechatXI"], ["game", "Game"]], S.names)) +
+    srow("Names", "", segs("names", [["app", "phonechatXI"], ["game", "Game"]], S.names)) +
+    srow("Times", "", segs("times", [["column", "Column"], ["dividers", "Dividers"], ["off", "Off"]], S.times)) +
+    srow("Color message text", "", tog(S.channelText, "channelText")) +
+    '<div class="subsect">Channel colors</div>' +
+    CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
+    (lookEdited(S.skin) ? srow("Reset " + (SKIN_LABEL[S.skin] || "skin") + " to default", "", '<button class="linkbtn" data-act="resetlook">Reset</button>') : "") +
+    '<div class="subsect">On every skin</div>' +
     srow("Text size", "", segs("size", [["XS", "XS"], ["S", "S"], ["M", "M"], ["L", "L"], ["XL", "XL"]], S.size)) +
     srow("Clock", "", segs("clock", [["12", "12-hour"], ["24", "24-hour"]], S.clock || "12")) +
     srow("Scrollback", "Lines kept per channel", segs("scrollback", [["1", "500"], ["2", "1,000"], ["4", "2,000"]], String(S.scrollback || 1))) +
-    '<div class="subsect">Channel colors</div>' +
-    CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
-    srow("Color message text", "Off: only names are colored.", tog(chText(), "channelText")) +
-    srow("Reset colors", "", '<button class="linkbtn" data-act="resetcolors">Reset</button>') +
     '<div class="sect">BACKUP</div>' +
     srow("Your settings", "Saved on the bridge too, so a new phone gets them.", '<button class="linkbtn" data-act="export">Export</button><button class="linkbtn" data-act="import" style="margin-left:8px">Import</button>') +
     '<input type="file" id="importin" accept="application/json,.json" hidden>' +
@@ -2633,6 +2716,7 @@ $("settings").addEventListener("input", function (e) {
   if (!c) return;
   S.colors = S.colors || {};
   S.colors[c.dataset.color] = c.value;
+  lookSave(S);
   applyColors(); save(); schedule();
 });
 $("settings").addEventListener("click", function (e) {
@@ -2640,7 +2724,7 @@ $("settings").addEventListener("click", function (e) {
   if (t) {
     var k = t.dataset.set;
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
-    else if (k === "channelText") { S.channelText = !S.channelText; }
+    else if (k === "channelText") { S.channelText = !S.channelText; lookSave(S); applyLook(); }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
@@ -2657,12 +2741,14 @@ $("settings").addEventListener("click", function (e) {
       S.scrollback = +val;
       api("/api/settings", {scrollback: +val}).then(function (j) { if (!j.ok) toast(j.error || "Could not change that."); }).catch(function () { toast("The bridge didn't answer."); });
     } else S[key] = val;
+    if (key === "skin") lookLoad(S); else if (LOOK_KEYS.indexOf(key) >= 0) lookSave(S);
     save(); applyLook(); seenCount = {}; render(); return;
   }
   var a = e.target.closest("[data-act]");
   if (!a) return;
   if (a.dataset.act === "emoreset") { S.emoticons = ""; save(); refreshEmo(); render(); return; }
-  if (a.dataset.act === "resetcolors") { S.colors = {}; applyColors(); save(); render(); return; }
+  if (a.dataset.act === "resetcolors") { S.colors = {}; lookSave(S); applyColors(); save(); render(); return; }
+  if (a.dataset.act === "resetlook") { delete S.looks[S.skin]; lookLoad(S); save(); applyLook(); seenCount = {}; render(); return; }
   if (a.dataset.act === "export") { exportPrefs(); return; }
   if (a.dataset.act === "resetall") { askReset(); return; }
   if (a.dataset.act === "restoreprev") { askRestore(); return; }
@@ -2826,7 +2912,7 @@ function debugText() {
     "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
-    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", names " + (S.names || "app") + ", text color " + (S.channelText ? "on" : "off") + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", names " + (S.names || "app") + ", times " + S.times + (lookEdited(S.skin) ? ", skin edited" : "") + ", text color " + (S.channelText ? "on" : "off") + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
       ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
     "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
     "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
