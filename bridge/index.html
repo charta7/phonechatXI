@@ -155,12 +155,15 @@ body.compact .pane .inner{gap:5px}
 .clock-12 .cl .t{width:46px}
 .cl .t.rep{visibility:hidden}
 body:not(.times-col) .cl .t{display:none}
-.div.tdiv{font-size:10px;letter-spacing:.5px;opacity:.75;margin:2px 0}
+.ti{float:right;margin:2px 0 0 10px;font-size:10.5px;color:var(--mute);font-weight:400;font-style:normal;white-space:nowrap}
+.div.zone{color:var(--soft);font-weight:700;letter-spacing:.6px;font-size:12px}
+.div.zone .pin{flex:none;margin-right:-2px;color:var(--gold)}
 .preview{border:1px solid var(--line);border-radius:10px;margin:6px 16px 10px;padding:8px 10px;pointer-events:none;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
 .lookdot::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:4px;vertical-align:2px}
 .ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
 .t,.vt{white-space:nowrap}
 .cl .ln{flex:1}
+.cl>div:not(.rail){flex:1;min-width:0}
 .cl .ln b{color:var(--c)}
 .cl svg.i{vertical-align:-1px;margin-right:5px}
 .cl .emo-tag{margin-right:5px}
@@ -858,13 +861,14 @@ var DEFAULTS = {
 var SKINS = ["midnight", "classic", "game", "onyx", "yuna"];
 var LOOK_KEYS = ["font", "density", "names", "times", "channelText", "colors"];
 var LOOK_BASE = {font: "readable", density: "comfortable", names: "app", times: "column", channelText: false, colors: {}};
-var SKIN_LOOK = {game: {density: "compact", names: "game", times: "dividers", channelText: true}};
-var LOOK_OK = {font: ["readable", "classic"], density: ["comfortable", "compact"], names: ["app", "game"], times: ["column", "dividers", "off"]};
+var SKIN_LOOK = {game: {density: "compact", names: "game", times: "inline", channelText: true}};
+var LOOK_OK = {font: ["readable", "classic"], density: ["comfortable", "compact"], names: ["app", "game"], times: ["column", "inline", "off"]};
 var SKIN_LABEL = {classic: "Classic", game: "Game", onyx: "Night", yuna: "Yunas", midnight: "Midnight"};
 function lookDefault(skin) { return Object.assign(JSON.parse(JSON.stringify(LOOK_BASE)), JSON.parse(JSON.stringify(SKIN_LOOK[skin] || {}))); }
 function cleanLook(v) {
   var out = {};
   if (!v || typeof v !== "object") return out;
+  if (v.times === "dividers") v.times = "inline";   // an earlier 1.1.2 test build
   Object.keys(LOOK_OK).forEach(function (k) { if (LOOK_OK[k].indexOf(v[k]) >= 0) out[k] = v[k]; });
   if (typeof v.channelText === "boolean") out.channelText = v.channelText;
   if (v.colors && typeof v.colors === "object") {
@@ -964,7 +968,7 @@ function cleanPrefs(o) {
   });
   o.colors = colors;
   o.recentEmotes = list(o.recentEmotes, 8, function (r) { return text(r, 30, /^\/[A-Za-z]+( [A-Za-z0-9]+)?$/); });
-  o.times = pick(o.times, ["column", "dividers", "off"], D.times);
+  o.times = pick(o.times === "dividers" ? "inline" : o.times, ["column", "inline", "off"], D.times);
   // Each skin keeps only what you changed. Settings saved before skins kept their own looks are taken as
   // changes to the skin you had on, so nothing moves.
   if (!o.looks || typeof o.looks !== "object" || Array.isArray(o.looks)) {
@@ -1422,7 +1426,7 @@ function blocks(items, ctx, newAfter) {
       newDone = true;
       if (i > 0) { out.push({type: "div", text: "New", cls: "newdiv"}); last = null; }
     }
-    if (m.ch === "zone") { out.push({type: "div", text: m.body}); last = null; continue; }
+    if (m.ch === "zone") { out.push({type: "div", text: m.body, cls: "zone"}); last = null; continue; }
     if (m.ch === "system") { out.push({type: "note", m: m}); last = null; continue; }
     if (isCallOnly(m)) {
       var grp = [m], j = i + 1;
@@ -1471,26 +1475,22 @@ function compactPrefix(m) {
     default: return who + (S.names === "game" ? " :" : ":");
   }
 }
+var PIN = '<svg class="pin" width="11" height="13" viewBox="0 0 11 13" aria-hidden="true"><path d="M5.5 12.5S1 7.9 1 5a4.5 4.5 0 019 0c0 2.9-4.5 7.5-4.5 7.5z" fill="currentColor"/><circle cx="5.5" cy="5" r="1.6" fill="var(--bg)"/></svg>';
 function renderBlocks(list, ctx) {
-  var html = [], lastMin = null, divMin = null;   // compact layout: the time shows once per minute, not on every line
+  var html = [], lastMin = null, tc = "";   // compact layout: the time shows once per minute, not on every line
   function tcls(ts) { var mk = Math.floor(ts / 60), same = mk === lastMin; lastMin = mk; return same ? "t rep" : "t"; }
+  // Times inline: the first line of each minute carries a small time at its right edge, so rows keep the full width.
+  function inl(ts) { return S.times === "inline" && tc === "t" ? '<span class="ti">' + hhmm(ts) + "</span>" : ""; }
   list.forEach(function (b) {
     if (b.type === "div" || b.type === "note") lastMin = null;
-    if (b.type === "div" && b.ts) divMin = Math.floor(b.ts / 60);   // a day line already shows this minute
-    // Times as dividers: a small time line each minute instead of a time on every row.
-    var bm = b.type === "burst" || b.type === "note" ? b.m : (b.ms ? b.ms[0] : null);
-    if (S.times === "dividers" && bm && bm.ts) {
-      var mk = Math.floor(bm.ts / 60);
-      if (mk !== divMin) { divMin = mk; html.push('<div class="div tdiv">' + hhmm(bm.ts) + "</div>"); }
-    }
-    if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.html || esc(b.text)) + "</div>"); return; }
+    if (b.type === "div") { html.push('<div class="div' + (b.cls ? " " + b.cls : "") + '">' + (b.cls === "zone" ? PIN : "") + (b.html || esc(b.text)) + "</div>"); return; }
     if (b.type === "note") { html.push('<div class="note">' + esc(b.m.body) + "</div>"); return; }
     var col = (CH[b.type === "burst" ? b.m.ch : b.ch] || {c: "var(--sys)"}).c;
     if (b.type === "burst") {
       var pills = b.grp.map(function (g) { return '<span class="callp">' + g.calls.join(" ") + "</span>"; }).join("");
       var head = ctx === "compact" ? "" : runHead({ms: [b.m], ch: b.m.ch, who: b.m.name, dir: b.m.dir}, ctx);
       if (ctx === "compact") {
-        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="' + tcls(b.m.ts) + '">' + hhmm(b.m.ts) + '</span><div class="ln">' + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
+        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="' + (tc = tcls(b.m.ts)) + '">' + hhmm(b.m.ts) + '</span><div class="ln">' + inl(b.m.ts) + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
       } else {
         html.push('<div class="run call" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + head + '<div class="burst"><span class="lbl">roll call</span>' + pills + "</div></div></div>");
       }
@@ -1500,7 +1500,7 @@ function renderBlocks(list, ctx) {
       b.ms.forEach(function (m) {
         var pre = compactPrefix(m);
         var cw = m.ch === "tell" ? (m.pending ? m.peer : m.name) : (m.dir === "out" || m.pending || m.ch === "emote" ? "" : (m.name || ""));
-        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="' + tcls(m.ts) + '">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="' + (tc = tcls(m.ts)) + '">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + inl(m.ts) + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
       });
       return;
     }
@@ -2665,7 +2665,7 @@ function renderSettings() {
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font)) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
     srow("Names", "", segs("names", [["app", "phonechatXI"], ["game", "Game"]], S.names)) +
-    srow("Times", "", segs("times", [["column", "Column"], ["dividers", "Dividers"], ["off", "Off"]], S.times)) +
+    srow("Times", "", segs("times", [["column", "Column"], ["inline", "Inline"], ["off", "Off"]], S.times)) +
     srow("Color message text", "", tog(S.channelText, "channelText")) +
     '<div class="subsect">Channel colors</div>' +
     CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
