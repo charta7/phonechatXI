@@ -2826,7 +2826,7 @@ function debugText() {
     "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
-    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", names " + (S.names || "app") + ", text color " + (S.channelText ? "on" : "off") + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
       ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
     "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
     "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
