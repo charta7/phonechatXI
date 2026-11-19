@@ -838,7 +838,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, names: "app", times: "column", looks: {}, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, times: "column", looks: {}, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: true, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: true, emote: true, finder: true}},
@@ -858,10 +858,10 @@ var DEFAULTS = {
 // touch follows along. Text size, clock and scrollback are yours on every skin and aren't part of a look.
 // ------------------------------------------------------------------------------------------
 var SKINS = ["midnight", "classic", "game", "onyx", "yuna"];
-var LOOK_KEYS = ["font", "density", "names", "times", "channelText", "colors"];
-var LOOK_BASE = {font: "readable", density: "comfortable", names: "app", times: "column", channelText: false, colors: {}};
-var SKIN_LOOK = {game: {density: "compact", names: "game", times: "inline", channelText: true}};
-var LOOK_OK = {font: ["readable", "classic"], density: ["comfortable", "compact"], names: ["app", "game"], times: ["column", "inline", "off"]};
+var LOOK_KEYS = ["font", "density", "times", "channelText", "colors"];
+var LOOK_BASE = {font: "readable", density: "comfortable", times: "column", channelText: false, colors: {}};
+var SKIN_LOOK = {game: {density: "compact", times: "inline", channelText: true}};
+var LOOK_OK = {font: ["readable", "classic"], density: ["comfortable", "compact"], times: ["column", "inline", "off"]};
 var SKIN_LABEL = {classic: "Classic", game: "Game", onyx: "Night", yuna: "Yunas", midnight: "Midnight"};
 function lookDefault(skin) { return Object.assign(JSON.parse(JSON.stringify(LOOK_BASE)), JSON.parse(JSON.stringify(SKIN_LOOK[skin] || {}))); }
 function cleanLook(v) {
@@ -922,7 +922,6 @@ function cleanPrefs(o) {
   function list(v, max, ok) { return Array.isArray(v) ? v.filter(ok).slice(0, max) : []; }
   var ID = /^[A-Za-z0-9_-]{1,24}$/;
   o.density = pick(o.density, ["comfortable", "compact"], D.density);
-  o.names = pick(o.names, ["app", "game"], D.names);
   o.size = pick(o.size, ["XS", "S", "M", "L", "XL"], D.size);
   o.calls = pick(o.calls, ["off", "highlight", "badge"], D.calls);
   o.clock = pick(o.clock, ["12", "24"], D.clock);
@@ -1452,7 +1451,7 @@ function runHead(b, ctx) {
   // Tells read like the game: "Wren>>" for one you got, ">>Wren" for one you sent.
   var label = esc(b.who || CH[b.ch].full);
   if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
-  else if (S.names === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
+  else if (S.skin === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
   if (ctx === "thread" && b.dir === "out") {
     return '<div class="rhead"><span class="t">' + (S.times !== "off" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
   }
@@ -1470,8 +1469,8 @@ function compactPrefix(m) {
     case "unity": return "{" + who + "}";
     case "yell": return who + (m.zone ? "[" + esc(m.zone) + "]" : "") + ":";
     case "emote": case "finder": return "";
-    case "ls1": case "ls2": return S.names === "game" ? "&lt;" + who + "&gt;" : who + ":";
-    default: return who + (S.names === "game" ? " :" : ":");
+    case "ls1": case "ls2": return S.skin === "game" ? "&lt;" + who + "&gt;" : who + ":";
+    default: return who + (S.skin === "game" ? " :" : ":");
   }
 }
 function renderBlocks(list, ctx) {
@@ -2662,7 +2661,6 @@ function renderSettings() {
     '<div class="preview">' + previewHtml() + "</div>" +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font)) +
     srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
-    srow("Names", "", segs("names", [["app", "phonechatXI"], ["game", "Game"]], S.names)) +
     srow("Times", "", segs("times", [["column", "Column"], ["inline", "Inline"], ["off", "Off"]], S.times)) +
     srow("Color message text", "", tog(S.channelText, "channelText")) +
     '<div class="subsect">Channel colors</div>' +
@@ -2910,7 +2908,7 @@ function debugText() {
     "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
-    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", names " + (S.names || "app") + ", times " + S.times + (lookEdited(S.skin) ? ", skin edited" : "") + ", text color " + (S.channelText ? "on" : "off") + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
+    "settings: skin " + (S.skin || "classic") + ", " + S.density + ", times " + S.times + (lookEdited(S.skin) ? ", skin edited" : "") + ", text color " + (S.channelText ? "on" : "off") + ", size " + S.size + ", clock " + (S.clock || "12") + ", scrollback x" + (S.scrollback || 1) +
       ", watch words " + (watchRe ? "set" : "none") + ", remember tells " + (status.save_tells ? "on" : "off") + ", bazaar " + (S.bazaar ? "on" : "off"),
     "home screen app: " + (navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches) ? "yes" : "no"),
     "screen: " + window.innerWidth + "x" + window.innerHeight + " @" + (window.devicePixelRatio || 1),
