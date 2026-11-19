@@ -838,7 +838,7 @@ function toast(text) {
 // ------------------------------------------------------------------------------------------
 var DEFAULTS = {
   density: "comfortable", size: "M", calls: "highlight", tipSeen: false, holdTip: false, tellsBan: false, hidden: [],
-  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, times: "column", looks: {}, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
+  clock: "12", watch: "", bazaar: false, caps: false, autocorrect: false, cmdMode: "all", cseg: "emote", motdMin: false, channelText: false, wikiAll: false, times: "column", looks: {}, quickFilters: false, emoticons: "", seenAlerts: 0, scrollback: 1,
   master: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: true, yell: true, emote: true, finder: true},
   views: [
     {id: "all", name: "All", ch: {ls1: true, ls2: true, party: true, tell: true, say: true, shout: true, unity: false, yell: true, emote: true, finder: true}},
@@ -931,7 +931,7 @@ function cleanPrefs(o) {
   o.font = pick(o.font, ["readable", "classic"], D.font);
   o.emoteMode = pick(o.emoteMode, ["", "motion", "text"], D.emoteMode);
   o.scrollback = pick(o.scrollback, [1, 2, 4], D.scrollback);
-  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
+  ["tipSeen", "holdTip", "tellsBan", "bazaar", "caps", "autocorrect", "motdMin", "channelText", "wikiAll", "quickFilters"].forEach(function (k) { o[k] = bool(o[k], D[k]); });
   o.seenAlerts = typeof o.seenAlerts === "number" && isFinite(o.seenAlerts) && o.seenAlerts >= 0 ? o.seenAlerts : 0;
   if (!text(o.watch, 200)) o.watch = D.watch;
   if (!text(o.emoticons, 400)) o.emoticons = D.emoticons;
@@ -2345,8 +2345,10 @@ $("findlist").addEventListener("click", function (e) {
 // Open Search already filled in, without bringing the keyboard up (from "Search for" on a line).
 // Long-press a chat line (touch only; a mouse can select text as usual): a small menu to copy it or search for who said it.
 // Item links in a line ({{Item}}), each once, at most 3, for the long-press menu.
+// Items in a line for the long-press menu. With "BG-Wiki for all auto-translate" on, every {Phrase} counts too:
+// the game doesn't say whether a phrase is an item, a skill, a place or just words, so they're all treated the same.
 function lineItems(b) {
-  var seen = {}, out = [], re = /\{\{([^{}<>\n]{1,40})\}\}/g, m;
+  var seen = {}, out = [], re = S.wikiAll ? /\{\{?([^{}<>\n]{1,40})\}?\}/g : /\{\{([^{}<>\n]{1,40})\}\}/g, m;
   while ((m = re.exec(String(b || ""))) && out.length < 3) { var n = m[1].trim(); if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; out.push(n); } }
   return out;
 }
@@ -2650,6 +2652,8 @@ function renderSettings() {
     '<div class="srow col"><div class="m"><div>Your emoticons</div><small>Shown under the :) button, in this order. Up to 20, separated by commas. Keyboard characters only, no emoji.</small></div>' +
     '<input class="field" id="emoin" placeholder="' + esc(EMO_DEFAULT.join(", ")) + '" maxlength="400" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" value="' + esc(S.emoticons || EMO_DEFAULT.join(", ")) + '">' +
     '<div style="display:flex;align-items:center;gap:10px"><small id="emonote" style="color:var(--mute);flex:1">Showing: ' + esc(emoList().join("  ")) + '</small><button class="linkbtn" data-act="emoreset">Reset to defaults</button></div></div>' +
+    '<div class="sect">BG-WIKI</div>' +
+    srow("BG-Wiki for all auto-translate", "Hold a line to search BG-Wiki for any auto-translate. They're all treated the same, so phrases like Thank you get a search too.", tog(S.wikiAll, "wikiAll")) +
     '<div class="sect">PRIVACY</div>' +
     srow("Remember tells", "Last 50 lines per person, on the bridge.", tog(status.save_tells, "save_tells")) +
     srow("Clear saved tells", "", '<button class="dangerbtn" data-act="clear">Clear</button>') +
@@ -2722,6 +2726,7 @@ $("settings").addEventListener("click", function (e) {
     if (k.indexOf("m.") === 0) { S.master[k.slice(2)] = !S.master[k.slice(2)]; }
     else if (k === "channelText") { S.channelText = !S.channelText; lookSave(S); applyLook(); }
     else if (k === "bazaar") { S.bazaar = !S.bazaar; }
+    else if (k === "wikiAll") { S.wikiAll = !S.wikiAll; }
     else if (k === "caps") { S.caps = !S.caps; applyCaps(); }
     else if (k === "autocorrect") { S.autocorrect = !S.autocorrect; applyCaps(); }
     else if (k === "save_tells") {
