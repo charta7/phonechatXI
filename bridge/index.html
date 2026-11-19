@@ -1068,7 +1068,7 @@ function importPrefs(file) {
 }
 var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
-var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#D4F58A", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
+var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#06ED00", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
 // Log prints every line the way the game does, so it always uses the compact rows.
 function isCompact() { return S.density === "compact"; }
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
