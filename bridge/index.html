@@ -2717,7 +2717,9 @@ $("settings").addEventListener("input", function (e) {
   var c = e.target.closest("[data-color]");
   if (!c) return;
   S.colors = S.colors || {};
-  S.colors[c.dataset.color] = c.value;
+  var ch = c.dataset.color, shipped = ((SKIN_COLORS[S.skin] || {})[ch]) || DEFAULT_COLORS[ch];
+  // Picking the skin's own color again isn't a change, so it doesn't mark the skin as edited.
+  if (c.value.toLowerCase() === String(shipped).toLowerCase()) delete S.colors[ch]; else S.colors[ch] = c.value;
   lookSave(S);
   applyColors(); save(); schedule();
 });
