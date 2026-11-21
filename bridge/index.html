@@ -2672,7 +2672,9 @@ function renderSettings() {
     '<div class="preview">' + previewHtml() + "</div>" +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font)) +
     (S.skin === "game" ? "" : srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density))) +
-    srow("Times", "", segs("times", [["column", "Column"], ["inline", "Inline"], ["off", "Off"]], S.times)) +
+    // Comfortable already puts the time on the name row, so there Column and Inline look the same: just On / Off.
+    srow("Times", "", isCompact() ? segs("times", [["column", "Column"], ["inline", "Inline"], ["off", "Off"]], S.times)
+      : segs("times", [[S.times === "off" ? "column" : S.times, "On"], ["off", "Off"]], S.times)) +
     srow("Color message text", "", tog(S.channelText, "channelText")) +
     '<div class="subsect">Channel colors</div>' +
     CHAT_CH.map(function (c) { return srow(ico(CH[c].icon, 16, "margin-right:8px;vertical-align:-2px") + CH[c].full, "", '<input type="color" class="swatch" data-color="' + c + '" value="' + colorOf(c) + '" aria-label="' + CH[c].full + ' color">'); }).join("") +
