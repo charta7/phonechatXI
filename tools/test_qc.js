@@ -127,6 +127,7 @@ console.log('PASS: dark message colors lighten; white is preserved');
   m.skin='onyx'; s.lookLoad(m); assert.equal(m.font,'classic'); assert.equal(m.colors.ls1,'#123456');
   delete m.looks.onyx; s.lookLoad(m); assert.equal(m.font,'readable'); assert.deepEqual(m.colors,{});
   const again=s.merged(JSON.parse(JSON.stringify(m))); assert.deepEqual(again.looks,{game:{channelText:false}}); assert.equal(again.skin,'onyx');
+  const gc=s.merged({skin:'game',looks:{game:{density:'comfortable'}}}); assert.deepEqual(gc.looks,{}); assert.equal(gc.density,'compact');
   const g=s.merged({skin:'game',size:'L'}); assert.deepEqual(g.looks,{}); assert.equal(g.density,'compact'); assert.equal(g.size,'L');
   assert.deepEqual(s.merged({skin:'classic',looks:{classic:{times:'dividers'}}}).looks,{classic:{times:'inline'}});
   const bad=s.merged({skin:'game',looks:{game:{names:'x',times:'off',colors:{ls1:'red'}},nope:{font:'classic'}}}); assert.deepEqual(bad.looks,{game:{times:'off'}});

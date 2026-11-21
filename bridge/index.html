@@ -157,7 +157,7 @@ body.compact .pane .inner{gap:5px}
 body:not(.times-col) .cl .t{display:none}
 .ti{float:right;margin:2px 0 0 10px;font-size:10.5px;color:var(--mute);font-weight:400;font-style:normal;white-space:nowrap}
 .div.zone{color:var(--soft);font-weight:700;letter-spacing:.6px;font-size:12px}
-.preview{border:1px solid var(--line);border-radius:10px;margin:6px 16px 10px;padding:8px 10px;pointer-events:none;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.preview{border:1px solid var(--line);border-radius:10px;margin:6px 0 10px;padding:8px 10px;pointer-events:none;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
 .lookdot::after{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-left:4px;vertical-align:2px}
 .ap{font-size:.74em;margin-left:2px;letter-spacing:.3px}
 .t,.vt{white-space:nowrap}
@@ -879,7 +879,9 @@ function cleanLook(v) {
 }
 function lookLoad(o) {   // the skin's look, with your changes on top
   var d = lookDefault(o.skin), mine = o.looks[o.skin] || {};
+  if (o.skin === "game") delete mine.density;   // Game is always compact
   LOOK_KEYS.forEach(function (k) { o[k] = JSON.parse(JSON.stringify(mine[k] !== undefined ? mine[k] : d[k])); });
+  if (o.looks[o.skin] && !Object.keys(o.looks[o.skin]).length) delete o.looks[o.skin];
 }
 function lookSave(o) {   // keep only what differs from how the skin shipped
   var d = lookDefault(o.skin), mine = {};
@@ -1069,7 +1071,7 @@ var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
 var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#06ED00", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
 // Log prints every line the way the game does, so it always uses the compact rows.
-function isCompact() { return S.density === "compact"; }
+function isCompact() { return S.density === "compact" || S.skin === "game"; }   // Game is the chat log: always compact
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }
 function applyColors() {
   CHAT_CH.forEach(function (c) { document.documentElement.style.setProperty("--" + c, colorOf(c)); });
@@ -2664,7 +2666,7 @@ function renderSettings() {
     (S.skin === "yuna" ? '<div class="skinnote">Inspired by Yunas&#39;s YunaUI. Unofficial, so send any issues to Charta, <b>not Yunas</b>.</div>' : "") +
     '<div class="preview">' + previewHtml() + "</div>" +
     srow("Font", "", segs("font", [["readable", "Readable"], ["classic", "Plain"]], S.font)) +
-    srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density)) +
+    (S.skin === "game" ? "" : srow("Density", "", segs("density", [["comfortable", "Comfortable"], ["compact", "Compact"]], S.density))) +
     srow("Times", "", segs("times", [["column", "Column"], ["inline", "Inline"], ["off", "Off"]], S.times)) +
     srow("Color message text", "", tog(S.channelText, "channelText")) +
     '<div class="subsect">Channel colors</div>' +

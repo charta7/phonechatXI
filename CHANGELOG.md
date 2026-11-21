@@ -28,7 +28,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - "Reset settings" in Settings > Backup goes back to how a new install starts. Your mention names stay, and saved tells and your phone link aren't touched.
 
 ### Looks
-- A new skin, Game. It looks like the game's own chat log: a black outline on the text, framed windows with a thin light edge and square corners. It prints names the way the game does (<Name> for linkshells, (Name) for party, Name : for the rest) and ships with compact rows, inline times and colored message text.
+- A new skin, Game. It looks like the game's own chat log: a black outline on the text, framed windows with a thin light edge and square corners. It prints names the way the game does (<Name> for linkshells, (Name) for party, Name : for the rest) and is always compact (no Density row), shipping with inline times and colored message text.
 - Each skin now keeps its own look. Change font, density, times, message text color or channel colors and it's saved to the skin you're on; switch skins and each comes back the way you left it. A dot marks a skin you've changed, and "Reset <skin> to default" puts it back how it shipped. Text size, clock and scrollback stay the same on every skin. Your current settings carry over to the skin you have on now.
 - A preview at the top of Appearance shows a few sample lines and redraws as you change things, in place of the old descriptions.
 - New Times setting: Column (as before), Inline (a small time at the right end of the first line of each minute, so lines use the full width) or Off (the exact time is still in the long-press menu). Game ships with Inline.
