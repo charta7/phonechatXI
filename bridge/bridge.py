@@ -59,7 +59,7 @@ CAPS = {
     "ls1": 500, "ls2": 500, "party": 500, "tell": 600,
     "unity": 300, "say": 300, "shout": 300, "yell": 300, "emote": 200,
     "venture": 200, "server": 100, "system": 150, "zone": 100, "echo": 50,
-    "_ack": 300, "_game": 5, "finder": 300, "bazaar": 100, "motd": 10,
+    "_ack": 300, "_game": 5, "finder": 300, "bazaar": 100, "sale": 100, "motd": 10,
 }
 SCROLLBACK = (1, 2, 4)          # Settings > Scrollback multiplies the chat caps above
 DEFAULT_CAP = 200

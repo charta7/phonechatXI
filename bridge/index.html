@@ -720,7 +720,7 @@ body.skin-game :is(#i-ls1,#i-ls2) circle{r:6.5px;stroke:#000;stroke-width:1.5px}
     </section>
     <section class="tab" id="tab-alerts">
       <div class="top"><div class="big">Alerts</div><div class="row"><div class="pill-on off" data-bridge><i></i><span>Bridge OFF</span></div><button class="iconbtn" data-go="settings" aria-label="Settings"><svg class="i" width="20" height="20"><use href="#i-gear"/></svg></button></div></div>
-      <div class="list" id="alerts"><div id="vent"></div><div id="mentions"></div><div id="bazaar"></div><div id="notices"></div></div>
+      <div class="list" id="alerts"><div id="vent"></div><div id="mentions"></div><div id="sales"></div><div id="bazaar"></div><div id="notices"></div></div>
     </section>
   </div>
 
@@ -2557,6 +2557,11 @@ function renderAlerts() {
     card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), m.ts); }).join(""), baz.map(noticeKey).join(";;")) :
     '<div class="empty sm">No visitors yet.</div>') : "";
 
+  // Auction House sales. Shown only once one has come in; the x hides them like other notices.
+  var sold = msgs.filter(function (m) { return m.ch === "sale" && !hid[noticeKey(m)]; }).slice(-20).reverse();
+  $("sales").innerHTML = sold.length ? '<div class="sect">AUCTION HOUSE</div>' +
+    card("bazaar", "var(--gold)", "Sold", sold[0].ts, sold.map(function (m) { return row(fmt(m.body), m.ts); }).join(""), sold.map(noticeKey).join(";;")) : "";
+
   var n = msgs.filter(function (m) { return (m.ch === "server" || m.ch === "system") && !hid[noticeKey(m)]; }).reverse().slice(0, 60);
   $("notices").innerHTML = '<div class="shead"><div class="sect">NOTICES</div>' + (n.length > 1 ? '<button class="linkbtn" data-dismiss="*">Clear all</button>' : "") + "</div>" +
     (n.length ? n.map(function (m) {
@@ -2567,7 +2572,7 @@ function renderAlerts() {
   msgs.forEach(function (m) {
     if (m.ts <= since) return;
     if (m._men) unseenMen++;
-    else if (m.ch === "venture" || m.ch === "server" || (S.bazaar && m.ch === "bazaar")) other = true;
+    else if (m.ch === "venture" || m.ch === "server" || m.ch === "sale" || (S.bazaar && m.ch === "bazaar")) other = true;
   });
   var bd = $("bdg-alerts");
   bd.hidden = curTab === "alerts" || !(unseenMen || other);

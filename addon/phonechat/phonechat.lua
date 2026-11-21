@@ -109,8 +109,8 @@ local MODES = {
     [205] = { 'server', 'in'  },
 }
 
--- Plain system-message modes that can carry Party Finder ads and bazaar
--- visits. Combat modes are never on this list.
+-- Plain system-message modes that can carry Party Finder ads, bazaar
+-- visits and Auction House sales. Combat modes are never on this list.
 local NOTICE_MODES = { [9] = true, [121] = true, [127] = true, [131] = true, [142] = true }
 
 local MOTD_MODE   = 217   -- linkshell message of the day: "[n]< LS name: set by >", then the message
@@ -809,6 +809,12 @@ local function system_line(text)
     local low = text:lower()
     if low:find('your bazaar', 1, true) and not low:find('^you ') then
         emit('bazaar', 'in', '', text)
+        return true
+    end
+    -- Auction House sales ("... has sold ..."). Only from the notice modes already read here;
+    -- this adds no mode, it lets one more kind of server notice through to the phone's Alerts.
+    if low:find('has sold', 1, true) then
+        emit('sale', 'in', '', text)
         return true
     end
     return false

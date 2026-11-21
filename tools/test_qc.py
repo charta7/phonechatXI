@@ -26,6 +26,16 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     line(123,'There are no party members.')
     feed=(path/'feed-Tester.log').read_text();assert 'single item' not in feed and 'no party members' in feed
     print('PASS: system failure allowlist')
+    line(121,'Your Shadow Cuisses has sold for 90,000 gil.')
+    line(121,'Some other notice from the server.')
+    line(205,'Your Ridill has sold.')
+    feed=(path/'feed-Tester.log').read_text()
+    assert '\tsale\tin\t\tYour Shadow Cuisses has sold for 90,000 gil.' in feed and '\tsale\tin\t\tYour Ridill has sold.' in feed
+    assert 'Some other notice' not in feed
+    line(14,'[1]<Marlow> my bow has sold out lol')
+    assert '\tsale\t' not in (path/'feed-Tester.log').read_text().split('my bow')[0].split('\n')[-1]
+    assert '\tls1\tin\tMarlow\tmy bow has sold out lol' in (path/'feed-Tester.log').read_text() or 'my bow has sold out lol' in (path/'feed-Tester.log').read_text()
+    print('PASS: AH sales from notice modes go to sale; other notices and chat are untouched')
     before = (path/'feed-Tester.log').read_bytes()
     for mode in (20, 21, 22, 23, 30, 999):
         line(mode, 'Tester hits the Goblin for 50 points of damage.')

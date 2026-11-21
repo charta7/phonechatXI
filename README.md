@@ -47,7 +47,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - The LS message of the day is pinned above chat, with an × to hide it.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Tapping one asks before it sends, starred ones too.
-- An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, server notices and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
+- An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, Auction House sales, server notices and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
 - A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - Four skins (Classic, Game, Night and Yunas, an unofficial look inspired by YunaUI), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
