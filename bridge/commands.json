@@ -1,7 +1,8 @@
 {
-  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-18; !moolix and the !box store change are from the server's November 2026 patch notes, not on the page yet. !box store is a one-tap row on the phone only: the bridge already allows !box with a word after it). Server commands are sent as /say !name. Adding a command changes what can be sent: it needs a staff review first, and the addon's own list (SERVER in phonechat.lua) must match this one (a test checks).",
+  "_source": "https://www.bg-wiki.com/ffxi/CatsEyeXI_Commands (checked 2026-10-18; !moolix, !bond and the !box store change are from the server's November 2026 patch notes, not on the page yet. !box store is a one-tap row on the phone only: the bridge already allows !box with a word after it). Server commands are sent as /say !name. Adding a command changes what can be sent: it needs a staff review first, and the addon's own list (SERVER in phonechat.lua) must match this one (a test checks).",
   "info": {
     "artifacts": "Stronghold artifact info",
+    "bond": "Your standing with your Adventuring Fellow",
     "currency": "Dynamis, Alexandrite, H-P Bayld and Incursion currency and where it is",
     "dailies": "Goblin and Sea dailies",
     "dailykills": "Daily Murdox quest progress",
