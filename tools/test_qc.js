@@ -89,13 +89,13 @@ console.log('PASS: dark message colors lighten; white is preserved');
 }
 // Linkshell marks: [1] / [2] in compact, the pixel pearl in comfortable, other channels keep their icon.
 {
-  const r={CH:{party:{icon:'party'}},ico:n=>'ICO:'+n};
-  vm.createContext(r); vm.runInContext(extract('var PIX_PEARL =', 'function ico('),r);
+  const r={CH:{party:{icon:'party'},ls2:{icon:'ls2'}},ico:n=>'ICO:'+n};
+  vm.createContext(r); vm.runInContext(extract('function rowIco(', 'function ico('),r);
   assert.equal(r.rowIco('ls1',13,true),'<span class="lstag">[1]</span>');
   assert.equal(r.rowIco('ls2',13,true),'<span class="lstag">[2]</span>');
-  assert.ok(r.rowIco('ls2',14,false).includes('class="i pix"') && r.rowIco('ls2',14,false).includes('fill="currentColor"'));
+  assert.equal(r.rowIco('ls2',14,false),'ICO:ls2');
   assert.equal(r.rowIco('party',13,true),'ICO:party');
-  console.log('PASS: linkshell marks are [1]/[2] in compact and a pixel pearl in comfortable');
+  console.log('PASS: linkshell marks are [1]/[2] in compact and the linkpearl in comfortable');
 }
 
 // Update note: shown once per new build on a phone that already had settings; never on a new phone or with storage blocked.

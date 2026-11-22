@@ -155,7 +155,6 @@ body.compact .pane .inner{gap:5px}
 .clock-12 .cl .t{width:46px}
 .cl .t.rep{visibility:hidden}
 .lstag{color:var(--c);font-weight:800;font-size:.86em;font-variant-numeric:tabular-nums;margin-right:5px;flex:none}
-.pix{color:var(--c);flex:none}
 body.skin-game .lstag{font-weight:inherit;font-size:1em;margin-right:0}
 body:not(.times-col) .cl .t{display:none}
 .ti{float:right;margin:2px 0 0 10px;font-size:10.5px;color:var(--mute);font-weight:400;font-style:normal;white-space:nowrap}
@@ -656,17 +655,20 @@ body.skin-game .opt.sel::before{content:"";width:0;height:0;border-left:7px soli
 /* The linkpearl icons go flat: a plain dot in the channel color with a black edge, no gloss. */
 body.skin-game #gG stop{stop-color:var(--ls1)!important}
 body.skin-game #gT stop{stop-color:var(--ls2)!important}
-body.skin-game :is(#i-ls1,#i-ls2) ellipse{display:none}
+body.skin-game :is(#i-ls1,#i-ls2) .pl-fx{display:none}
 body.skin-game :is(#i-ls1,#i-ls2) circle{r:6.5px;stroke:#000;stroke-width:1.5px}
 </style>
 </head>
 <body class="size-M">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<radialGradient id="gG" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:#f0fff3;stop-color:color-mix(in srgb,var(--ls1) 20%,#fff)"/><stop offset=".5" style="stop-color:var(--ls1)"/><stop offset="1" style="stop-color:#2b8a46;stop-color:color-mix(in srgb,var(--ls1) 50%,#000)"/></radialGradient>
-<radialGradient id="gT" cx="35%" cy="30%" r="75%"><stop offset="0" style="stop-color:#eafffd;stop-color:color-mix(in srgb,var(--ls2) 20%,#fff)"/><stop offset=".5" style="stop-color:var(--ls2)"/><stop offset="1" style="stop-color:#1a7f78;stop-color:color-mix(in srgb,var(--ls2) 50%,#000)"/></radialGradient>
+<radialGradient id="gG" cx="38%" cy="34%" r="72%"><stop offset="0" style="stop-color:#fff;stop-color:color-mix(in srgb,var(--ls1) 45%,#fff)"/><stop offset=".45" style="stop-color:var(--ls1)"/><stop offset="1" style="stop-color:#000;stop-color:color-mix(in srgb,var(--ls1) 55%,#000)"/></radialGradient>
+<radialGradient id="gT" cx="38%" cy="34%" r="72%"><stop offset="0" style="stop-color:#fff;stop-color:color-mix(in srgb,var(--ls2) 45%,#fff)"/><stop offset=".45" style="stop-color:var(--ls2)"/><stop offset="1" style="stop-color:#000;stop-color:color-mix(in srgb,var(--ls2) 55%,#000)"/></radialGradient>
+<linearGradient id="plShade" x1="20%" y1="15%" x2="85%" y2="90%"><stop offset=".45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#1a0f2e" stop-opacity=".45"/></linearGradient>
+<radialGradient id="plSheen" cx="68%" cy="72%" r="45%"><stop offset="0" stop-color="#d8b8ff" stop-opacity=".42"/><stop offset=".6" stop-color="#ffc6e0" stop-opacity=".18"/><stop offset="1" stop-color="#ffc6e0" stop-opacity="0"/></radialGradient>
+<radialGradient id="plSpot"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".35" stop-color="#fff8fb" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
 </defs>
-<symbol id="i-ls1" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gG)"/><ellipse cx="7.3" cy="6.5" rx="2.6" ry="1.6" fill="#fff" opacity=".55"/></symbol>
-<symbol id="i-ls2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gT)"/><ellipse cx="7.3" cy="6.5" rx="2.6" ry="1.6" fill="#fff" opacity=".55"/></symbol>
+<symbol id="i-ls1" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gG)"/><g class="pl-fx"><circle cx="10" cy="10" r="8.5" fill="url(#plShade)"/><circle cx="10" cy="10" r="8.5" fill="url(#plSheen)"/><path d="M4.2 14.2A7.6 7.6 0 0 1 6.4 3.4" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.1" stroke-linecap="round"/><circle cx="7.2" cy="6.6" r="3.6" fill="url(#plSpot)"/><circle cx="10" cy="10" r="8.35" fill="none" stroke="#000" stroke-opacity=".36" stroke-width=".6"/></g></symbol>
+<symbol id="i-ls2" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.5" fill="url(#gT)"/><g class="pl-fx"><circle cx="10" cy="10" r="8.5" fill="url(#plShade)"/><circle cx="10" cy="10" r="8.5" fill="url(#plSheen)"/><path d="M4.2 14.2A7.6 7.6 0 0 1 6.4 3.4" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="1.1" stroke-linecap="round"/><circle cx="7.2" cy="6.6" r="3.6" fill="url(#plSpot)"/><circle cx="10" cy="10" r="8.35" fill="none" stroke="#000" stroke-opacity=".36" stroke-width=".6"/></g></symbol>
 <symbol id="i-party" viewBox="0 0 20 20"><circle cx="10" cy="5.5" r="3" style="fill:var(--party)"/><path d="M4.5 18c0-3.4 2.4-5.2 5.5-5.2s5.5 1.8 5.5 5.2z" style="fill:var(--party)"/><circle cx="3.8" cy="9" r="2" style="fill:var(--party)" opacity=".7"/><circle cx="16.2" cy="9" r="2" style="fill:var(--party)" opacity=".7"/></symbol>
 <symbol id="i-tell" viewBox="0 0 20 20"><path d="M3 4h14a1 1 0 011 1v8a1 1 0 01-1 1H9l-4 3v-3H3a1 1 0 01-1-1V5a1 1 0 011-1z" style="fill:var(--tell)"/></symbol>
 <symbol id="i-say" viewBox="0 0 20 20"><path d="M10 3c4.4 0 8 2.7 8 6s-3.6 6-8 6c-.9 0-1.8-.1-2.6-.3L3.5 17l1-3.3C3 12.6 2 11 2 9c0-3.3 3.6-6 8-6z" style="fill:var(--say)"/></symbol>
@@ -801,23 +803,10 @@ function esc(s) {
   });
 }
 function $(id) { return document.getElementById(id); }
-// Linkshell marks in chat rows. Compact: the game's own [1] / [2] tag, so the two linkshells can't be
-// confused. Comfortable: a small pixel linkpearl in the linkshell's color, like the game's inventory icon.
-var PIX_PEARL = (function () {
-  // Drawn from the game's linkpearl icon: the body takes the linkshell's color (the line's channel color,
-  // including one you picked), with the icon's lighting on top: bright highlight top left, lit rim, darker lower right.
-  var g = ["..oooo..", ".oCWHLo.", "oCWWHLLo", "oGCHLLVo", "oGCLLVVo", "oGCLVVBo", ".oGVVBo.", "..oooo.."], base = "", over = "";
-  var tone = {W: 'fill="#fff" opacity=".9"', H: 'fill="#fff" opacity=".55"', C: 'fill="#fff" opacity=".28"', G: 'fill="#fff" opacity=".12"',
-              V: 'fill="#000" opacity=".22"', B: 'fill="#000" opacity=".42"', o: 'fill="#000" opacity=".62"'};
-  g.forEach(function (row, y) { row.split("").forEach(function (k, x) {
-    if (k === ".") return;
-    base += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>';
-    if (tone[k]) over += '<rect x="' + x + '" y="' + y + '" width="1" height="1" ' + tone[k] + "/>";
-  }); });
-  return '<svg class="i pix" width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor">' + base + "</g>" + over + "</svg>";
-})();
+// Linkshell marks in chat rows. Compact: the game's own [1] / [2] tag, so the two linkshells can't be confused.
+// Comfortable: the linkpearl, the same one used everywhere else.
 function rowIco(ch, size, compact) {
-  if (ch === "ls1" || ch === "ls2") return compact ? '<span class="lstag">[' + ch.charAt(2) + "]</span>" : PIX_PEARL;
+  if (ch === "ls1" || ch === "ls2") if (compact) return '<span class="lstag">[' + ch.charAt(2) + "]</span>";
   return ico((CH[ch] || {}).icon, size);
 }
 function ico(name, size, style) {
