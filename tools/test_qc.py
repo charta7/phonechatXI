@@ -38,6 +38,10 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     assert '\tsale\t' not in (path/'feed-Tester.log').read_text().split('my bow')[0].split('\n')[-1]
     assert '\tls1\tin\tMarlow\tmy bow has sold out lol' in (path/'feed-Tester.log').read_text() or 'my bow has sold out lol' in (path/'feed-Tester.log').read_text()
     print('PASS: AH sales from notice modes go to sale; other notices and chat are untouched')
+    line(121,'\u2192 A new Summit of the Stars perk is now active: Reraise')
+    feed=(path/'feed-Tester.log').read_text(encoding='utf-8',errors='replace')
+    assert '\tserver\tin\t\t' in feed and 'Summit of the Stars perk is now active: Reraise' in feed.split('\tserver\tin\t\t')[-1]
+    print('PASS: Summit of the Stars perks go to server notices')
     # Auto-translate: each block keeps its own type even when a block before it can't be parsed.
     lua.execute(r'''
       local q = AshitaCore:GetChatManager().QueueCommand

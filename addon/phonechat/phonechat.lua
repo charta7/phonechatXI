@@ -110,7 +110,7 @@ local MODES = {
 }
 
 -- Plain system-message modes that can carry Party Finder ads, bazaar
--- visits and Auction House sales. Combat modes are never on this list.
+-- visits, Auction House sales and Summit of the Stars perks. Combat modes are never on this list.
 local NOTICE_MODES = { [9] = true, [121] = true, [127] = true, [131] = true, [142] = true }
 
 local MOTD_MODE   = 217   -- linkshell message of the day: "[n]< LS name: set by >", then the message
@@ -814,6 +814,12 @@ local function system_line(text, from_reply)
     -- server notice through to the phone's Alerts.
     if not from_reply and low:find('has sold to ', 1, true) and low:find(' gil', 1, true) then
         emit('sale', 'in', '', text)
+        return true
+    end
+    -- Summit of the Stars perk announcements ("A new Summit of the Stars perk is now active: Reraise"),
+    -- from the same notice modes. They show with the other server notices in Alerts.
+    if not from_reply and low:find('summit of the stars', 1, true) then
+        emit('server', 'in', '', text)
         return true
     end
     return false

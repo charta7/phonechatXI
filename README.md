@@ -3,7 +3,7 @@
 > [!NOTE]
 > **v1.1.2 is the current version.** It's going through CatsEyeXI's new addon approval process. **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026), and until 1.1.2 is approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version.
 >
-> What 1.1.2 changes on the game side, plainly: Auction House sales now reach the phone (from the same server notices it already reads; no new message mode), there's one new command from the server's own list (`!bond`), and every `!` command asks before it sends. Everything else is on the phone. See the [changelog](CHANGELOG.md).
+> What 1.1.2 changes on the game side, plainly: Auction House sales and Summit of the Stars perks now reach the phone (from the same server notices it already reads; no new message mode), there's one new command from the server's own list (`!bond`), and every `!` command asks before it sends. Everything else is on the phone. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -47,7 +47,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - The LS message of the day is pinned above chat, with an × to hide it.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
 - A Server tab with every CatsEye `!` command in a searchable list, filterable by game mode (ACE, CW, WEW). Star the ones you use. Every command asks before it sends, whether you tap it in the list (starred ones too) or type it.
-- An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, Auction House sales, server notices and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
+- An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, Auction House sales, server notices (including Summit of the Stars perks) and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
 - A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
 - Four skins (Classic, Night, Game and Yunas, an unofficial look inspired by YunaUI). Each skin keeps its own look (font, layout, times, message colors, channel colors), with a live preview in Settings and a reset back to how it shipped. Text size and 12 or 24-hour time apply on every skin. Settings are saved on the bridge and can be exported (without your mention names).
