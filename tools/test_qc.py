@@ -36,6 +36,21 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     assert '\tsale\t' not in (path/'feed-Tester.log').read_text().split('my bow')[0].split('\n')[-1]
     assert '\tls1\tin\tMarlow\tmy bow has sold out lol' in (path/'feed-Tester.log').read_text() or 'my bow has sold out lol' in (path/'feed-Tester.log').read_text()
     print('PASS: AH sales from notice modes go to sale; other notices and chat are untouched')
+    # Auto-translate: each block keeps its own type even when a block before it can't be parsed.
+    lua.execute(r'''
+      local q = AshitaCore:GetChatManager().QueueCommand
+      AshitaCore.GetChatManager = function() return {
+        ParseAutoTranslate = function(self, s, b)
+          local n = ({['\7RID'] = 'Ridill', ['\2HEL'] = 'Hello!'})[s:sub(2, -2)]
+          if n then return '\239\39' .. n .. '\239(' end
+          return s
+        end, QueueCommand = q } end''')
+    line(14, b'[1]<Marlow> \xfd\x02BAD\xfd then \xfd\x07RID\xfd')
+    line(14, b'[1]<Quenby> \xfd\x02HEL\xfd and \xfd\x07RID\xfd')
+    feed=(path/'feed-Tester.log').read_bytes()
+    assert b'[auto-translate] then {{Ridill}}' in feed, feed[-200:]
+    assert b'{Hello!} and {{Ridill}}' in feed, feed[-200:]
+    print('PASS: auto-translate items stay items after an unparsed block')
     before = (path/'feed-Tester.log').read_bytes()
     for mode in (20, 21, 22, 23, 30, 999):
         line(mode, 'Tester hits the Goblin for 50 points of damage.')

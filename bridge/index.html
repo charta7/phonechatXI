@@ -1223,7 +1223,8 @@ function isMention(m) {
   return !!watchRe && m.dir !== "out" && !m.pending && CHAT_CH.indexOf(m.ch) >= 0 && m.ch !== "finder" && m.ch !== "yell" && m.ch !== "emote" && watchRe.test(m.body || "");
 }
 function markWatch(h) {
-  return h.split(/(<[^>]+>)/).map(function (part, i) {
+  // Tags and HTML entities (&amp; and the like) are left whole, so a watched word can't split one.
+  return h.split(/(<[^>]+>|&(?:amp|lt|gt|quot|#39);)/).map(function (part, i) {
     return i % 2 ? part : part.replace(watchReG, '$1<mark class="mw">$2</mark>');
   }).join("");
 }
@@ -1323,7 +1324,8 @@ function fmt(body) {
   }
   // Web addresses stay plain text: the only outside page the phone opens is a BG-Wiki item search.
   // {{Item}} = an auto-translated item: link it. {Phrase} = auto-translate phrase or zone: style only.
-  h = h.replace(/\{\{([^{}<>\n]{1,40})\}\}/g, function (all, name) {
+  // Measured after escaping, so an apostrophe (&#39;) or ampersand doesn't push a long item name past the limit.
+  h = h.replace(/\{\{([^{}<>\n]{1,120})\}\}/g, function (all, name) {
     var q = name.replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').trim();
     if (!q) return all;
     // Not a link: in chat a tap on the line means reply, so BG-Wiki lives in the long-press menu. A mouse click,
@@ -1586,15 +1588,16 @@ function renderPane(id, items, ctx, emptyText) {
     // already on screen don't flash again; a line that starts a new run brings its header with it.
     var all = inner.querySelectorAll("[data-k]"), n = Math.min(items.length - before, 6), last = null;
     items.slice(-n).forEach(function (m) {
-      var el = m.id != null && !m.pending ? inner.querySelector('[data-m="' + String(m.id).replace(/[^\w-]/g, "") + '"]') : null;
+      var el = pane._noFade ? null : m.id != null && !m.pending ? inner.querySelector('[data-m="' + String(m.id).replace(/[^\w-]/g, "") + '"]') : null;
       if (el && el.classList.contains("ln")) { var run = el.closest(".run"); if (run && run.querySelector(".ln") === el) el = run; }
-      if (!el) el = all[all.length - 1];
+      if (!el && m.pending && !pane._noFade) el = all[all.length - 1];   // only a line you just sent has no id yet
       if (el) { el.classList.add("fresh"); last = el; }
     });
     // Looks only: the newest line is marked when chat had been quiet, so a skin can glow for it and stay calm in busy chat.
     if (last && Date.now() - (pane._lastNew || 0) > 5000) last.classList.add("lull");
     pane._lastNew = Date.now();
   }
+  pane._noFade = false;   // set when the view changes, so switching views doesn't fade old lines in as new
   var jump = document.querySelector('[data-jump="' + id + '"]');
   if (goto) {
     // Came from a search result: put that line a third of the way down and flash it.
@@ -1701,7 +1704,7 @@ function renderViews() {
 $("viewseg").addEventListener("click", function (e) {
   var b = e.target.closest("[data-view]");
   if (!b) return;
-  S.view = b.dataset.view; save(); seenCount["pane-chat"] = undefined; render();
+  S.view = b.dataset.view; save(); seenCount["pane-chat"] = undefined; $("pane-chat")._noFade = true; render();
 });
 $("pills").addEventListener("click", function (e) {
   var b = e.target.closest("[data-pill]");

@@ -59,6 +59,12 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
 - Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
 - Changing Save tells or Scrollback, or clearing saved tells, now says so if the bridge doesn't answer.
+- An auto-translate item that follows one the addon can't read keeps its BG-Wiki link (each auto-translate is now matched to its own type).
+- AH sales are only taken from server notices, never from the reply to a ! command you sent.
+- Long item names with an apostrophe or ampersand keep their BG-Wiki link.
+- Switching chat views no longer fades in lines as if they were new, and zone or system lines no longer make the line above them fade.
+- A watched name that matches an HTML code word (like "amp") no longer garbles messages with & or quotes in them.
+- The bridge's local setup page escapes the folder path it shows.
 
 ## 1.1.1 (November 2026)
 

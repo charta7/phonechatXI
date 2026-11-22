@@ -12,7 +12,7 @@
     Each line comes from one tap on the phone.
 
     Commands (/pchat, /pcxi and /phonechat all work):
-        /pchat            status, phone link and the list of options
+        /pchat help       status, phone link and the list of options
         /pchat            the phonechatXI window: start/stop, QR code, settings
         /pchat qr         the same window
         /pchat start      start the bridge
@@ -214,28 +214,25 @@ end
 -- so the phone can link items only.
 local function clean(s)
     s = tostring(s or '')
-    local types = {}
-    for inner in s:gmatch('\253(.-)\253') do types[#types + 1] = inner:byte(1) end
-    local ok, res = pcall(function ()
-        return AshitaCore:GetChatManager():ParseAutoTranslate(s, true)
-    end)
-    if ok and type(res) == 'string' then
-        s = res
-    end
+    -- Each block is parsed on its own, so its type (item or phrase) stays paired with it even when
+    -- a block before it can't be parsed. Parsed blocks are marked \1 (item) or \2 (phrase) for below.
     s = (s:gsub('\253(.-)\253', function (inner)
         local t = inner:byte(1)
+        local ok, res = pcall(function ()
+            return AshitaCore:GetChatManager():ParseAutoTranslate('\253' .. inner .. '\253', true)
+        end)
+        if ok and type(res) == 'string' and res:find('\239\39', 1, true) then
+            return (res:gsub('\239\39', t == 7 and '\1\239\39' or '\2\239\39'))
+        end
         if t == 2 then return '[auto-translate]' end
         if t == 7 then return '[item]' end
         return '[?]'
     end))
     s = (s:gsub('[\r\n]+$', ''))
     s = (s:gsub('[\30\31\127].', ''))
-    local k = 0
-    s = (s:gsub('\239\39(.-)\239%(', function (x)
-        k = k + 1
-        if types[k] == 7 then return '{{' .. x .. '}}' end
-        return '{' .. x .. '}'
-    end))
+    s = (s:gsub('\1\239\39(.-)\239%(', '{{%1}}'))
+    s = (s:gsub('\2\239\39(.-)\239%(', '{%1}'))
+    s = (s:gsub('[\1\2]', ''))
     s = (s:gsub('\239\39', '{'))
     s = (s:gsub('\239%(', '}'))
     s = (s:gsub('\7', '\n'))
@@ -800,7 +797,7 @@ end
 
 -- Party Finder ads and bazaar visits from the system modes.
 -- Returns true when the line was handled.
-local function system_line(text)
+local function system_line(text, from_reply)
     local ad = text:match('^%[PartyFinder%]%s*(.+)$')
     if ad then
         emit('finder', 'in', '', ad)
@@ -813,7 +810,7 @@ local function system_line(text)
     end
     -- Auction House sales ("... has sold ..."). Only from the notice modes already read here;
     -- this adds no mode, it lets one more kind of server notice through to the phone's Alerts.
-    if low:find('has sold', 1, true) then
+    if not from_reply and low:find('has sold', 1, true) then
         emit('sale', 'in', '', text)
         return true
     end
@@ -861,7 +858,7 @@ local function handle_line(raw_mode, message)
         end
         -- Replies to a ! command typed from the phone, only for a few seconds after it was typed.
         if mode == REPLY_MODE and S.cmd_at and os.clock() - S.cmd_at <= REPLY_WAIT then
-            if not system_line(text) then emit('echo', 'in', '', text) end
+            if not system_line(text, true) then emit('echo', 'in', '', text) end
             return
         end
     end

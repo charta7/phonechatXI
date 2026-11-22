@@ -26,6 +26,7 @@ Needs only the Python standard library.
 import argparse
 import atexit
 import glob
+import html
 import ipaddress
 import json
 import os
@@ -1032,7 +1033,7 @@ class Handler(BaseHTTPRequestHandler):
             if self.client_address[0] not in ("127.0.0.1", "::1"):
                 self.send_body(403, "Open /setup on the computer running the bridge.")
                 return
-            self.send_body(200, SETUP_PAGE % {"url": self.url, "version": VERSION, "folder": self.folder},
+            self.send_body(200, SETUP_PAGE % {"url": html.escape(self.url, quote=True), "version": VERSION, "folder": html.escape(self.folder, quote=True)},
                            "text/html; charset=utf-8")
             return
         if not self.authed(q):
