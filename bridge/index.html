@@ -802,15 +802,19 @@ function esc(s) {
 }
 function $(id) { return document.getElementById(id); }
 // Linkshell marks in chat rows. Compact: the game's own [1] / [2] tag, so the two linkshells can't be
-// confused. Comfortable: a small pixel linkpearl, drawn like the game's inventory icon.
+// confused. Comfortable: a small pixel linkpearl in the linkshell's color, like the game's inventory icon.
 var PIX_PEARL = (function () {
-  // Drawn from the game's linkpearl item icon: iridescent, not tinted by channel (the name and bar carry the color).
-  var g = ["..oooo..", ".oCWHLo.", "oCWWHLLo", "oGCHLLVo", "oGCLLVVo", "oGCLVVBo", ".oGVVBo.", "..oooo.."], r = "";
-  var c = {o: "#4a3c4e", W: "#fffaf4", H: "#ffd6e0", C: "#e8c8b0", G: "#c9a878", L: "#c8b8d8", V: "#9c8cc0", B: "#7f86b8"};
+  // Drawn from the game's linkpearl icon: the body takes the linkshell's color (the line's channel color,
+  // including one you picked), with the icon's lighting on top: bright highlight top left, lit rim, darker lower right.
+  var g = ["..oooo..", ".oCWHLo.", "oCWWHLLo", "oGCHLLVo", "oGCLLVVo", "oGCLVVBo", ".oGVVBo.", "..oooo.."], base = "", over = "";
+  var tone = {W: 'fill="#fff" opacity=".9"', H: 'fill="#fff" opacity=".55"', C: 'fill="#fff" opacity=".28"', G: 'fill="#fff" opacity=".12"',
+              V: 'fill="#000" opacity=".22"', B: 'fill="#000" opacity=".42"', o: 'fill="#000" opacity=".62"'};
   g.forEach(function (row, y) { row.split("").forEach(function (k, x) {
-    if (c[k]) r += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + c[k] + '"/>';
+    if (k === ".") return;
+    base += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>';
+    if (tone[k]) over += '<rect x="' + x + '" y="' + y + '" width="1" height="1" ' + tone[k] + "/>";
   }); });
-  return '<svg class="i pix" width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">' + r + "</svg>";
+  return '<svg class="i pix" width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><g fill="currentColor">' + base + "</g>" + over + "</svg>";
 })();
 function rowIco(ch, size, compact) {
   if (ch === "ls1" || ch === "ls2") return compact ? '<span class="lstag">[' + ch.charAt(2) + "]</span>" : PIX_PEARL;
