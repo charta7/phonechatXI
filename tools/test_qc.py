@@ -51,6 +51,16 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     assert b'[auto-translate] then {{Ridill}}' in feed, feed[-200:]
     assert b'{Hello!} and {{Ridill}}' in feed, feed[-200:]
     print('PASS: auto-translate items stay items after an unparsed block')
+    # The addon's own ! command list must match the bridge's commands.json exactly.
+    cj=json.loads((ROOT/'bridge/commands.json').read_text())
+    bridge_cmds=set(cj['info'])|set(cj['action'])
+    import re as _re
+    src=(ROOT/'addon/phonechat/phonechat.lua').read_text(encoding='latin-1')
+    blk=_re.search(r"local SERVER = \{\}\s*for c in \(\[\[(.*?)\]\]\)", src, _re.S)
+    assert blk, 'SERVER list not found in phonechat.lua'
+    lua_cmds=set(blk.group(1).split())
+    assert lua_cmds==bridge_cmds, (sorted(bridge_cmds-lua_cmds), sorted(lua_cmds-bridge_cmds))
+    print('PASS: addon and bridge allow exactly the same ! commands')
     before = (path/'feed-Tester.log').read_bytes()
     for mode in (20, 21, 22, 23, 30, 999):
         line(mode, 'Tester hits the Goblin for 50 points of damage.')

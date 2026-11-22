@@ -41,8 +41,8 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
 - Search (1.1.2, not released yet): the magnifier on Chat or Tells finds a name or a word in every channel at once, with a chip per channel to narrow it down. Tap a result to go to that moment, then "Back to live". It only looks through chat the page has already loaded.
 - Catching up (1.1.2, not released yet): a "New" line marks where you left off. Long-press a line to copy it or search for who said it. Tap a mention in Alerts to go to it.
-- Linked items (`{{Suppanomimi}}`): long-press the line and pick "Search BG-Wiki for Suppanomimi" (a tap on the line replies, as usual). On a computer, click the item.
-- Web addresses in chat show as plain text and never open on a tap. Long-press the line for "Open <site>". It always asks first and shows the site name in bold with the full address under it, so a look-alike stands out. Only `http://`, `https://` and `www.` addresses are offered, never ones with a login in them.
+- Linked items (`{{Suppanomimi}}`): on a touch screen, long-press the line and pick "Search BG-Wiki for Suppanomimi" (a tap on the line replies, as usual). On a computer, click the item. Turn on BG-Wiki for all auto-translate in Settings to get the same search for every auto-translate phrase, up to 3 per line.
+- Web addresses in chat show as plain text and never open on a tap. On a touch screen, long-press the line for "Open <site>". It always asks first and shows the site name in bold with the full address under it, so a look-alike stands out. Only `http://`, `https://` and `www.` addresses are offered, never ones with a login in them.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
 - The LS message of the day is pinned above chat, with an × to hide it.
 - An Emotes tab with the stock emotes, plus dances, chair poses and job emotes.
@@ -75,7 +75,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - Split messages. One tap sends one line of 130 bytes at most, counted on the whole typed line (so about 127 letters on a linkshell, fewer for a tell or Japanese text), and no more than one line per second.
 - Read the combat log.
 - Read other addons. Lines they print are ignored, the ventures addon's included.
-- Go online. There's no cloud or outside server. The only outside pages are a BG-Wiki search for an item, and a web address from chat when you long-press it, pick Open and confirm.
+- Go online. There's no cloud or outside server. The only outside pages are a BG-Wiki search you pick from the hold menu (an item, or any auto-translate if you turn that on), and a web address from chat when you long-press it, pick Open and confirm.
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again against the same list right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
@@ -198,6 +198,7 @@ If your Deck or PC just got a new network address, you don't need a new link. Sc
 - Chat is held in the bridge's memory and is gone when it stops. On the way, it passes through a feed file, and lines you send pass through an outbox file, both in the phonechat folder. They're emptied the next time the bridge starts, and the addon also empties the feed file when it loads.
 - Tells are saved only if you turn on Remember tells: the last 50 lines per person, on the bridge, deleted with Clear saved tells. No other chat is saved.
 - Phone settings (views, colors, skins, favorites) are also saved on the bridge in `phone-settings.json`, so a new shortcut picks them up. No chat goes in that file. Your mention names, which tells you've read, who you last sent a tell to and the alerts you've cleared stay on the phone only. They're never sent to the bridge or put in an export file, so a new phone or shortcut needs your name typed again.
+- `/pchat debug` is for bug reports and is off by default. While it's on, the addon writes every line the game shows to `debug-<Character>.log` in the phonechat folder, including combat, linkshell and tells, so it can be checked later. That file is never sent anywhere, stops at 2 MB (plus one older copy), and is yours to delete. Turn debug off when you're done.
 - Anyone on your Wi-Fi with your link can read and send, so keep it to yourself.
 - Unsent text in the message box stays in the open page only. It's never saved or sent on its own.
 

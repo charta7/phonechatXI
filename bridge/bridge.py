@@ -869,11 +869,18 @@ def keep_previous_prefs(folder, build):
     try:
         src = os.path.join(folder, "phone-settings.json")
         if os.path.isfile(src):
-            shutil.copyfile(src, os.path.join(folder, PREFS_PREVIOUS))
+            # Copy to a temp file, check it reads back as settings, then swap it in. A copy that fails
+            # halfway can't leave the only earlier backup cut short.
+            dst = os.path.join(folder, PREFS_PREVIOUS)
+            tmp = dst + ".tmp"
+            shutil.copyfile(src, tmp)
+            with open(tmp, "r", encoding="utf-8") as f:
+                json.load(f)
+            os.replace(tmp, dst)
             copied = True
         with open(mark, "w", encoding="utf-8") as f:
             f.write(build)
-    except OSError:
+    except (OSError, ValueError):
         pass
     return copied
 

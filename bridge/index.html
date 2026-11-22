@@ -991,7 +991,11 @@ function cleanPrefs(o) {
   }
   else {
     var looks = {};
-    SKINS.forEach(function (k) { var v = cleanLook(o.looks[k]); if (Object.keys(v).length) looks[k] = v; });
+    SKINS.forEach(function (k) {
+      var v = cleanLook(o.looks[k]), d = lookDefault(k);
+      Object.keys(v).forEach(function (f) { if (JSON.stringify(v[f]) === JSON.stringify(d[f])) delete v[f]; });   // not a change
+      if (Object.keys(v).length) looks[k] = v;
+    });
     o.looks = looks;
     lookLoad(o);
   }
@@ -1036,7 +1040,9 @@ function syncPrefs() {
   }).catch(function () { prefsReady = true; });
 }
 // Back to how a new install starts. Mention names and tell read marks stay (they never leave this phone anyway).
-function resetPrefs() { adopt({savedAt: Date.now()}); save(); toast("Settings reset."); }
+// Scrollback lives on the bridge too; a reset, restore or import has to tell it, or it keeps the old value.
+function pushScrollback() { api("/api/settings", {scrollback: S.scrollback || 1}).then(function (j) { if (!j.ok) toast(j.error || "Could not change scrollback."); }).catch(function () { toast("The bridge didn't answer."); }); }
+function resetPrefs() { adopt({savedAt: Date.now()}); save(); pushScrollback(); toast("Settings reset."); }
 function askReset(after) {
   openSheet('<div class="grab"></div><div class="shead"><div class="sect">RESET SETTINGS?</div></div><div class="sfoot">Views, channels, colors, look, emoticons and starred commands go back to how a new install starts. Your mention names stay. Saved tells and your phone link aren\'t touched.</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok" style="background:var(--bad)">Reset</button></div>', function (e) {
     var b = e.target.closest("[data-sb]");
@@ -1055,7 +1061,7 @@ function askRestore() {
       var o = j && j.prefs;
       if (!o || typeof o !== "object" || !o.views) { toast("No earlier copy found."); return; }
       o.savedAt = Date.now();
-      adopt(o); save(); toast("Settings restored.");
+      adopt(o); save(); pushScrollback(); toast("Settings restored.");
     }).catch(function () { toast("The bridge didn't answer."); });
   });
 }
@@ -1074,7 +1080,7 @@ function importPrefs(file) {
       var obj = JSON.parse(r.result);
       if (!obj || typeof obj !== "object" || !obj.views) throw new Error("bad");
       obj.savedAt = Date.now();
-      adopt(obj); save(); toast("Settings imported.");
+      adopt(obj); save(); pushScrollback(); toast("Settings imported.");
     } catch (e) { toast("That file isn't a phonechatXI settings file."); }
   };
   r.readAsText(file);
@@ -1170,8 +1176,11 @@ function api(path, body) {
 }
 var NO_ANSWER = "The bridge didn't answer. Check the chat before you send it again.";
 function getJSON(path) {
-  return fetch(path + (path.indexOf("?") < 0 ? "?" : "&") + "t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}})
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
+  var ctl = window.AbortController ? new AbortController() : null;
+  var timer = ctl ? setTimeout(function () { ctl.abort(); }, API_TIMEOUT_MS) : 0;
+  return fetch(path + (path.indexOf("?") < 0 ? "?" : "&") + "t=" + encodeURIComponent(TOKEN), {headers: {"X-Token": TOKEN}, signal: ctl ? ctl.signal : undefined})
+    .then(function (r) { clearTimeout(timer); if (!r.ok) throw new Error(r.status); return r.json(); },
+          function (e) { clearTimeout(timer); throw e; });
 }
 // After an update the bridge serves a new page, but an open page (a Home Screen shortcut can stay open for days)
 // keeps running the old one. The first build this page hears is its own; a different one later means "reload".
@@ -1429,7 +1438,7 @@ function isCallOnly(m) { return false; }   // roll-call folding removed in 1.1
 // "New" line: newAfter is when you last looked. The line goes above the first message from someone else
 // that came in after that, as long as there's older chat above it to set it apart.
 function isNewFor(m, newAfter) { return newAfter > 0 && m.ts > newAfter && !m.pending && m.dir !== "out" && CHAT_CH.indexOf(m.ch) >= 0; }
-function blocks(items, ctx, newAfter) {
+function blocks(items, ctx, newAfter, trimmed) {
   items = items.slice().sort(function (a, b) { return (a.ts - b.ts) || ((a.id || 1e12) - (b.id || 1e12)); });
   var out = [], last = null, prevTs = 0, newDone = !(newAfter > 0);
   for (var i = 0; i < items.length; i++) {
@@ -1438,7 +1447,7 @@ function blocks(items, ctx, newAfter) {
     prevTs = m.ts;
     if (!newDone && isNewFor(m, newAfter)) {
       newDone = true;
-      if (i > 0) { out.push({type: "div", text: "New", cls: "newdiv"}); last = null; }
+      if (i > 0 || trimmed) { out.push({type: "div", text: "New", cls: "newdiv"}); last = null; }   // trimmed: older lines are above, just not shown
     }
     if (m.ch === "zone") { out.push({type: "div", text: m.body, cls: "zone"}); last = null; continue; }
     if (m.ch === "system") { out.push({type: "note", m: m}); last = null; continue; }
@@ -1573,7 +1582,7 @@ function renderPane(id, items, ctx, emptyText) {
   }
   if (!shown) shown = items.slice(-cap);
   var mode = ctx === "thread" ? "thread" : (isCompact() ? "compact" : ctx);
-  var html = shown.length ? renderBlocks(blocks(shown, mode, pane._win == null ? pane._newAfter : 0), mode) : '<div class="empty">' + emptyText + "</div>";
+  var html = shown.length ? renderBlocks(blocks(shown, mode, pane._win == null ? pane._newAfter : 0, shown.length < items.length), mode) : '<div class="empty">' + emptyText + "</div>";
   if (html === pane._html && !first && !goto) {   // nothing changed: leave the DOM (and the scroll) alone
     pane._count = items.length;
     if (pane._win != null) liveJump(pane, id, items);
@@ -2290,13 +2299,15 @@ function openThread(peer, line) {
 // the chat panes draw from). Nothing is asked of the bridge or the game, and nothing is sent or saved.
 // ------------------------------------------------------------------------------------------
 var FIND_MAX = 100, findQ = "", findCh = "";
+// A channel switched off in every view (an older version's Settings switch carries over that way) isn't searched.
+function searchable(c) { return c === "tell" || (S.master[c] !== false && S.views.some(function (v) { return v.ch[c] !== false; })); }
 function findHits(q, list, max, only) {
   q = (q || "").trim().toLowerCase();
   var hits = [], more = false, counts = {};
   if (q.length < 2) return {hits: hits, more: more, counts: counts};
   for (var i = list.length - 1; i >= 0; i--) {   // newest first
     var m = list[i];
-    if (CHAT_CH.indexOf(m.ch) < 0 || !S.master[m.ch]) continue;
+    if (CHAT_CH.indexOf(m.ch) < 0 || !searchable(m.ch)) continue;
     var at = (m.body || "").toLowerCase().indexOf(q);
     var who = m.ch === "tell" || m.dir !== "out" ? (m.name || "") : "";
     if (at < 0 && who.toLowerCase().indexOf(q) < 0) continue;
@@ -2365,7 +2376,7 @@ $("findlist").addEventListener("click", function (e) {
 // Items in a line for the long-press menu. With "BG-Wiki for all auto-translate" on, every {Phrase} counts too:
 // the game doesn't say whether a phrase is an item, a skill, a place or just words, so they're all treated the same.
 function lineItems(b) {
-  var seen = {}, out = [], re = S.wikiAll ? /\{\{?([^{}<>\n]{1,40})\}?\}/g : /\{\{([^{}<>\n]{1,40})\}\}/g, m;
+  var seen = {}, out = [], re = S.wikiAll ? /\{\{?([^{}<>\n]{1,120})\}?\}/g : /\{\{([^{}<>\n]{1,120})\}\}/g, m;
   while ((m = re.exec(String(b || ""))) && out.length < 3) { var n = m[1].trim(); if (n && !seen[n.toLowerCase()]) { seen[n.toLowerCase()] = 1; out.push(n); } }
   return out;
 }
@@ -2374,7 +2385,12 @@ function lineItems(b) {
 function lineLinks(b) {
   var out = [], seen = {}, re = /\b(?:https?:\/\/|www\.)[^\s<>"'{}\[\]`]{2,300}/gi, m;
   while ((m = re.exec(String(b || ""))) && out.length < 3) {
-    var raw = m[0].replace(/[.,;:!?)\]]+$/, ""), u;
+    var raw = m[0], u, t;
+    // Drop trailing punctuation, but keep a ")" that closes a "(" inside the address.
+    while ((t = /[.,;:!?)\]]$/.exec(raw))) {
+      if (t[0] === ")" && (raw.split("(").length - 1) >= (raw.split(")").length - 1)) break;
+      raw = raw.slice(0, -1);
+    }
     try { u = new URL(/^www\./i.test(raw) ? "https://" + raw : raw); } catch (e) { continue; }
     if ((u.protocol !== "https:" && u.protocol !== "http:") || !u.hostname || u.username || u.password || u.hostname.indexOf(".") < 0) continue;
     if (seen[u.href]) continue;
@@ -2596,7 +2612,12 @@ function renderAlerts() {
 }
 // Keyed by time and text, not the bridge's message number: that number starts over each time the bridge starts,
 // so a hidden card could otherwise hide a different, new one later.
-function noticeKey(m) { return m.ts + ":" + String(m.body || "").slice(0, 40); }
+// Only a hash is kept (no message text), from the channel, time and the whole message.
+function noticeKey(m) {
+  var text = (m.ch || "") + "|" + m.ts + "|" + String(m.body || ""), a = 2166136261, b = 5381;
+  for (var i = 0; i < text.length; i++) { a = Math.imul(a ^ text.charCodeAt(i), 16777619); b = Math.imul(b, 33) ^ text.charCodeAt(i); }
+  return "n:" + text.length + ":" + (a >>> 0).toString(16) + ":" + (b >>> 0).toString(16);
+}
 // A linkshell with no MOTD prints nothing when you switch to it, so the old one would stay pinned.
 // The x hides that MOTD (remembered on the phone); the same MOTD re-sent after zoning stays hidden,
 // and a different one shows again.
@@ -2709,7 +2730,7 @@ function renderSettings() {
     srow("phonechatXI " + esc(status.version || ""), "Made by Charta", "") +
     srow("Build", esc(status.build || "Unknown"), "") +
     srow("Yunas skin", "Inspired by Yunas's YunaUI (github.com/YunasXI/yunaui). Unofficial, so send any issues to Charta, <b>not Yunas</b>. It copies the look only, no YunaUI code or images. Chat text in this skin uses TeX Gyre Adventor (GUST Font License).", "") +
-    srow("Your data", "Your chat stays on your home network. The only outside page it opens is BG-Wiki, when you tap an item.", "") +
+    srow("Your data", "Your chat stays on your home network. It only opens an outside page when you ask: a BG-Wiki search from the hold menu (items, or every auto-translate if you turn that on), or a web address from chat after you confirm it.", "") +
     srow("Something wrong?", "Copies details for a bug report, without your phone link or any chat.", '<button class="linkbtn" data-act="debug">Copy debug info</button>') +
     '<div style="height:28px"></div>';
   $("settings").innerHTML = h;
@@ -2834,7 +2855,9 @@ function go(name) {
   if (!el) return;
   if (name === "settings") refreshStatus();
   stack.push(name);
-  el.style.zIndex = (el.classList.contains("tabs") ? 5 : 20) + stack.length;
+  var top = 0;   // above whatever is open now, so Search from a tell thread isn't hidden behind it
+  document.querySelectorAll('[id^="scr-"].open').forEach(function (o) { if (o !== el) top = Math.max(top, +o.style.zIndex || 0); });
+  el.style.zIndex = Math.max((el.classList.contains("tabs") ? 5 : 20) + stack.length, top + 1);
   el.classList.add("open");
   try { history.pushState({s: stack.length}, ""); } catch (e) { histOK = false; }
   render();

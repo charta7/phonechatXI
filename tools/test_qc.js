@@ -58,14 +58,17 @@ console.log('PASS: dark message colors lighten; white is preserved');
 
 // Search: every channel at once, newest first, hidden channels left out, capped; and the pane window around a hit.
 {
-  const f={CHAT_CH:['ls1','ls2','party','tell','say'],S:{master:{ls1:true,ls2:false,party:true,tell:true,say:true}},esc:s=>String(s).replace(/</g,'&lt;')};
-  vm.createContext(f); vm.runInContext(extract('function findHits(', 'function findWho('),f);
+  const f={CHAT_CH:['ls1','ls2','party','tell','say'],S:{master:{ls1:true,ls2:false,party:true,tell:true,say:true},views:[{ch:{ls1:true,ls2:true,party:true,tell:true,say:true}}]},esc:s=>String(s).replace(/</g,'&lt;')};
+  vm.createContext(f); vm.runInContext(extract('function searchable(', 'function findWho('),f);
   const L=[{id:1,ch:'ls1',name:'Wren',dir:'in',body:'anyone seen a Kraken Club?'},{id:2,ch:'system',body:'kraken'},{id:3,ch:'ls2',name:'A',dir:'in',body:'kraken'},
     {id:4,ch:'tell',name:'Kraken',dir:'out',body:'hello'},{id:5,ch:'party',name:'Me',dir:'out',body:'no match'},{id:6,ch:'party',name:'Bo',dir:'in',body:'KRAKEN pls'}];
   let r=f.findHits(' kraken ',L,10); assert.deepEqual(r.hits.map(h=>h.m.id),[6,4,1]); assert.equal(r.hits[0].at,0); assert.equal(r.hits[1].at,-1); assert.equal(r.more,false);
   assert.equal(f.findHits('k',L,10).hits.length,0);
   r=f.findHits('kraken',L,2); assert.equal(r.hits.length,2); assert.equal(r.more,true);
   assert.equal(f.findHits('me',L,10).hits.length,0);   // your own name on your own lines doesn't count
+  f.S.views=[{ch:{ls1:true,party:false,tell:false}},{ch:{ls1:true,party:false}}];   // Party off in every view: not searched; tells always are
+  assert.deepEqual(f.findHits('kraken',L,10).hits.map(h=>h.m.id),[4,1]);
+  f.S.views=[{ch:{ls1:true,ls2:true,party:true,tell:true,say:true}}];
   assert.equal(f.findSnippet('a <b> kraken',6,6),'a &lt;b> <mark class="fh">kraken</mark>');
   console.log('PASS: search finds across channels newest first, skips hidden channels and system lines, caps results, escapes snippets');
   const w={}; vm.createContext(w); vm.runInContext(extract('function paneWindow(', 'function leaveWindow('),w);
@@ -102,6 +105,8 @@ console.log('PASS: dark message colors lighten; white is preserved');
   const r={}; vm.createContext(r); vm.runInContext(extract('function noticeKey(', '// A linkshell with no MOTD'),r);
   assert.equal(r.noticeKey({id:5,ts:100,body:'Your Ridill has sold.'}), r.noticeKey({id:9,ts:100,body:'Your Ridill has sold.'}));
   assert.notEqual(r.noticeKey({id:5,ts:100,body:'Your Ridill has sold.'}), r.noticeKey({id:5,ts:200,body:'Your Fire Crystal has sold.'}));
+  assert.ok(!r.noticeKey({ts:100,body:'Your Ridill has sold.'}).includes('Ridill'));   // no message text kept
+  assert.notEqual(r.noticeKey({ch:'sale',ts:100,body:'x'.repeat(40)+'A'}), r.noticeKey({ch:'sale',ts:100,body:'x'.repeat(40)+'B'}));
   console.log('PASS: hidden Alerts cards stay matched to the same message across bridge restarts');
 }
 
@@ -145,6 +150,7 @@ console.log('PASS: dark message colors lighten; white is preserved');
   delete m.looks.onyx; s.lookLoad(m); assert.equal(m.font,'readable'); assert.deepEqual(m.colors,{});
   const again=s.merged(JSON.parse(JSON.stringify(m))); assert.deepEqual(again.looks,{game:{channelText:false}}); assert.equal(again.skin,'onyx');
   const gc=s.merged({skin:'game',looks:{game:{density:'comfortable'}}}); assert.deepEqual(gc.looks,{}); assert.equal(gc.density,'compact');
+  assert.deepEqual(s.merged({skin:'classic',looks:{classic:{times:'column',font:'classic'},game:{density:'compact',times:'inline'}}}).looks,{classic:{font:'classic'}});   // shipped values aren't edits
   const g=s.merged({skin:'game',size:'L'}); assert.deepEqual(g.looks,{}); assert.equal(g.density,'compact'); assert.equal(g.size,'L');
   assert.deepEqual(s.merged({skin:'classic',looks:{classic:{times:'dividers'}}}).looks,{classic:{times:'inline'}});
   const bad=s.merged({skin:'game',looks:{game:{names:'x',times:'off',colors:{ls1:'red'}},nope:{font:'classic'}}}); assert.deepEqual(bad.looks,{game:{times:'off'}});
@@ -165,8 +171,8 @@ console.log('PASS: dark message colors lighten; white is preserved');
 }
 // Search chips: counts cover every match; picking a channel narrows the list.
 {
-  const f={CHAT_CH:['ls1','party','tell'],S:{master:{ls1:true,party:true,tell:true}}};
-  vm.createContext(f); vm.runInContext(extract('function findHits(', 'function findSnippet('),f);
+  const f={CHAT_CH:['ls1','party','tell'],S:{master:{ls1:true,party:true,tell:true},views:[{ch:{ls1:true,party:true,tell:true}}]}};
+  vm.createContext(f); vm.runInContext(extract('function searchable(', 'function findSnippet('),f);
   const L=[{id:1,ch:'ls1',name:'A',dir:'in',body:'kraken'},{id:2,ch:'party',name:'B',dir:'in',body:'kraken'},{id:3,ch:'party',name:'C',dir:'in',body:'Kraken'}];
   let r=f.findHits('kraken',L,1,'party'); assert.equal(r.counts.ls1,1); assert.equal(r.counts.party,2); assert.deepEqual(r.hits.map(h=>h.m.id),[3]); assert.equal(r.more,true);
   r=f.findHits('kraken',L,10,''); assert.equal(r.hits.length,3);
@@ -203,4 +209,13 @@ console.log('PASS: dark message colors lighten; white is preserved');
   const code=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join('\n');
   new vm.Script(code);
   console.log('PASS: page script parses');
+}
+
+// Web addresses: a ")" that closes a "(" in the address stays; trailing punctuation goes.
+{
+  const r={URL}; vm.createContext(r); vm.runInContext(extract('function lineLinks(', 'function plainBody('),r);
+  assert.equal(r.lineLinks('see https://en.wikipedia.org/wiki/Final_Fantasy_(video_game).')[0].href,'https://en.wikipedia.org/wiki/Final_Fantasy_(video_game)');
+  assert.equal(r.lineLinks('(https://www.bg-wiki.com/ffxi/Ridill)')[0].href,'https://www.bg-wiki.com/ffxi/Ridill');
+  assert.equal(r.lineLinks('go to www.bg-wiki.com!')[0].href,'https://www.bg-wiki.com/');
+  console.log('PASS: web addresses keep a closing bracket that belongs to them');
 }

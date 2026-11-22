@@ -4,7 +4,7 @@ Versioning: a patch (like 1.1.1) is fixes, looks, phone-side changes and new `!`
 
 ## 1.1.2 (in progress, not released)
 
-Phone-side changes and fixes. It reads nothing new from the game and sends the same lines as 1.1.1. The addon changes only its version number.
+Mostly phone-side changes and fixes. Three things change in the addon or what it sends: Auction House sales now reach the phone (from the same server notice messages it already reads; no new message mode), the Server tab can send one new command from the server's own list (`!bond`), and auto-translate is read one block at a time so items keep their links. Everything else it reads and sends is the same as 1.1.1.
 
 ### Search
 - A magnifier on the Chat and Tells pages opens Search. Type a name or a word (2 letters or more) and every match shows in one list, newest first, across all your channels: which channel, who said it, when, and the line with the match in gold. Channels you've hidden everywhere in Settings are left out. It shows the newest 100 matches.
@@ -56,7 +56,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 
 ### Fixes
 - On iPhone, the Home Screen app's status bar now matches the skin. It stayed in Midnight's color on Onyx, Yunas and Classic. It is also set from your saved skin as the app opens, so it no longer starts in the wrong color.
-- A request to the bridge that gets no answer now gives up after 10 seconds. Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
+- A request to the bridge that gets no answer now gives up after 10 seconds (sending, and with this release reading settings too). Before, one hung request could leave sending stuck until you reloaded the page. The message says to check the chat before sending again, because the bridge may have got the line.
 - Retry keeps the failed line on screen until the bridge accepts the new send. Before, it removed the line first, so if the retry failed too, the text was gone.
 - Changing Save tells or Scrollback, or clearing saved tells, now says so if the bridge doesn't answer.
 - An auto-translate item that follows one the addon can't read keeps its BG-Wiki link (each auto-translate is now matched to its own type).
@@ -68,6 +68,16 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - A card you hid in Alerts (AH sale, bazaar visit, notice) could hide a different, new card after the bridge restarted. Hidden cards are now matched by their time and text, and hidden ones no longer light up the Alerts badge.
 - The Links filter shows exactly the lines whose addresses you can open from the hold menu.
 - Copy text strips the braces from long item names too.
+- Hidden Alerts cards are remembered as a short code made from the message, not its text, so no notice text is kept on the phone.
+- Search no longer finds lines from a channel you've switched off in every view.
+- "Find <name> in chat" from a tell conversation opens Search on top of it, not behind it.
+- Resetting, restoring or importing settings also sets the bridge's Scrollback to match.
+- The "New" line still shows when everything on screen is new and older lines are further up.
+- A web address ending in a bracket that's part of it (like a Wikipedia page) keeps that bracket.
+- The hold menu offers BG-Wiki for long item names too, same as chat.
+- Reading settings and restoring a backup give up after 10 seconds too, like sending.
+- Importing settings that match a skin's defaults no longer marks the skin as changed.
+- The bridge writes its settings backup to a temp file and checks it before replacing the old one, so a failed copy can't leave a broken backup.
 
 ## 1.1.1 (November 2026)
 
