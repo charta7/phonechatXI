@@ -97,6 +97,13 @@ console.log('PASS: dark message colors lighten; white is preserved');
   assert.equal(r.rowIco('party',13,true),'ICO:party');
   console.log('PASS: linkshell marks are [1]/[2] in compact and the linkpearl in comfortable');
 }
+// Hidden Alerts cards: the key ignores the bridge's message number, which starts over when the bridge restarts.
+{
+  const r={}; vm.createContext(r); vm.runInContext(extract('function noticeKey(', '// A linkshell with no MOTD'),r);
+  assert.equal(r.noticeKey({id:5,ts:100,body:'Your Ridill has sold.'}), r.noticeKey({id:9,ts:100,body:'Your Ridill has sold.'}));
+  assert.notEqual(r.noticeKey({id:5,ts:100,body:'Your Ridill has sold.'}), r.noticeKey({id:5,ts:200,body:'Your Fire Crystal has sold.'}));
+  console.log('PASS: hidden Alerts cards stay matched to the same message across bridge restarts');
+}
 
 // Update note: shown once per new build on a phone that already had settings; never on a new phone or with storage blocked.
 {

@@ -1315,7 +1315,6 @@ document.addEventListener("visibilitychange", function () {
 // ------------------------------------------------------------------------------------------
 // Message text: escape, calls, links
 // ------------------------------------------------------------------------------------------
-var URL_RE = /\b((?:https?:\/\/|www\.)[^\s<>"']+[^\s<>"'.,;:!?)\]])/gi;
 var CALL_RE = /&lt;\s*call\s*(\d{1,2})\s*&gt;/gi;
 function fmt(body) {
   var h = esc(body);
@@ -1336,7 +1335,7 @@ function fmt(body) {
   if (watchRe) h = markWatch(h);
   return h;
 }
-function hasLink(m) { URL_RE.lastIndex = 0; return URL_RE.test(m.body || ""); }
+function hasLink(m) { return lineLinks(m.body).length > 0; }   // same rules as the long-press menu
 
 // ------------------------------------------------------------------------------------------
 // Which messages a screen shows
@@ -2398,7 +2397,7 @@ function askOpenLink(l) {
     if (b.dataset.sb === "ok") window.open(l.href, "_blank", "noopener,noreferrer");
   });
 }
-function plainBody(b) { return String(b || "").replace(/\{\{([^{}]{1,40})\}\}/g, "$1"); }
+function plainBody(b) { return String(b || "").replace(/\{\{([^{}]{1,120})\}\}/g, "$1"); }
 function copyText(t, quiet) {
   var ok = false, ta = document.createElement("textarea");
   ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
@@ -2588,14 +2587,16 @@ function renderAlerts() {
   msgs.forEach(function (m) {
     if (m.ts <= since) return;
     if (m._men) unseenMen++;
-    else if (m.ch === "venture" || m.ch === "server" || m.ch === "sale" || (S.bazaar && m.ch === "bazaar")) other = true;
+    else if (m.ch === "venture" || ((m.ch === "server" || m.ch === "sale" || (S.bazaar && m.ch === "bazaar")) && !hid[noticeKey(m)])) other = true;
   });
   var bd = $("bdg-alerts");
   bd.hidden = curTab === "alerts" || !(unseenMen || other);
   bd.textContent = unseenMen ? String(Math.min(unseenMen, 99)) : "!";
   if (curTab === "alerts") S.seenAlerts = nowSec();
 }
-function noticeKey(m) { return String(m.id || (m.ts + ":" + (m.body || "").slice(0, 40))); }
+// Keyed by time and text, not the bridge's message number: that number starts over each time the bridge starts,
+// so a hidden card could otherwise hide a different, new one later.
+function noticeKey(m) { return m.ts + ":" + String(m.body || "").slice(0, 40); }
 // A linkshell with no MOTD prints nothing when you switch to it, so the old one would stay pinned.
 // The x hides that MOTD (remembered on the phone); the same MOTD re-sent after zoning stays hidden,
 // and a different one shows again.

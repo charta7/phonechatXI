@@ -65,6 +65,9 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - Switching chat views no longer fades in lines as if they were new, and zone or system lines no longer make the line above them fade.
 - A watched name that matches an HTML code word (like "amp") no longer garbles messages with & or quotes in them.
 - The bridge's local setup page escapes the folder path it shows.
+- A card you hid in Alerts (AH sale, bazaar visit, notice) could hide a different, new card after the bridge restarted. Hidden cards are now matched by their time and text, and hidden ones no longer light up the Alerts badge.
+- The Links filter shows exactly the lines whose addresses you can open from the hold menu.
+- Copy text strips the braces from long item names too.
 
 ## 1.1.1 (November 2026)
 
