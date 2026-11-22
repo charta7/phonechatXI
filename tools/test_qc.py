@@ -61,6 +61,15 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     lua_cmds=set(blk.group(1).split())
     assert lua_cmds==bridge_cmds, (sorted(bridge_cmds-lua_cmds), sorted(lua_cmds-bridge_cmds))
     print('PASS: addon and bridge allow exactly the same ! commands')
+    # Every ! command needs the phone's confirmation, info commands included; emotes don't.
+    bspec=importlib.util.spec_from_file_location('bridge_mod',ROOT/'bridge/bridge.py'); bm=importlib.util.module_from_spec(bspec); bspec.loader.exec_module(bm)
+    cmds=bm.Commands(str(ROOT/'bridge/commands.json'))
+    for name in ('!bond','!moolix'):
+        try: cmds.check(name, False); raise AssertionError(name+' sent without confirmation')
+        except bm.SendError as e: assert str(e)=='needs_confirm', e
+        assert cmds.check(name, True)[0]=='/say '+name
+    assert cmds.check('/wave', False)[0]=='/wave'
+    print('PASS: every ! command asks first, typed or tapped; emotes send directly')
     before = (path/'feed-Tester.log').read_bytes()
     for mode in (20, 21, 22, 23, 30, 999):
         line(mode, 'Tester hits the Goblin for 50 points of damage.')

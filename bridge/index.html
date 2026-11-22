@@ -1955,7 +1955,7 @@ var sending = false;
 function submit(ctx, inp) {
   var text = (inp.value || "").trim();
   if (!text || sending) return;
-  if (ctx === "cmd") { sendCommand(text, false, inp); return; }
+  if (ctx === "cmd") { sendCommand(text, false, inp); return; }   // the bridge answers "confirm first", which opens the same sheet
   var t = compTarget(ctx);
   if (t.ch === "tell" && !t.peer) { pickPeer(function (peer) { S.target = {ch: "tell", peer: peer}; save(); updateComposers(); }); return; }
   if (/^[\/!]/.test(text) && ["/", "!", "!!", "!?"].indexOf(text) < 0) { toast("Emotes and ! commands have their own tabs."); return; }
@@ -2016,15 +2016,7 @@ function sendCommand(text, confirmed, inp) {
     schedule();
   }).catch(function () { sending = false; toast(NO_ANSWER); });
 }
-function confirmCommand(text, inp) {
-  var name = text.split(/\s+/)[0].slice(1).toLowerCase();
-  openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(text) + '</div><div class="sfoot">' + esc(commands.action[name] || "This command changes something in the game.") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
-    var b = e.target.closest("[data-sb]");
-    if (!b) return;
-    closeSheet();
-    if (b.dataset.sb === "ok") sendCommand(text, true, inp);
-  });
-}
+function confirmCommand(text, inp) { askSend(text, inp); }   // typed commands get the same sheet as the list
 // Emoji can't show in game (the bridge drops them), so a few common ones turn into the classic
 // text emoticons as you type. You see the result in the box before you send. Phone-side only.
 var EMO = [
@@ -2156,14 +2148,14 @@ function renderCmdList() {
     (info ? '<div class="sect">INFO</div>' + info : "") + (act ? '<div class="sect">ACTIONS</div>' + act : "") +
     (!favs && !info && !act ? '<div class="empty">No match</div>' : '<div class="sfoot">From BG-Wiki\'s CatsEyeXI Commands page and the server\'s patch notes' + (commands.modes_asof ? ", as of " + esc(commands.modes_asof) : "") + ". Tap one to send it. Star it to keep it at the bottom." + (hasModes() ? " Icons mark commands that only work in some game modes. The filter only tidies this list; you can still type any command." : "") + "</div>");
 }
-// Tapping a command always asks first. One tap on Send = one command.
-function askSend(t) {
+// Every command asks first, tapped from the list or typed. One tap on Send = one command.
+function askSend(t, inp) {
   var n = cmdName(t), act = !!commands.action[n];
   openSheet('<div class="grab"></div><div class="shead"><div class="sect">SEND THIS COMMAND?</div></div><div style="padding:6px;font-family:var(--mono);font-size:17px;color:var(--gold)">' + esc(t) + '</div><div class="sfoot">' + esc(cmdDesc(n, t) || "CatsEye server command.") + (act ? (/[.!?]$/.test(cmdDesc(n, t)) ? "" : ".") + " This one changes something in the game." : "") + '</div><div class="sbtns"><button class="sec" data-sb="x">Cancel</button><button class="pri" data-sb="ok">Send</button></div>', function (e) {
     var b = e.target.closest("[data-sb]");
     if (!b) return;
     closeSheet();
-    if (b.dataset.sb === "ok") sendCommand(t, act, null);
+    if (b.dataset.sb === "ok") sendCommand(t, true, inp || null);
   });
 }
 $("cmdsearch").addEventListener("input", renderCmdList);

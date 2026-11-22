@@ -307,7 +307,7 @@ class Commands:
             raise SendError("Blocked: not an allowed command.")
         if not ARGS_RE.fullmatch(args):
             raise SendError("Blocked: arguments can only use letters, numbers, spaces, _ and -.")
-        if name in self.action and not confirmed:
+        if not confirmed:   # every ! command, typed or tapped, is confirmed on the phone first
             raise SendError("needs_confirm")
         return "/say !" + name + ((" " + args) if args else ""), name in self.action
 
