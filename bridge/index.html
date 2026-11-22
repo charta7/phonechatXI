@@ -154,6 +154,9 @@ body.compact .pane .inner{gap:5px}
 .cl .t{flex:none;color:var(--mute);font-size:11.5px;padding-top:3px;width:36px;white-space:nowrap}
 .clock-12 .cl .t{width:46px}
 .cl .t.rep{visibility:hidden}
+.lstag{color:var(--c);font-weight:800;font-size:.86em;font-variant-numeric:tabular-nums;margin-right:5px;flex:none}
+.pix{color:var(--c);flex:none}
+body.skin-game .lstag{font-weight:inherit;font-size:1em;margin-right:0}
 body:not(.times-col) .cl .t{display:none}
 .ti{float:right;margin:2px 0 0 10px;font-size:10.5px;color:var(--mute);font-weight:400;font-style:normal;white-space:nowrap}
 .div.zone{color:var(--soft);font-weight:700;letter-spacing:.6px;font-size:12px}
@@ -798,6 +801,21 @@ function esc(s) {
   });
 }
 function $(id) { return document.getElementById(id); }
+// Linkshell marks in chat rows. Compact: the game's own [1] / [2] tag, so the two linkshells can't be
+// confused. Comfortable: a small pixel linkpearl, drawn like the game's inventory icon.
+var PIX_PEARL = (function () {
+  // Drawn from the game's linkpearl item icon: iridescent, not tinted by channel (the name and bar carry the color).
+  var g = ["..oooo..", ".oCWHLo.", "oCWWHLLo", "oGCHLLVo", "oGCLLVVo", "oGCLVVBo", ".oGVVBo.", "..oooo.."], r = "";
+  var c = {o: "#4a3c4e", W: "#fffaf4", H: "#ffd6e0", C: "#e8c8b0", G: "#c9a878", L: "#c8b8d8", V: "#9c8cc0", B: "#7f86b8"};
+  g.forEach(function (row, y) { row.split("").forEach(function (k, x) {
+    if (c[k]) r += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + c[k] + '"/>';
+  }); });
+  return '<svg class="i pix" width="16" height="16" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">' + r + "</svg>";
+})();
+function rowIco(ch, size, compact) {
+  if (ch === "ls1" || ch === "ls2") return compact ? '<span class="lstag">[' + ch.charAt(2) + "]</span>" : PIX_PEARL;
+  return ico((CH[ch] || {}).icon, size);
+}
 function ico(name, size, style) {
   // The Emotes tab and the send picker use a "/bow" tag ("the slash actions live here"); chat uses the waving figure.
   if (name === "emote-tag") return '<span class="i emo-tag" style="font-size:' + Math.max(9, Math.round((size || 14) * 0.55)) + 'px' + (style ? ";" + style : "") + '">/bow</span>';
@@ -1457,9 +1475,9 @@ function runHead(b, ctx) {
   if (b.ch === "tell" && ctx !== "thread") label = b.dir === "out" ? "&gt;&gt;" + esc(whoName) : esc(whoName) + "&gt;&gt;";
   else if (S.skin === "game" && b.who) label = b.ch === "ls1" || b.ch === "ls2" ? "&lt;" + esc(b.who) + "&gt;" : b.ch === "party" ? "(" + esc(b.who) + ")" : label;
   if (ctx === "thread" && b.dir === "out") {
-    return '<div class="rhead"><span class="t">' + (S.times !== "off" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + ico(c.icon) + "</div>";
+    return '<div class="rhead"><span class="t">' + (S.times !== "off" ? extra.replace(/^ &middot; /, "") + " &middot; " + hhmm(m.ts) : extra.replace(/^ &middot; /, "")) + '</span><b>' + esc(b.who) + "</b>" + rowIco(b.ch, 14, false) + "</div>";
   }
-  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + ico(c.icon) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + (S.times !== "off" ? hhmm(m.ts) + extra : extra.replace(/^ &middot; /, "")) + "</span></div>";
+  return '<div class="rhead"><button class="chico" data-focus="' + b.ch + '" aria-label="Open ' + esc((CH[b.ch] || {}).full || "") + '">' + rowIco(b.ch, 14, false) + '</button><button class="who"' + nameTap + "><b>" + label + '</b></button><span class="t">' + (S.times !== "off" ? hhmm(m.ts) + extra : extra.replace(/^ &middot; /, "")) + "</span></div>";
 }
 function replyAttr(m) {
   var peer = m.ch === "tell" ? (m.pending ? m.peer : m.name) : "";
@@ -1491,7 +1509,7 @@ function renderBlocks(list, ctx) {
       var pills = b.grp.map(function (g) { return '<span class="callp">' + g.calls.join(" ") + "</span>"; }).join("");
       var head = ctx === "compact" ? "" : runHead({ms: [b.m], ch: b.m.ch, who: b.m.name, dir: b.m.dir}, ctx);
       if (ctx === "compact") {
-        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="' + (tc = tcls(b.m.ts)) + '">' + hhmm(b.m.ts) + '</span><div class="ln">' + inl(b.m.ts) + ico(CH[b.m.ch].icon, 13) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
+        html.push('<div class="cl run call" style="--c:' + col + '"><div class="rail"></div><span class="' + (tc = tcls(b.m.ts)) + '">' + hhmm(b.m.ts) + '</span><div class="ln">' + inl(b.m.ts) + rowIco(b.m.ch, 13, true) + "<b>" + compactPrefix(b.m) + '</b> <span class="lbl" style="color:var(--mute)">roll call</span> ' + pills + "</div></div>");
       } else {
         html.push('<div class="run call" style="--c:' + col + '"><div class="rail"></div><div class="rbody">' + head + '<div class="burst"><span class="lbl">roll call</span>' + pills + "</div></div></div>");
       }
@@ -1501,7 +1519,7 @@ function renderBlocks(list, ctx) {
       b.ms.forEach(function (m) {
         var pre = compactPrefix(m);
         var cw = m.ch === "tell" ? (m.pending ? m.peer : m.name) : (m.dir === "out" || m.pending || m.ch === "emote" ? "" : (m.name || ""));
-        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="' + (tc = tcls(m.ts)) + '">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + inl(m.ts) + ico(CH[m.ch].icon, 13) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
+        html.push('<div class="cl' + (b.dir === "out" ? " out" : "") + (m._men ? " mention" : "") + (b.call ? " run call" : "") + (m.ch === "tell" ? " tellc" : "") + '" style="--c:' + col + '"' + replyAttr(m) + lineAttr(m) + '><div class="rail"></div><span class="' + (tc = tcls(m.ts)) + '">' + hhmm(m.ts) + '</span><div><div class="ln' + (m.ch === "emote" ? " emote" : "") + '">' + inl(m.ts) + rowIco(m.ch, 13, true) + (pre ? (cw ? '<b data-who="' + esc(cw) + '" data-ch="' + m.ch + '">' : "<b>") + pre + "</b> " : "") + bodyHtml(m) + stateHtml(m) + "</div>" + failHtml(m) + "</div></div>");
       });
       return;
     }
