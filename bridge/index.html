@@ -463,7 +463,7 @@ body.skin-classic .pill-on{border-radius:4px}
 body.skin-onyx{--bg:#000;--pane:#000;--raise:#0b0b0f;--chip:#141418;--line:#1c1c22;--edge:#2c2c36;--edge2:#3a3a46;
   --text:#f2f2f2;--soft:#d6d6d6;--mute:#8a8a96;--gold:#e9d27a;--ink:#111;--serif:var(--sans)}
 body.skin-onyx .pane{border-radius:0;border-color:#26262e;box-shadow:none}
-body.skin-onyx .rail{display:none}
+body.skin-onyx .rail{width:2px}   /* same channel bar as Classic */
 body.skin-onyx .run,body.skin-onyx .cl{gap:6px}
 body.skin-onyx .pane .inner{gap:7px}
 body.skin-onyx.compact .pane .inner{gap:2px}
@@ -2615,7 +2615,7 @@ document.addEventListener("click", function (e) {
 // ------------------------------------------------------------------------------------------
 function tog(on, key) { return '<button class="tog' + (on ? " on" : "") + '" data-set="' + key + '"></button>'; }
 function skinSegs() {
-  var opts = [["classic", "Classic"], ["game", "Game"], ["onyx", "Night"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []);
+  var opts = [["classic", "Classic"], ["onyx", "Night"], ["game", "Game"], ["yuna", "Yunas"]].concat(S.skin === "midnight" ? [["midnight", "Midnight"]] : []);
   return '<div class="segs">' + opts.map(function (o) {
     return '<button data-seg="skin" data-val="' + o[0] + '" class="' + (o[0] === S.skin ? "on " : "") + (lookEdited(o[0]) ? "lookdot" : "") + '">' + o[1] + "</button>";
   }).join("") + "</div>";
