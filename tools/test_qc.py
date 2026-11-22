@@ -26,12 +26,14 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     line(123,'There are no party members.')
     feed=(path/'feed-Tester.log').read_text();assert 'single item' not in feed and 'no party members' in feed
     print('PASS: system failure allowlist')
-    line(121,'Your Shadow Cuisses has sold for 90,000 gil.')
+    line(121,"Your 'Bird feather' has sold to Charta for 7000 gil!")   # the real line, captured Nov 22
+    line(121,'You buy the 12 bird feathers for 7,000 gil.')            # your own purchase: not a sale
     line(121,'Some other notice from the server.')
-    line(205,'Your Ridill has sold.')
+    line(205,'The event has sold out.')                                 # "has sold" alone isn't a sale
     feed=(path/'feed-Tester.log').read_text()
-    assert '\tsale\tin\t\tYour Shadow Cuisses has sold for 90,000 gil.' in feed and '\tsale\tin\t\tYour Ridill has sold.' in feed
-    assert 'Some other notice' not in feed
+    assert "\tsale\tin\t\tYour 'Bird feather' has sold to Charta for 7000 gil!" in feed
+    assert 'You buy the 12' not in feed and 'Some other notice' not in feed
+    assert '\tsale\tin\t\tThe event has sold out.' not in feed and '\tserver\tin\t\tThe event has sold out.' in feed   # stays a server notice
     line(14,'[1]<Marlow> my bow has sold out lol')
     assert '\tsale\t' not in (path/'feed-Tester.log').read_text().split('my bow')[0].split('\n')[-1]
     assert '\tls1\tin\tMarlow\tmy bow has sold out lol' in (path/'feed-Tester.log').read_text() or 'my bow has sold out lol' in (path/'feed-Tester.log').read_text()

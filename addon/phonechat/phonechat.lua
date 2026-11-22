@@ -808,9 +808,11 @@ local function system_line(text, from_reply)
         emit('bazaar', 'in', '', text)
         return true
     end
-    -- Auction House sales ("... has sold ..."). Only from the notice modes already read here;
-    -- this adds no mode, it lets one more kind of server notice through to the phone's Alerts.
-    if not from_reply and low:find('has sold', 1, true) then
+    -- Auction House sales, as CatsEye sends them on mode 121 (captured Nov 22, 2026):
+    --   Your 'Bird feather' has sold to Charta for 7000 gil!
+    -- Only from the notice modes already read here; this adds no mode, it lets one more kind of
+    -- server notice through to the phone's Alerts.
+    if not from_reply and low:find('has sold to ', 1, true) and low:find(' gil', 1, true) then
         emit('sale', 'in', '', text)
         return true
     end
