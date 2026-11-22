@@ -1,9 +1,9 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026).
+> **v1.1.2 is the current version.** It's going through CatsEyeXI's new addon approval process. **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026), and until 1.1.2 is approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version.
 >
-> **v1.1.1 is waiting on CatsEyeXI approval.** Staff are setting up a new process for approving addons, and 1.1.1 will go through it. It builds on 1.1.0 with fixes, looks and a few phone-side features, reads nothing new from the game, and sends the same lines plus one read-only command from the server's own list (`!moolix`). Until it's approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version. See the [changelog](CHANGELOG.md).
+> What 1.1.2 changes on the game side, plainly: Auction House sales now reach the phone (from the same server notices it already reads; no new message mode), there's one new command from the server's own list (`!bond`), and every `!` command asks before it sends. Everything else is on the phone. See the [changelog](CHANGELOG.md).
 
 # phonechatXI
 
@@ -39,8 +39,8 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - Views, like the game's chat windows. All, Linkshells and Party & tells are built in, and you can add your own.
 - A Tells tab with a thread per person.
 - Tap a name to start a tell, or a line to reply on its channel. Nothing sends until you press send.
-- Search (1.1.2, not released yet): the magnifier on Chat or Tells finds a name or a word in every channel at once, with a chip per channel to narrow it down. Tap a result to go to that moment, then "Back to live". It only looks through chat the page has already loaded.
-- Catching up (1.1.2, not released yet): a "New" line marks where you left off. Long-press a line to copy it or search for who said it. Tap a mention in Alerts to go to it.
+- Search: the magnifier on Chat or Tells finds a name or a word in every channel at once, with a chip per channel to narrow it down. Tap a result to go to that moment, then "Back to live". It only looks through chat the page has already loaded.
+- Catching up: a "New" line marks where you left off. Long-press a line to copy it or search for who said it. Tap a mention in Alerts to go to it.
 - Linked items (`{{Suppanomimi}}`): on a touch screen, long-press the line and pick "Search BG-Wiki for Suppanomimi" (a tap on the line replies, as usual). On a computer, click the item. Turn on BG-Wiki for all auto-translate in Settings to get the same search for every auto-translate phrase, up to 3 per line.
 - Web addresses in chat show as plain text and never open on a tap. On a touch screen, long-press the line for "Open <site>". It always asks first and shows the site name in bold with the full address under it, so a look-alike stands out. Only `http://`, `https://` and `www.` addresses are offered, never ones with a login in them.
 - Mentions: your name or nicknames (up to 3) are highlighted in chat and collected in Alerts. Emotes and yell don't count.
@@ -50,7 +50,7 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 - An Alerts tab: a card per VNM or HVNM with a 10 minute countdown from Populox's first message, then POP!, plus your mentions, Auction House sales, server notices and (if you turn it on) bazaar visits. VNM cards, notices and bazaar visits clear with ×.
 - A `:)` button with your own list of text emoticons. Set them in Settings, or keep the eight defaults.
 - The keyboard doesn't capitalize or autocorrect, so game words like Jeuno or Windurst come through as you typed them. Both can be turned on in Settings.
-- Four skins (Classic, Night, Game and Yunas, an unofficial look inspired by YunaUI), two fonts, a compact layout, text size, 12 or 24-hour time and per-channel colors. Settings are saved on the bridge and can be exported (without your mention names).
+- Four skins (Classic, Night, Game and Yunas, an unofficial look inspired by YunaUI). Each skin keeps its own look (font, layout, times, message colors, channel colors), with a live preview in Settings and a reset back to how it shipped. Text size and 12 or 24-hour time apply on every skin. Settings are saved on the bridge and can be exported (without your mention names).
 
 <p>
   <img src="docs/screenshots/skin-classic.png" width="180" alt="Classic skin">
@@ -79,15 +79,16 @@ Tested on a Steam Deck and on Windows 11, with an iPhone.
 
 What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stock emotes, and the `!` commands in [`bridge/commands.json`](bridge/commands.json). The bridge checks every line, and the addon checks it again against the same list right before typing it. The addon's check is `allowed()` in [`phonechat.lua`](addon/phonechat/phonechat.lua).
 
-## New in 1.1.1
+## New in 1.1.2
 
-- The Yunas skin, an unofficial look inspired by YunaUI.
-- VNM and HVNM cards count down from Populox's first message, show POP!, and stack when several run at once.
-- A full-width message box that grows as you type. Unsent text stays put when you switch channels.
-- Tells in chat read like the game (`Wren>>`, `>>Wren`).
-- The LS1 message of the day shows in full, and you can set your own `:)` emoticons.
+- Search across every channel at once, and a "New" line where you left off.
+- Hold a line for a small menu: copy it, find that person in chat, search BG-Wiki for an item, or open a web address after a confirm screen.
+- Two new skins: Game, which looks like the game's own chat log, and Night, a dimmed one for a dark room. Each skin keeps its own look, with a live preview and a reset.
+- Times can sit in a column, inline at the right of the line, or be off. Linkshell lines show the game's `[1]` and `[2]` in the compact layout.
+- Auction House sales show in Alerts. `!bond` is on the Server tab, and every `!` command asks before it sends.
+- Your settings are kept across updates, with a copy from before the last update you can restore.
 
-The full list, and what 1.1.0 added, is in the [changelog](CHANGELOG.md).
+v1.1.1 was a GitHub-only release, and 1.1.2 replaces it. The full list, including what 1.1.1 and 1.1.0 added, is in the [changelog](CHANGELOG.md).
 
 ## Install
 

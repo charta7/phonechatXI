@@ -2,7 +2,7 @@
 
 Versioning: a patch (like 1.1.1) is fixes, looks, phone-side changes and new `!` commands from the server's own command list. It reads nothing new from the game. A minor version (like 1.2.0) changes what phonechatXI reads from the game, or sends something that isn't on the server's command list, and goes to staff for review first; it isn't released until they sign off.
 
-## 1.1.2 (in progress, not released)
+## 1.1.2 (November 2026)
 
 Mostly phone-side changes and fixes. Three things change in the addon or what it sends: Auction House sales now reach the phone (from the same server notice messages it already reads; no new message mode), the Server tab can send one new command from the server's own list (`!bond`), and auto-translate is read one block at a time so items keep their links. Everything else it reads and sends is the same as 1.1.1.
 
@@ -80,7 +80,7 @@ Mostly phone-side changes and fixes. Three things change in the addon or what it
 - Importing settings that match a skin's defaults no longer marks the skin as changed.
 - The bridge writes its settings backup to a temp file and checks it before replacing the old one, so a failed copy can't leave a broken backup.
 
-## 1.1.1 (November 2026)
+## 1.1.1 (November 2026, GitHub only; replaced by 1.1.2)
 
 Fixes, looks and a few phone-side features (your own emoticons, drafts, HVNM cards, the Yunas skin). It reads nothing new and sends the same lines as 1.1.0, plus `!moolix` from the server's command list: one kind of line it now reads less of (the first item under Fixes), and LS1's message of the day is sorted differently.
 

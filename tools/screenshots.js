@@ -10,12 +10,14 @@ async function page(browser, prefs) {
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 2 });
   const p = await ctx.newPage();
   await p.addInitScript(pr => {
-    try { localStorage.setItem("pcxi", JSON.stringify(Object.assign({ savedAt: Date.now() + 1e9, tipSeen: true }, pr))); } catch (e) {}
+    try { localStorage.setItem("pcxi", JSON.stringify(Object.assign({ savedAt: Date.now() + 1e9, tipSeen: true, holdTip: true }, pr))); } catch (e) {}
   }, prefs);
   await p.goto(url);
   await p.waitForSelector("#tab-chat .top");
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(800);
+  // README shots: dismiss the one-time "Updated" note (each shot is a fresh browser that looks like an upgrade).
+  const ok = await p.$("[data-updok]"); if (ok) { await ok.click(); await p.waitForTimeout(300); }
   return p;
 }
 async function shot(p, name) { await p.waitForTimeout(400); await p.screenshot({ path: out + "/" + name + ".png" }); console.log("  " + name + ".png"); }
