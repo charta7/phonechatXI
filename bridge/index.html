@@ -375,7 +375,6 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 .c1 .m{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;padding:10px 0;text-align:left;white-space:nowrap;overflow:hidden}
 .c1 .m b{flex:none;font-family:var(--mono);font-size:15px;font-weight:400;color:var(--gold)}
 .c1 .m span.d{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:13px;color:var(--mute)}
-.c1 .ctag{flex:none;margin-left:0;vertical-align:0}
 .modeic{width:16px;height:16px;flex:none;image-rendering:auto}
 .c1 .mds{flex:none;display:flex;gap:2px}
 #modeseg button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
@@ -393,7 +392,6 @@ body.skin-onyx .emtiles button{background:#0c0c0e;border-color:#2a2a30;box-shado
 .crow .m{flex:1;min-width:0;text-align:left}
 .crow .m div{font-family:var(--mono);font-size:15px;color:var(--gold)}
 .crow .m small{display:block;font-size:12.5px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ctag{font-family:var(--sans);font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--vent);border:1px solid #5a4620;border-radius:6px;padding:0 5px;margin-left:8px;vertical-align:2px}
 .search{margin:8px 18px 0;padding:10px 14px;border:1px solid var(--edge);border-radius:999px;background:var(--pane);color:var(--text);font-size:16px;outline:none;width:calc(100% - 36px)}
 .starb{flex:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
 
@@ -2139,7 +2137,7 @@ function renderCmdList() {
     if (q && t.toLowerCase().indexOf(q) < 0 && d.toLowerCase().indexOf(q) < 0) return "";
     return '<div class="c1"><button class="starb" data-star="' + esc(t) + '" aria-label="Favorite">' + starSvg(isFav(t)) + '</button>' +
       '<button class="m" data-cmdpick="' + esc(t) + '"><b>' + esc(t) + '</b><span class="d">' + esc(d) + "</span>" +
-      (ms ? '<span class="mds">' + ms.map(function (m) { return modeIcon(m, 16); }).join("") + "</span>" : "") + (commands.action[n] ? '<span class="ctag">CONFIRM</span>' : "") + "</button></div>";
+      (ms ? '<span class="mds">' + ms.map(function (m) { return modeIcon(m, 16); }).join("") + "</span>" : "") + "</button></div>";
   }
   var favs = S.favs.map(function (f) { return row(f, true); }).join("");
   var info = Object.keys(commands.info).sort().map(function (n) { return row("!" + n); }).join("");
