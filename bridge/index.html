@@ -459,9 +459,10 @@ body.skin-classic .tabbar{background:linear-gradient(180deg,#1f2d72,#0b1236);bor
 body.skin-classic .send.on{background:linear-gradient(180deg,#f6ecbd,#d9c47a)}
 body.skin-classic .pill-on{border-radius:4px}
 
-/* Night (stored as "onyx" so saved settings carry over): plain dark mode, true black, more lines on screen. */
+/* Night (stored as "onyx" so saved settings carry over): the lights-off skin, for a dark room next to the game.
+   True black for OLED, off-white text, dimmed channel colors and muted gold, so nothing glares. */
 body.skin-onyx{--bg:#000;--pane:#000;--raise:#0b0b0f;--chip:#141418;--line:#1c1c22;--edge:#2c2c36;--edge2:#3a3a46;
-  --text:#f2f2f2;--soft:#d6d6d6;--mute:#8a8a96;--gold:#e9d27a;--ink:#111;--serif:var(--sans)}
+  --text:#d4d4d8;--soft:#b8b8be;--mute:#77777f;--gold:#bfac68;--ink:#111;--serif:var(--sans)}
 body.skin-onyx .pane{border-radius:0;border-color:#26262e;box-shadow:none}
 body.skin-onyx .rail{width:2px}   /* same channel bar as Classic */
 body.skin-onyx .run,body.skin-onyx .cl{gap:6px}
@@ -1069,7 +1070,8 @@ function importPrefs(file) {
 }
 var DEFAULT_COLORS = {ls1: "#7ee08f", ls2: "#06ED00", party: "#7fb2ff", tell: "#ff8fd0", say: "#dfe5f5", shout: "#ff9a5c", unity: "#e8c35c", yell: "#c98a5c", emote: "#b9a6ff", finder: "#8fd0ff"};
 // A skin can bring its own channel colors. Colors you picked yourself win over any skin's.
-var SKIN_COLORS = {game: {ls1: "#9CF27A", ls2: "#06ED00", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
+// Night: the lights-off skin. Channel colors at about 80% so they don't glow on black.
+var SKIN_COLORS = {onyx: {ls1: "#65B372", ls2: "#05BE00", party: "#668ECC", tell: "#CC72A6", say: "#B2B7C4", shout: "#CC7B4A", unity: "#BA9C4A", yell: "#A16E4A", emote: "#9485CC", finder: "#72A6CC"}, game: {ls1: "#9CF27A", ls2: "#06ED00", party: "#8FD3FF", tell: "#FF9CF0", say: "#F2F2F2", shout: "#FFB070", yell: "#E0A27A", unity: "#F2E08C", emote: "#CDB8FF", finder: "#9EC8FF"}, yuna: {ls1: "#FFFFFF", ls2: "#9EFF8C", party: "#80D6FF", tell: "#DB7AFF", say: "#E8EBF4", shout: "#FF7373", yell: "#FF9973", unity: "#F2E08C", emote: "#CCA6FF", finder: "#CCF273"}};
 // Log prints every line the way the game does, so it always uses the compact rows.
 function isCompact() { return S.density === "compact" || S.skin === "game"; }   // Game is the chat log: always compact
 function colorOf(c) { return (S.colors && S.colors[c]) || ((SKIN_COLORS[S.skin] || {})[c]) || DEFAULT_COLORS[c]; }

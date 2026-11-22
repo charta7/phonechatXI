@@ -37,7 +37,7 @@ Phone-side changes and fixes. It reads nothing new from the game and sends the s
 - Zone changes are in bold, so they no longer look like a time line.
 - When a new line joins a run of lines from the same person, only that line fades in. Before, the whole run flashed again.
 - Onyx is now called Night in the skin list. It's the same plain black look, and your saved choice carries over.
-- Night now has Classic's colored channel bar on the left of each line. Skin order in Settings: Classic, Night, Game, Yunas.
+- Night is now the lights-off skin, for a dark room next to the game: true black, off-white text, channel colors and gold dimmed so nothing glares, and Classic's colored channel bar on the left of each line. Skin order in Settings: Classic, Night, Game, Yunas.
 - Auto-translate braces now look like the game on every skin: green open brace, red close brace, and the words keep the line's color. Items and phrases match.
 - Midnight is no longer in the skin list. Nothing was removed: if you already have it selected it stays, and it shows in the list for you.
 - Text size has two more steps, XS and XL (Settings > Appearance). S, M and L are unchanged, so your current size stays as it is.
