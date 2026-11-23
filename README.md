@@ -1,7 +1,7 @@
 <p align="center"><img src="docs/header.png" alt="phonechatXI" width="640"></p>
 
 > [!NOTE]
-> **v1.1.2 is the current version.** It's going through CatsEyeXI's new addon approval process. **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026), and until 1.1.2 is approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version.
+> **v1.1.2 is the current version.** It's waiting on CatsEyeXI staff approval. **v1.1.0 was reviewed by CatsEyeXI staff and approved** (November 2026), and until 1.1.2 is approved, [v1.1.0](https://github.com/charta7/phonechatXI/releases/tag/v1.1.0) is the approved version.
 >
 > What 1.1.2 changes on the game side, plainly: Auction House sales and Summit of the Stars perks now reach the phone (from the same server notices it already reads; no new message mode), there's one new command from the server's own list (`!bond`), and every `!` command asks before it sends. Everything else is on the phone. See the [changelog](CHANGELOG.md).
 
