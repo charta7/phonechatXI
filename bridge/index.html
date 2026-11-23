@@ -2528,6 +2528,7 @@ function renderAlerts() {
     return '<div class="acard" style="--c:' + color + '"><div class="ah"><span class="al">' + ico(icon, 15) + "<b>" + label + "</b></span>" +
       '<span class="vt">' + (ts ? hhmm(ts) : "") + "</span>" + (x ? '<button class="ax" data-dismiss="' + esc(x) + '" aria-label="Dismiss">&times;</button>' : "") + "</div>" + body + "</div>";
   }
+  // A card with one line already shows its time in the header, so the line only gets its own time when there are several.
   function row(main, ts, right) {
     return '<div class="vrow"><span class="vm">' + main + "</span>" + (right || "") + (ts ? '<span class="vt">' + hhmm(ts) + "</span>" : "") + "</div>";
   }
@@ -2575,13 +2576,13 @@ function renderAlerts() {
   // The x hides the visits shown (remembered on the phone); a new visit shows again.
   var baz = S.bazaar ? msgs.filter(function (m) { return m.ch === "bazaar" && !hid[noticeKey(m)]; }).slice(-20).reverse() : [];
   $("bazaar").innerHTML = S.bazaar ? '<div class="sect">BAZAAR</div>' + (baz.length ?
-    card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), m.ts); }).join(""), baz.map(noticeKey).join(";;")) :
+    card("bazaar", "var(--gold)", "Bazaar", baz[0].ts, baz.map(function (m) { return row(esc(m.body), baz.length > 1 ? m.ts : 0); }).join(""), baz.map(noticeKey).join(";;")) :
     '<div class="empty sm">No visitors yet.</div>') : "";
 
   // Auction House sales. Shown only once one has come in; the x hides them like other notices.
   var sold = msgs.filter(function (m) { return m.ch === "sale" && !hid[noticeKey(m)]; }).slice(-20).reverse();
   $("sales").innerHTML = sold.length ? '<div class="sect">AUCTION HOUSE</div>' +
-    card("bazaar", "var(--gold)", "Sold", sold[0].ts, sold.map(function (m) { return row(fmt(m.body), m.ts); }).join(""), sold.map(noticeKey).join(";;")) : "";
+    card("bazaar", "var(--gold)", "Sold", sold[0].ts, sold.map(function (m) { return row(fmt(m.body), sold.length > 1 ? m.ts : 0); }).join(""), sold.map(noticeKey).join(";;")) : "";
 
   var n = msgs.filter(function (m) { return (m.ch === "server" || m.ch === "system") && !hid[noticeKey(m)]; }).reverse().slice(0, 60);
   $("notices").innerHTML = '<div class="shead"><div class="sect">NOTICES</div>' + (n.length > 1 ? '<button class="linkbtn" data-dismiss="*">Clear all</button>' : "") + "</div>" +
