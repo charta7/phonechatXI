@@ -41,6 +41,11 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     line(121,'\u2192 A new Summit of the Stars perk is now active: Reraise')
     feed=(path/'feed-Tester.log').read_text(encoding='utf-8',errors='replace')
     assert '\tserver\tin\t\t' in feed and 'Summit of the Stars perk is now active: Reraise' in feed.split('\tserver\tin\t\t')[-1]
+    line(121,'Quixy of Fun has selected a new universal bonus.')
+    line(121,'Active Bonus: Synth. H.Q. Rate\u2191')
+    feed=(path/'feed-Tester.log').read_text(encoding='utf-8',errors='replace')
+    assert '\tserver\tin\t\tQuixy of Fun has selected a new universal bonus.' in feed
+    assert '\tserver\tin\t\tActive Bonus: Synth. H.Q. Rate' in feed
     print('PASS: Summit of the Stars perks go to server notices')
     # Auto-translate: each block keeps its own type even when a block before it can't be parsed.
     lua.execute(r'''

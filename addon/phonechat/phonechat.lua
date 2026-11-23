@@ -816,9 +816,13 @@ local function system_line(text, from_reply)
         emit('sale', 'in', '', text)
         return true
     end
-    -- Summit of the Stars perk announcements ("A new Summit of the Stars perk is now active: Reraise"),
-    -- from the same notice modes. They show with the other server notices in Alerts.
-    if not from_reply and low:find('summit of the stars', 1, true) then
+    -- Summit of the Stars announcements, from the same notice modes. They show with the other server
+    -- notices in Alerts. CatsEye words them two ways (both seen Nov 22, 2026):
+    --   A new Summit of the Stars perk is now active: Reraise
+    --   Quixy of Fun has selected a new universal bonus.  /  Active Bonus: Synth. H.Q. Rate
+    if not from_reply and (low:find('summit of the stars', 1, true)
+            or low:find('has selected a new universal bonus', 1, true)
+            or low:find('active bonus:', 1, true)) then
         emit('server', 'in', '', text)
         return true
     end
