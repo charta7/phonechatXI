@@ -19,7 +19,7 @@ There are three parts:
 
 **You need:**
 
-- The CatsEye launcher (Ashita v4). VanaCore's beta works too on Windows.
+- The CatsEye launcher (Ashita v4). VanaCore's beta works too on Windows, either through its Ashita support or as a native VanaCore addon.
 - Python 3.7 or newer. The Steam Deck already has it; on Windows, see Install.
 - A phone on the same Wi-Fi as the game.
 
@@ -87,6 +87,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 - Times can sit in a column, inline at the right of the line, or be off. Linkshell lines show the game's `[1]` and `[2]` in the compact layout.
 - Auction House sales show in Alerts. `!bond` is on the Server tab, and every `!` command asks before it sends.
 - Your settings are kept across updates, with a copy from before the last update you can restore.
+- The same addon folder also loads natively in VanaCore (see Install). It reads and sends the same things either way.
 
 v1.1.1 was a GitHub-only release, and 1.1.2 replaces it. The full list, including what 1.1.1 and 1.1.0 added, is in the [changelog](CHANGELOG.md).
 
@@ -110,6 +111,16 @@ The bridge runs in the background; the `/pchat` window shows whether it's on. It
 4. Scan the QR code in the phonechatXI window with your phone's camera, then add the page to your Home Screen.
 
 The addon puts the bridge in `<Ashita>\config\addons\phonechat\` (on VanaCore, `<VanaCore>\config\addons\phonechat\`), so you never move files by hand. Ashita and VanaCore each keep their own copy and phone link.
+
+### VanaCore (native)
+
+VanaCore runs phonechatXI as an Ashita addon with no changes, and that's what the launcher sets up. If you'd rather load it as a native VanaCore addon (VanaCore 0.7.47 or newer):
+
+1. Copy the `phonechat` folder from the zip to `VanaCore\addons\vanacore\`.
+2. Add `/addon load phonechat` to `VanaCore\scripts\boot.txt`, and take phonechat off the launcher's Addons page so only one copy loads.
+3. Start the game and type `/pchat` as above.
+
+It's the same folder and the same code; only the dozen calls into the game go through VanaCore's own names. Your link and settings stay in `<VanaCore>\config\addons\phonechat\` either way, so switching doesn't change your phone link.
 
 ### Updating
 

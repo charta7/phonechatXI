@@ -4,7 +4,10 @@ Versioning: a patch (like 1.1.1) is fixes, looks, phone-side changes and new `!`
 
 ## 1.1.2 (November 2026)
 
-Mostly phone-side changes and fixes. Three things change in the addon or what it sends: Auction House sales and Summit of the Stars perk announcements now reach the phone (from the same server notice messages it already reads; no new message mode), the Server tab can send one new command from the server's own list (`!bond`), and auto-translate is read one block at a time so items keep their links. Everything else it reads and sends is the same as 1.1.1.
+Mostly phone-side changes and fixes. Three things change in the addon or what it sends: Auction House sales and Summit of the Stars perk announcements now reach the phone (from the same server notice messages it already reads; no new message mode), the Server tab can send one new command from the server's own list (`!bond`), auto-translate is read one block at a time so items keep their links, and the addon can also load natively in VanaCore (the same file; its calls into the game go through VanaCore's own names there, and it reads and sends the same things). Everything else it reads and sends is the same as 1.1.1.
+
+### VanaCore
+- The same `phonechat` folder now loads as a native VanaCore addon too (copy it to `VanaCore\addons\vanacore\`, VanaCore 0.7.47 or newer). Under Ashita, and under VanaCore's Ashita support as the launcher sets it up, nothing changes. The dozen calls into the game (reading chat, typing a line, the auto-translate parser, your name, file checks, the settings window) sit in one small table at the top of the addon, with an Ashita and a VanaCore version of each. What it reads and sends is the same on both.
 
 ### Search
 - A magnifier on the Chat and Tells pages opens Search. Type a name or a word (2 letters or more) and every match shows in one list, newest first, across all your channels: which channel, who said it, when, and the line with the match in gold. Channels you've hidden everywhere in Settings are left out. It shows the newest 100 matches.

@@ -114,3 +114,56 @@ with tempfile.TemporaryDirectory(prefix='phonechat-prefs-qc-') as folder:
     assert prev['skin']=='onyx' and 'watch' not in prev and bridge.load_prefs(folder)['skin']=='yuna'
     assert bridge.keep_previous_prefs(folder,'unknown') is False
     print('PASS: bridge keeps one copy of the phone settings per update, without names, and leaves the current ones alone')
+
+# The same file loaded as a native VanaCore addon: no AshitaCore, no ashita, only vana.*.
+FAKE_VANA = r'''
+FAKE_CLOCK = 0
+os.clock = function() return FAKE_CLOCK end
+os.execute = function(c) return false end
+io.popen = nil
+addon = {}
+print = function(s) SAY(tostring(s)) end
+EVENTS, RUN, PARSED = {}, {}, {}
+vana = {
+  paths = { addon = ADDON_DIR, install = ADDON_DIR },
+  fs = { exists = function(p) return EXISTS(p) end, create_dir = function(p) MKDIR(p) return true end },
+  events = { on = function(name, fn, key) EVENTS[name] = fn end },
+  chat = { run = function(line, mode) RUN[#RUN + 1] = tostring(mode) .. ' ' .. line end },
+  game = { party = function() return { members = { { name = CHAR_NAME } } } end },
+  ashita = { parse_auto_translate = function(s, brackets)
+    PARSED[#PARSED + 1] = tostring(brackets)
+    if s:sub(2, -2) == '\7RID' then return '\239\39Ridill\239(' end
+    return s end },
+}
+local real_open = io.open
+io.open = function(p, m) return real_open((p:gsub('\\', '/')), m) end
+'''
+with tempfile.TemporaryDirectory(prefix='phonechat-vana-qc-') as tmp:
+    path=pathlib.Path(tmp); (path/'dir.txt').write_text(tmp+'/')
+    said=[]
+    lua=LuaRuntime(unpack_returned_tuples=True); g=lua.globals()
+    g.SAY=said.append;g.MKDIR=lambda p:pathlib.Path(p.replace('\\','/')).mkdir(parents=True,exist_ok=True)
+    g.EXISTS=lambda p:pathlib.Path(p.replace('\\','/')).exists();g.ADDON_DIR=tmp+'/';g.CHAR_NAME='Tester'
+    g.BAND=lambda a,b:int(a)&int(b);lua.execute('bit={band=BAND}')
+    lua.execute(FAKE_VANA)
+    lua.execute((ROOT/'addon/phonechat/phonechat.lua').read_bytes())
+    ev=set(g.EVENTS.keys())
+    assert ev=={'load','text_in','packet_in','present','command'}, sorted(ev)   # d3d_present is VanaCore's present
+    g.EVENTS['load']()
+    g.EVENTS['text_in'](lua.table_from(dict(mode=14,message=b'[1]<Marlow> got \xfd\x07RID\xfd',injected=False,blocked=False)))
+    feed=(path/'feed-Tester.log').read_bytes()
+    assert b'\tls1\tin\tMarlow\tgot {{Ridill}}' in feed, feed[-200:]
+    assert list(g.PARSED.values())==['true'], list(g.PARSED.values())          # brackets on, as under Ashita
+    e=lua.table_from(dict(command='/pchat url',blocked=False))
+    assert g.EVENTS['command'](e) is True and e['blocked'] is True               # handled either way VanaCore reads it
+    e=lua.table_from(dict(command='/echo hi',blocked=False))
+    assert g.EVENTS['command'](e) is None and e['blocked'] is False              # other commands left alone
+    assert any('[phonechat]' in s for s in said), said
+    # A line from the phone goes out through vana.chat.run as typed (mode 1).
+    import time as _t
+    lua.execute('FAKE_CLOCK=1'); g.EVENTS['present']()                            # opens the outbox (nothing old is typed)
+    (path/'outbox-Tester.log').write_text('id1\t%d\t/l hello\n'%int(_t.time()))
+    for i in range(2,40):
+        lua.execute('FAKE_CLOCK=%d'%i); g.EVENTS['present']()
+    assert '1 /l hello' in list(g.RUN.values()), list(g.RUN.values())
+    print('PASS: native VanaCore: same file loads on vana.* only, reads chat, types the phone\'s lines, handles /pchat')

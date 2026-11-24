@@ -37,9 +37,98 @@ addon.version = '1.1.2'
 addon.desc    = 'phonechatXI: mirrors chat to your phone and types the replies you send from it.'
 addon.link    = ''
 
-require('common')
-local chat = require('chat')
-local has_imgui, imgui = pcall(require, 'imgui')
+----------------------------------------------------------------------------------------------------
+-- Host: the calls that differ between Ashita and native VanaCore. The same folder loads in either:
+-- Ashita (and VanaCore's Ashita layer) from addons\ashita\, native VanaCore from addons\vanacore\.
+-- Everything below this table is the same code on both.
+----------------------------------------------------------------------------------------------------
+
+local V = rawget(_G, 'vana')
+local NATIVE = type(V) == 'table' and rawget(_G, 'AshitaCore') == nil
+
+local chat, has_imgui, imgui
+if NATIVE then
+    imgui = V.imgui               -- VanaCore 0.7.47 or newer; without it the window is skipped
+    has_imgui = imgui ~= nil
+else
+    require('common')
+    chat = require('chat')
+    has_imgui, imgui = pcall(require, 'imgui')
+end
+local bit = rawget(_G, 'bit') or require('bit')
+
+local host = { native = NATIVE }
+
+-- A line in the chat log from phonechat itself. kind: nil, 'ok' or 'bad'.
+function host.say(text, kind)
+    if NATIVE or chat == nil then print('[phonechat] ' .. text) return end
+    if kind == 'ok' then print(chat.success(text))
+    elseif kind == 'bad' then print(chat.error(text))
+    else print(chat.header(addon.name):append(chat.message(text))) end
+end
+
+function host.exists(path)
+    if NATIVE then return V.fs.exists(path) == true end
+    return ashita.fs.exists(path) == true
+end
+
+function host.mkdir(path)
+    if NATIVE then return V.fs.create_dir(path) end
+    return ashita.fs.create_dir(path)
+end
+
+-- The addon's own folder (where bridge\ and qrencode.lua are).
+function host.addon_path()
+    if NATIVE then return V.paths.addon end
+    return addon.path
+end
+
+-- Ashita's install folder, or VanaCore's.
+function host.install_path()
+    if NATIVE then return V.paths.install end
+    return AshitaCore:GetInstallPath()
+end
+
+-- The game's own auto-translate parser, with the item and phrase brackets.
+function host.parse_auto_translate(text)
+    if NATIVE then return V.ashita.parse_auto_translate(text, true) end
+    return AshitaCore:GetChatManager():ParseAutoTranslate(text, true)
+end
+
+-- The character's name (party slot 0).
+function host.my_name()
+    if NATIVE then
+        local p = V.game.party()
+        local m = p and p.members and p.members[1]
+        return m and m.name
+    end
+    return AshitaCore:GetMemoryManager():GetParty():GetMemberName(0)
+end
+
+-- Types a line as if it were typed in the chat box.
+function host.run(line)
+    if NATIVE then return V.chat.run(line, 1) end
+    return AshitaCore:GetChatManager():QueueCommand(1, line)
+end
+
+-- The words of a typed command.
+function host.args(line)
+    if not NATIVE then return line:args() end
+    local out = {}
+    for w in tostring(line or ''):gmatch('%S+') do out[#out + 1] = w end
+    return out
+end
+
+-- Registers an event handler. Ashita's d3d_present is VanaCore's present.
+function host.on(name, key, fn)
+    if NATIVE then
+        if name == 'd3d_present' then name = 'present' end
+        return V.events.on(name, fn, key)
+    end
+    return ashita.events.register(name, key, fn)
+end
+
+local WINDOW_AUTO_SIZE = rawget(_G, 'ImGuiWindowFlags_AlwaysAutoResize') or 64
 
 local PENDING_MAX   = 300   -- lines kept while we wait to learn the character name
 local STATUS_FRESH  = 10    -- seconds; bridge heartbeat older than this = OFF
@@ -122,7 +211,7 @@ local REPLY_WAIT  = 10    -- seconds after we type a ! command that its replies 
 ----------------------------------------------------------------------------------------------------
 
 local function note(text)
-    print(chat.header(addon.name):append(chat.message(text)))
+    host.say(text)
 end
 
 local function read_file(path)
@@ -148,13 +237,13 @@ local function exists(path)
 end
 
 local function dir_exists(path)
-    local ok, res = pcall(function () return ashita.fs.exists(path) end)
+    local ok, res = pcall(host.exists, path)
     if ok then return res == true end
     return false
 end
 
 local function mkdir(path)
-    pcall(function () ashita.fs.create_dir(path) end)
+    pcall(host.mkdir, path)
 end
 
 local function with_sep(p)
@@ -180,7 +269,7 @@ end
 -- <Ashita>\config\addons\phonechat\ on Windows.
 local function resolve_dir()
     local here = ''
-    pcall(function () here = with_sep(addon.path) end)
+    pcall(function () here = with_sep(host.addon_path()) end)
     local txt = here ~= '' and read_file(here .. 'dir.txt') or nil
     if txt then
         txt = txt:gsub('^\239\187\191', ''):match('^%s*(.-)%s*$')
@@ -194,7 +283,7 @@ local function resolve_dir()
     end
     if dir_exists('Z:\\home\\deck') then return 'Z:\\home\\deck\\phonechat\\' end
     local install = ''
-    pcall(function () install = with_sep(AshitaCore:GetInstallPath()) end)
+    pcall(function () install = with_sep(host.install_path()) end)
     return install .. 'config\\addons\\phonechat\\'
 end
 
@@ -219,7 +308,7 @@ local function clean(s)
     s = (s:gsub('\253(.-)\253', function (inner)
         local t = inner:byte(1)
         local ok, res = pcall(function ()
-            return AshitaCore:GetChatManager():ParseAutoTranslate('\253' .. inner .. '\253', true)
+            return host.parse_auto_translate('\253' .. inner .. '\253')
         end)
         if ok and type(res) == 'string' and res:find('\239\39', 1, true) then
             return (res:gsub('\239\39', t == 7 and '\1\239\39' or '\2\239\39'))
@@ -361,7 +450,7 @@ end
 
 local function resolve_name()
     local ok, n = pcall(function ()
-        return AshitaCore:GetMemoryManager():GetParty():GetMemberName(0)
+        return host.my_name()
     end)
     if ok and type(n) == 'string' and n ~= '' and n ~= '?' then
         set_name(n)
@@ -395,7 +484,7 @@ end
 -- Copy the bridge that ships inside the addon into the shared folder, when it's missing or
 -- older. Files come from bridge\manifest.txt. config.json (your link) is never touched.
 local function install_bridge()
-    local src = with_sep(addon.path) .. 'bridge\\'
+    local src = with_sep(host.addon_path()) .. 'bridge\\'
     local dst = S.dir .. 'bridge\\'
     local ship = bridge_version(src)
     if not ship then return false, 'This copy of the addon has no bridge folder. Reinstall the phonechat zip.' end
@@ -452,9 +541,7 @@ end
 
 local function announce(on)
     local text = 'Phone chat bridge: ' .. (on and 'ON' or 'OFF')
-    local ok = pcall(function ()
-        print(on and chat.success(text) or chat.error(text))
-    end)
+    local ok = pcall(host.say, text, on and 'ok' or 'bad')
     if not ok then print(text) end
 end
 
@@ -559,7 +646,7 @@ end
 -- Is the running bridge older than the one this addon carries? (After an update, until restarted.)
 local function bridge_outdated()
     if not S.bver then return false end
-    if S.ship == nil then S.ship = bridge_version(with_sep(addon.path) .. 'bridge\\') or false end
+    if S.ship == nil then S.ship = bridge_version(with_sep(host.addon_path()) .. 'bridge\\') or false end
     return S.ship and newer(S.ship, S.bver) or false
 end
 
@@ -753,7 +840,7 @@ local function send_next()
     local cmd = table.remove(S.sendq, 1)
     if cmd == nil then return end
     local ok = pcall(function ()
-        AshitaCore:GetChatManager():QueueCommand(1, cmd)
+        host.run(cmd)
     end)
     if ok then
         S.sent = S.sent + 1
@@ -943,7 +1030,7 @@ local function load_qr()
     if qrenc ~= nil then return qrenc end
     qrenc = false
     pcall(function ()
-        local fn = loadfile(with_sep(addon.path) .. 'qrencode.lua')
+        local fn = loadfile(with_sep(host.addon_path()) .. 'qrencode.lua')
         if fn then
             local m = fn()
             if type(m) == 'table' and type(m.qrcode) == 'function' then qrenc = m end
@@ -1018,7 +1105,7 @@ local function draw_config()
         S.bridge_now = refresh_status()
     end
     local ok, err = pcall(function ()
-        if imgui.Begin('phonechatXI', S.show_config, ImGuiWindowFlags_AlwaysAutoResize) then
+        if imgui.Begin('phonechatXI', S.show_config, WINDOW_AUTO_SIZE) then
             local on, url = S.bridge_now, S.url
             local state = on and ('ON' .. (S.bver and ('  (' .. S.bver .. ')') or ''))
                 or (S.starting_at and 'starting...' or 'OFF')
@@ -1082,7 +1169,7 @@ end
 -- Events
 ----------------------------------------------------------------------------------------------------
 
-ashita.events.register('load', 'phonechat_load', function ()
+host.on('load', 'phonechat_load', function ()
     S.dir = resolve_dir()
     load_cfg()
     resolve_name()
@@ -1094,7 +1181,7 @@ ashita.events.register('load', 'phonechat_load', function ()
     end
 end)
 
-ashita.events.register('text_in', 'phonechat_text_in', function (e)
+host.on('text_in', 'phonechat_text_in', function (e)
     local ok, err
     if e.injected then
         ok, err = pcall(handle_injected, e.mode, e.message)
@@ -1109,7 +1196,7 @@ ashita.events.register('text_in', 'phonechat_text_in', function (e)
     end
 end)
 
-ashita.events.register('packet_in', 'phonechat_packet_in', function (e)
+host.on('packet_in', 'phonechat_packet_in', function (e)
     if e.id ~= 0x000A then return end
     pcall(function ()
         local raw = e.data:sub(0x84 + 1, 0x84 + 16)
@@ -1118,7 +1205,7 @@ ashita.events.register('packet_in', 'phonechat_packet_in', function (e)
     end)
 end)
 
-ashita.events.register('d3d_present', 'phonechat_tick', function ()
+host.on('d3d_present', 'phonechat_tick', function ()
     local now = os.time()
     local clk = os.clock()
     if not S.ready and clk >= S.next_name then
@@ -1150,12 +1237,12 @@ ashita.events.register('d3d_present', 'phonechat_tick', function ()
     draw_config()
 end)
 
-ashita.events.register('command', 'phonechat_command', function (e)
-    local args = e.command:args()
+host.on('command', 'phonechat_command', function (e)
+    local args = host.args(e.command)
     if #args == 0 then return end
     local c = args[1]:lower()
     if c ~= '/pchat' and c ~= '/pcxi' and c ~= '/phonechat' then return end
-    e.blocked = true
+    e.blocked = true   -- Ashita reads this; VanaCore also wants the handler to return true (at the end)
 
     local sub = (args[2] or ''):lower()
     if sub == 'debug' then
@@ -1180,4 +1267,5 @@ ashita.events.register('command', 'phonechat_command', function (e)
     else
         print_help()
     end
+    return true
 end)
