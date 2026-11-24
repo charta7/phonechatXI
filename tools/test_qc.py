@@ -183,6 +183,17 @@ vana = {
     if s:sub(2, -2) == '\7RID' then return '\239\39Ridill\239(' end
     return s end },
 }
+PUSHED, POPPED, BEGUN = 0, 0, 0
+vana.imgui = setmetatable({
+  Begin = function() BEGUN = BEGUN + 1 return true end,
+  PushStyleColor = function(i, c) assert(type(i) == 'number' and #c == 4) PUSHED = PUSHED + 1 end,
+  PushStyleVar = function(i, v) assert(type(i) == 'number') PUSHED = PUSHED + 1 end,
+  PopStyleColor = function(n) POPPED = POPPED + (n or 1) end,
+  PopStyleVar = function(n) POPPED = POPPED + (n or 1) end,
+  GetCursorScreenPos = function() return { 0, 0 } end,
+  GetWindowDrawList = function() return { AddRectFilled = function() end } end,
+  Button = function() return false end, Checkbox = function() return false end,
+}, { __index = function() return function() end end })
 local real_open = io.open
 io.open = function(p, m) return real_open((p:gsub('\\', '/')), m) end
 '''
@@ -214,4 +225,8 @@ with tempfile.TemporaryDirectory(prefix='phonechat-vana-qc-') as tmp:
     for i in range(2,40):
         lua.execute('FAKE_CLOCK=%d'%i); g.EVENTS['present']()
     assert '1 /l hello' in list(g.RUN.values()), list(g.RUN.values())
-    print('PASS: native VanaCore: same file loads on vana.* only, reads chat, types the phone\'s lines, handles /pchat')
+    g.EVENTS['command'](lua.table_from(dict(command='/pchat',blocked=False)))      # opens the window
+    lua.execute('FAKE_CLOCK=100'); g.EVENTS['present']()
+    assert g.BEGUN>=1 and g.PUSHED>0 and g.PUSHED==g.POPPED, (g.BEGUN,g.PUSHED,g.POPPED)   # VanaCore look pushed and popped evenly
+    assert not any('window error' in x for x in said), said
+    print('PASS: native VanaCore: same file loads on vana.* only, reads chat, types the phone\'s lines, handles /pchat, styles its window and pops the style evenly')

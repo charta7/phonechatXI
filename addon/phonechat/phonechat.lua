@@ -133,6 +133,47 @@ end
 
 local WINDOW_AUTO_SIZE = rawget(_G, 'ImGuiWindowFlags_AlwaysAutoResize') or 64
 
+-- On native VanaCore the /pchat window takes VanaCore's own look (its navy, one blue accent, rounded),
+-- so it sits with VanaCore's windows. Under Ashita it keeps ImGui's default look, as before.
+-- ImGui's colour and style-var numbers: VanaCore has no ImGuiCol_* globals, so they're spelled out.
+local VANA_LOOK = {
+    colors = {
+        { 0,  '#E8EAF1' }, { 1,  '#7B8095' },                     -- Text, TextDisabled
+        { 2,  '#161822' }, { 4,  '#0F1118' }, { 5,  '#2A2E3E' },  -- WindowBg, PopupBg, Border
+        { 7,  '#080A10' }, { 8,  '#1F2334' }, { 9,  '#1B2340' },  -- FrameBg, hovered, active
+        { 10, '#161822' }, { 11, '#1B2340' }, { 12, '#161822' },  -- TitleBg, active, collapsed
+        { 18, '#7AA2F7' },                                        -- CheckMark
+        { 21, '#1F2334' }, { 22, '#2A3350' }, { 23, '#3E5CB3' },  -- Button, hovered, active
+        { 27, '#2A2E3E' },                                        -- Separator
+    },
+    vars = {
+        { 2, { 14, 12 } }, { 3, 10 }, { 4, 1 },                   -- WindowPadding, WindowRounding, WindowBorderSize
+        { 11, { 10, 5 } }, { 12, 6 }, { 14, { 8, 7 } },           -- FramePadding, FrameRounding, ItemSpacing
+    },
+}
+
+local function hex_rgba(hex)
+    return { tonumber(hex:sub(2, 3), 16) / 255, tonumber(hex:sub(4, 5), 16) / 255, tonumber(hex:sub(6, 7), 16) / 255, 1 }
+end
+
+-- Pushes the window's look; returns how many colours and vars to pop.
+function host.push_window_look()
+    if not NATIVE then return 0, 0 end
+    local nc, nv = 0, 0
+    for _, c in ipairs(VANA_LOOK.colors) do
+        if pcall(imgui.PushStyleColor, c[1], hex_rgba(c[2])) then nc = nc + 1 end
+    end
+    for _, v in ipairs(VANA_LOOK.vars) do
+        if pcall(imgui.PushStyleVar, v[1], v[2]) then nv = nv + 1 end
+    end
+    return nc, nv
+end
+
+function host.pop_window_look(nc, nv)
+    if nv > 0 then pcall(imgui.PopStyleVar, nv) end
+    if nc > 0 then pcall(imgui.PopStyleColor, nc) end
+end
+
 local PENDING_MAX   = 300   -- lines kept while we wait to learn the character name
 local STATUS_FRESH  = 10    -- seconds; bridge heartbeat older than this = OFF
 local CHECK_EVERY   = 5     -- seconds between bridge status checks
@@ -1132,6 +1173,7 @@ local function draw_config()
         next_panel = now + PANEL_CHECK
         S.bridge_now = refresh_status()
     end
+    local nc, nv = host.push_window_look()
     local ok, err = pcall(function ()
         if imgui.Begin('phonechatXI', S.show_config, WINDOW_AUTO_SIZE) then
             local on, url = S.bridge_now, S.url
@@ -1194,6 +1236,7 @@ local function draw_config()
         end
         imgui.End()
     end)
+    host.pop_window_look(nc, nv)
     if not ok then
         S.show_config[1] = false
         note('window error: ' .. tostring(err))

@@ -8,6 +8,7 @@ Mostly phone-side changes and fixes. A few things change in the addon or what it
 
 ### VanaCore
 - The same `phonechat` folder now loads as a native VanaCore addon too (copy it to `VanaCore\addons\vanacore\`, VanaCore 0.7.47 or newer). Under Ashita, and under VanaCore's Ashita support as the launcher sets it up, nothing changes. The dozen calls into the game (reading chat, typing a line, the auto-translate parser, your name, file checks, the settings window) sit in one small table at the top of the addon, with an Ashita and a VanaCore version of each. What it reads and sends is the same on both.
+- On native VanaCore, the `/pchat` window takes VanaCore's own look (its navy, one blue accent, rounded corners) so it sits with VanaCore's windows. The QR code stays black on white. Under Ashita the window looks as before.
 
 ### Other servers
 - New `/pchat server` setting (also in the `/pchat` window): CatsEyeXI, the default, or Other server. Other server only turns things off: no `!` server commands (the Server tab is hidden, and the addon and the bridge both refuse them), and no CatsEye-only alerts (Populox ventures, Party Finder ads, Auction House sales, Summit of the Stars). Chat, tells, emotes and bazaar visits are unchanged. Nothing new is read or sent on either setting, and CatsEyeXI players see no change.
