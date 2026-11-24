@@ -137,8 +137,18 @@ If an older bridge is still running (for example, started from Desktop Mode), th
 | `/pchat url` | Prints the phone link. |
 | `/pchat newlink` | Makes a new phone link. The old one stops working. |
 | `/pchat debug` | Turns the debug log on or off: every line the game shows, with its mode number, in `debug-<Name>.log` in the phonechat folder (4 MB at most). It includes other players' chat, so share it privately. Your phone link is left out. |
+| `/pchat server` | Shows which server phonechatXI is set to. `/pchat server other` for any server that isn't CatsEyeXI, `/pchat server catseye` to go back. Also in the `/pchat` window. |
 
 `/pcxi` and `/phonechat` work too.
+
+## Other servers
+
+phonechatXI is made for CatsEyeXI and set to it by default. If you play somewhere else and your server allows it, set it to Other server with `/pchat server other`. That only turns things off, it never adds anything:
+
+- No `!` server commands. The Server tab is hidden, and the addon and the bridge both refuse to send one.
+- No CatsEye-only alerts: Populox ventures, Party Finder ads, Auction House sales and Summit of the Stars.
+
+Chat, tells, emotes, mentions, bazaar visits and everything else on the phone work the same. Check your server's rules on addons first. Only CatsEyeXI has reviewed phonechatXI, and other servers aren't tested.
 
 ## How it works
 

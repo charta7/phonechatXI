@@ -2,6 +2,12 @@
 
 Versioning: a patch (like 1.1.1) is fixes, looks, phone-side changes and new `!` commands from the server's own command list. It reads nothing new from the game. A minor version (like 1.2.0) changes what phonechatXI reads from the game, or sends something that isn't on the server's command list, and goes to staff for review first; it isn't released until they sign off.
 
+## Unreleased
+
+### Other servers
+- New `/pchat server` setting (also in the `/pchat` window): CatsEyeXI, the default, or Other server. Other server only turns things off: no `!` server commands (the Server tab is hidden, and the addon and the bridge both refuse them), and no CatsEye-only alerts (Populox ventures, Party Finder ads, Auction House sales, Summit of the Stars). Chat, tells, emotes and bazaar visits are unchanged. Nothing new is read or sent on either setting, and CatsEyeXI players see no change.
+- The setting is kept in `addon-settings.txt`, which the bridge now reads to know which server you picked. Switching takes effect within a few seconds, and the phone page follows without a reload. Settings > Connection shows which one is on.
+
 ## 1.1.2 (November 2026)
 
 Mostly phone-side changes and fixes. Three things change in the addon or what it sends: Auction House sales and Summit of the Stars perk announcements now reach the phone (from the same server notice messages it already reads; no new message mode), the Server tab can send one new command from the server's own list (`!bond`), and auto-translate is read one block at a time so items keep their links. Everything else it reads and sends is the same as 1.1.1.

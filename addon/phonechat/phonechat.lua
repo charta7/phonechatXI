@@ -6,7 +6,8 @@
 
     What it will type (anything else is dropped, even if the bridge asks):
         /l  /l2  /p  /s  /sh  /t Name   followed by your message
-        /say !command [simple arguments]     CatsEye server commands (only those in commands.json)
+        /say !command [simple arguments]     CatsEye server commands (only those in commands.json;
+                                             never with /pchat server other)
         /wave, /bow ... [motion|text]       stock emotes (and /sitchair 1-4, /jobemote job)
     It never types anything on its own: no auto replies, triggers, timers or repeats.
     Each line comes from one tap on the phone.
@@ -20,6 +21,8 @@
         /pchat url        print the phone link
         /pchat newlink    make a new phone link (the old one stops working)
         /pchat debug      toggle debug logging (every chat line with its mode number)
+        /pchat server     which server you play on: catseye (default) or other. "other" turns off
+                          ! server commands and CatsEye-only alerts; it never adds anything.
 
     Shared folder (feed, outbox, bridge, settings):
         dir.txt next to this file if present, else on Steam Deck / Linux <home>/phonechat/,
@@ -112,6 +115,18 @@ local MODES = {
 -- Plain system-message modes that can carry Party Finder ads, bazaar
 -- visits, Auction House sales and Summit of the Stars perks. Combat modes are never on this list.
 local NOTICE_MODES = { [9] = true, [121] = true, [127] = true, [131] = true, [142] = true }
+
+-- Server profiles. CatsEyeXI is the default and is what this addon has always done. "other" is for
+-- any other server: it only turns CatsEye's extras off and never adds anything. With it, no ! server
+-- command is ever typed, and CatsEye-only notices (Populox ventures, Party Finder ads, Auction House
+-- sales, Summit of the Stars) aren't picked out. Chat, tells, emotes and bazaar visits work the same.
+-- Picked with /pchat server or in the /pchat window, saved in addon-settings.txt, which the bridge reads.
+local PROFILES = {
+    catseye = { label = 'CatsEyeXI',    commands = true,  extras = true  },
+    other   = { label = 'Other server', commands = false, extras = false },
+}
+S.server = 'catseye'
+local function profile() return PROFILES[S.server] or PROFILES.catseye end
 
 local MOTD_MODE   = 217   -- linkshell message of the day: "[n]< LS name: set by >", then the message
 local REPLY_MODE  = 9     -- replies to ! server commands ("CatsEyeXI: Domain Shards (...)")
@@ -318,6 +333,7 @@ local function load_cfg()
     if not s then return end
     for k, v in s:gmatch('(%w+)%s*=%s*(%w+)') do
         if S.cfg[k] ~= nil then S.cfg[k] = (v == 'true') end
+        if k == 'server' and PROFILES[v] then S.server = v end
     end
 end
 
@@ -326,7 +342,16 @@ local function save_cfg()
     local f = io.open(cfg_path(), 'wb')
     if f == nil then return end
     for k, v in pairs(S.cfg) do f:write(k .. '=' .. tostring(v) .. '\n') end
+    f:write('server=' .. S.server .. '\n')
     f:close()
+end
+
+local function set_server(name)
+    if not PROFILES[name] or name == S.server then return end
+    S.server = name
+    S.sendq = {}          -- nothing queued under the old profile is typed under the new one
+    save_cfg()
+    note('Server set to ' .. profile().label .. '. The bridge picks it up within a few seconds.')
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -692,7 +717,7 @@ local function allowed(cmd)
         return true
     end
     local name = cmd:match('^/say !(%a+)$') or cmd:match('^/say !(%a+) [%w_%-][%w _%-]*$')
-    if name then return SERVER[name:lower()] == true end
+    if name then return profile().commands and SERVER[name:lower()] == true end
     return emote_ok(cmd)
 end
 
@@ -798,7 +823,8 @@ end
 -- Party Finder ads and bazaar visits from the system modes.
 -- Returns true when the line was handled.
 local function system_line(text, from_reply)
-    local ad = text:match('^%[PartyFinder%]%s*(.+)$')
+    local extras = profile().extras            -- CatsEye-only notices; off for other servers
+    local ad = extras and text:match('^%[PartyFinder%]%s*(.+)$')
     if ad then
         emit('finder', 'in', '', ad)
         return true
@@ -812,6 +838,7 @@ local function system_line(text, from_reply)
     --   Your 'Bird feather' has sold to Charta for 7000 gil!
     -- Only from the notice modes already read here; this adds no mode, it lets one more kind of
     -- server notice through to the phone's Alerts.
+    if not extras then return false end
     if not from_reply and low:find('has sold to ', 1, true) and low:find(' gil', 1, true) then
         emit('sale', 'in', '', text)
         return true
@@ -921,7 +948,7 @@ local function handle_line(raw_mode, message)
     end
 
     local name, body = parse(channel, dir, text)
-    if channel == 'unity' and name == 'Populox' then
+    if channel == 'unity' and name == 'Populox' and profile().extras then
         channel = 'venture'
     end
     emit(channel, dir, name, body)
@@ -1005,6 +1032,7 @@ local function print_help()
     note('/pchat url      print the phone link')
     note('/pchat newlink  make a new phone link')
     note('/pchat debug    debug log (now ' .. (S.debug and 'on' or 'off') .. ')')
+    note('/pchat server   which server you play on (now ' .. profile().label .. '): /pchat server catseye or other')
     note(('character: %s | lines: %d | sent: %d | dropped: %d | errors: %d'):format(
         S.name or '(not known yet)', S.lines, S.sent, S.dropped, S.errors))
 end
@@ -1063,6 +1091,13 @@ local function draw_config()
             if imgui.Checkbox('Print the link in chat when the bridge starts', b) then
                 S.cfg.showlink = b[1]
                 save_cfg()
+            end
+            imgui.Text('Server: ' .. profile().label)
+            imgui.SameLine()
+            local other = S.server == 'catseye' and 'other' or 'catseye'
+            if imgui.Button('Switch to ' .. PROFILES[other].label) then set_server(other) end
+            if S.server ~= 'catseye' then
+                imgui.TextWrapped('Chat, tells and emotes only. No ! server commands or CatsEye alerts.')
             end
             local d = { S.debug }
             if imgui.Checkbox('Debug log (this session only)', d) then
@@ -1169,6 +1204,16 @@ ashita.events.register('command', 'phonechat_command', function (e)
         stop_bridge(false)
     elseif sub == 'newlink' then
         new_link()
+    elseif sub == 'server' then
+        local want = (args[3] or ''):lower()
+        if want == 'catseyexi' then want = 'catseye' end
+        if PROFILES[want] and want ~= S.server then
+            set_server(want)
+        elseif PROFILES[want] then
+            note('Server is already ' .. profile().label .. '.')
+        else
+            note('Server: ' .. profile().label .. '. Change it with /pchat server catseye or /pchat server other.')
+        end
     elseif sub == '' or sub == 'config' or sub == 'settings' or sub == 'qr' then
         if not has_imgui and sub == '' then
             print_help()
