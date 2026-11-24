@@ -252,6 +252,7 @@ mark.fh{background:none;color:var(--gold);font-weight:700}
 
 /* tab bar */
 .tabbar{position:absolute;left:0;right:0;bottom:0;z-index:15;display:flex;border-top:1px solid var(--line);background:var(--bg);padding:8px 8px calc(10px + var(--safe-b))}
+.tabbar button[hidden]{display:none}
 .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;color:var(--mute);position:relative}
 .tabbar button.on{color:var(--gold)}
 .tabbar .bdg{position:absolute;top:-4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:var(--ink);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
@@ -1155,6 +1156,13 @@ var lastCmdAt = 0;
 var status = {char: "", save_tells: false, url: ""};
 var connected = false, everConnected = false, lastBoot = null, offlineSince = Date.now(), linkDead = false;
 var commands = {info: {}, action: {}};
+// Server profile, set in game with /pchat server. CatsEyeXI unless the addon says otherwise. "other"
+// hides the Server tab, Party Finder and Ventures: it only takes CatsEye extras away, never adds any.
+function onCatsEye() { return (status.server || "catseye") === "catseye"; }
+function chOn(c) { return c !== "finder" || onCatsEye(); }
+function loadCommands() {
+  getJSON("/api/commands").then(function (j) { commands = j; renderCmdList(); if (curTab === "cmds") showCseg(); render(); }).catch(function () {});
+}
 
 // A request that gets no answer gives up after 10 seconds, so one hung request can't leave sending stuck until a reload.
 // The bridge may still have got it: the callers say "check the chat" and never send it again by themselves.
@@ -1199,7 +1207,9 @@ function ackBuild() {
 }
 function refreshStatus() {
   getJSON("/api/status").then(function (j) {
+    var was = status.server || "catseye";
     status = j;
+    if ((j.server || "catseye") !== was) loadCommands();
     if (j && typeof j.build === "string" && j.build !== "unknown") {
       if (pageBuild === null) { pageBuild = j.build; updateNote = seenBuild(j.build, freshLocal, localStorage); }
       else if (j.build !== pageBuild) pageStale = true;
@@ -1702,7 +1712,7 @@ function renderViews() {
     var since = nowSec() - 600;
     msgs.forEach(function (m) { if (m.calls && m.ts >= since) recentCall[m.ch] = true; });
   }
-  $("pills").innerHTML = CHAT_CH.filter(function (c) { return S.master[c]; }).map(function (c) {
+  $("pills").innerHTML = CHAT_CH.filter(function (c) { return S.master[c] && chOn(c); }).map(function (c) {
     var on = !!v.ch[c];
     return '<button class="chipb' + (on ? " on" : "") + '" data-pill="' + c + '">' + ico(CH[c].icon) + CH[c].label + (recentCall[c] ? '<span class="callflag">CALL</span>' : "") + "</button>";
   }).join("");
@@ -1730,7 +1740,7 @@ function editView(id) {
       (draft.id === "all" ? '<div class="sfoot" style="padding-top:0">The All view can\'t be renamed.</div>' :
         '<label class="sfield" for="vname">Name</label><input class="sinput" id="vname" maxlength="18" value="' + esc(draft.name) + '" placeholder="View name">') +
       '<div class="srow"><div class="m"><div>Quick filter row</div><small>Show channel shortcuts below your views.</small></div><button class="tog' + (S.quickFilters ? " on" : "") + '" data-quick-filters aria-label="Quick filter row" aria-pressed="' + !!S.quickFilters + '"></button></div>' +
-      CHAT_CH.map(function (c) {
+      CHAT_CH.filter(chOn).map(function (c) {
         return '<div class="srow" style="padding:8px 6px">' + ico(CH[c].icon, 22) + '<div class="m"><div>' + CH[c].full + "</div>" + (CH[c].sub ? "<small>" + CH[c].sub + "</small>" : "") + '</div><button class="tog' + (draft.ch[c] ? " on" : "") + '" data-vt="' + c + '" aria-label="' + CH[c].full + '"></button></div>';
       }).join("") +
       '<div class="sbtns">' + (draft.id !== "all" && !isNew ? '<button class="del" data-sb="del">Delete view</button>' : "") +
@@ -1908,7 +1918,7 @@ function openPicker(ctx) {
     opt("shout", "/sh &middot; local area") +
     '<div style="height:1px;background:var(--line);margin:6px 0"></div>' +
     '<button class="opt" data-o="emote"><div class="oc" style="--c:var(--emote)">' + ico("emote-tag", 22) + '</div><div style="flex:1"><b>Emote</b><small>/wave, /bow and the rest</small></div></button>' +
-    '<button class="opt" data-o="cmd"><div class="oc" style="--c:var(--gold)">' + ico("cmd", 22) + '</div><div style="flex:1"><b>Server command</b><small>CatsEye ! commands</small></div></button>';
+    (onCatsEye() ? '<button class="opt" data-o="cmd"><div class="oc" style="--c:var(--gold)">' + ico("cmd", 22) + '</div><div style="flex:1"><b>Server command</b><small>CatsEye ! commands</small></div></button>' : "");
   openSheet(html, function (e) {
     var b = e.target.closest("[data-o]");
     if (!b) return;
@@ -2564,7 +2574,7 @@ function renderAlerts() {
   odd.forEach(function (m) {
     h += card("vent", "var(--vent)", "Populox", m.ts, '<div class="abody">' + fmt(m.body) + "</div>", "vo|" + m.ts + "|" + (m.body || "").slice(0, 24));
   });
-  $("vent").innerHTML = '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>');
+  $("vent").innerHTML = onCatsEye() ? '<div class="sect">VENTURES</div>' + (h || '<div class="empty sm">No venture news yet.</div>') : "";
 
   var men = msgs.filter(function (m) { return m._men; }).slice(-30).reverse();
   // Tap a mention to go to that moment in chat, the same as a search result.
@@ -2673,6 +2683,7 @@ function renderSettings() {
   var h = '<div class="sect">CONNECTION</div>' +
     srow("Bridge", connected ? "Connected" + (status.version ? " &middot; " + esc(status.version) : "") + (status.char ? " &middot; " + esc(status.char) : "") : "Not connected", '<button class="linkbtn" data-act="qr">' + (showQr ? "Hide QR" : "Show QR") + "</button>") +
     (showQr ? '<div id="qrbox"></div><div class="sfoot" style="text-align:center;word-break:break-all">' + esc(link) + "</div>" : "") +
+    srow("Server", (onCatsEye() ? "CatsEyeXI." : "Other server: chat, tells and emotes only. No ! commands or CatsEye alerts.") + " Change it in game with <span class=\"code\">/pchat server</span>.", "") +
     srow("Start with the game", "Turn on in the <span class=\"code\">/pchat</span> window.", "") +
     srow("Replace phone link", "If someone saw your link or QR, make a new one in the <span class=\"code\">/pchat</span> window or with <span class=\"code\">/pchat newlink</span>. Then scan the new QR and redo your Home Screen shortcut.", "") +
     '<div class="sect">CALLS</div>' +
@@ -2835,7 +2846,7 @@ document.getElementById("tabbar").addEventListener("click", function (e) {
   if (b) showTab(b.dataset.tab, b.dataset.cs);
 });
 function showCseg() {
-  var em = S.cseg !== "server";
+  var em = S.cseg !== "server" || !onCatsEye();
   $("cp-emote").hidden = !em;
   $("cp-server").hidden = em;
   $("cmdtitle").textContent = em ? "Emotes" : "Server";
@@ -2952,6 +2963,7 @@ function debugText() {
   var lines = [
     "phonechatXI debug info",
     "bridge: " + (status.version || "unknown") + (connected ? ", connected" : ", not connected") + (linkDead ? ", link replaced" : ""),
+    "server: " + (status.server || "catseye (default)"),
     "build: " + (status.build || "unknown"),
     "character seen: " + (status.char ? "yes" : "no"),
     "lines loaded: " + msgs.length + (last ? ", newest " + Math.max(0, nowSec() - last) + "s ago" : ""),
@@ -3043,6 +3055,15 @@ function banner() {
 var queued = false;
 function schedule() { if (!queued) { queued = true; requestAnimationFrame(function () { queued = false; render(); }); } }
 function render() {
+  var srvBtn = document.querySelector('#tabbar [data-cs="server"]');
+  if (srvBtn) srvBtn.hidden = !onCatsEye();
+  if (!onCatsEye() && S.cseg === "server") {          // switched to Other server while on the Server tab
+    S.cseg = "emote";
+    if (curTab === "cmds") {
+      document.querySelectorAll("#tabbar button").forEach(function (x) { x.classList.toggle("on", x.dataset.tab === "cmds" && x.dataset.cs !== "server"); });
+      showCseg();
+    }
+  }
   document.querySelectorAll("[data-bridge]").forEach(function (p) {
     p.classList.toggle("off", !connected);
     p.querySelector("span").textContent = connected ? "Bridge ON" : "Bridge OFF";
@@ -3140,7 +3161,7 @@ if (!TOKEN) {
 } else {
   connect();
   syncPrefs();
-  getJSON("/api/commands").then(function (j) { commands = j; renderCmdList(); if (curTab === "cmds") showCseg(); }).catch(function () {});
+  loadCommands();
   setInterval(refreshStatus, 30000);
   setInterval(function () { if (!connected) render(); }, 2000);
   setInterval(function () { if (curTab === "alerts") schedule(); }, 30000);

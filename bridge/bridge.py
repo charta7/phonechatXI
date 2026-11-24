@@ -17,7 +17,8 @@ Rules this file enforces (see the spec):
     makes up a message on its own: no auto replies, triggers, timers or repeats.
   * Chat goes only to LS1, LS2, party, tells, say and shout. Commands are the
     CatsEye ! server commands and the stock emotes listed in commands.json.
-    Everything else is refused.
+    Everything else is refused. With the server set to "other" (/pchat server other),
+    ! commands are refused too: only chat and emotes go out.
   * Only tells can be saved to disk, and only when saving is turned on.
 
 Needs only the Python standard library.
@@ -256,7 +257,22 @@ def clean_text(text):
     return " ".join("".join(out).split())
 
 
+SERVERS = ("catseye", "other")
+
+
+def read_server(folder):
+    """Which server the addon is set to (/pchat server), from its addon-settings.txt. Defaults to CatsEyeXI."""
+    try:
+        with open(os.path.join(folder, "addon-settings.txt"), "r", encoding="utf-8", errors="replace") as f:
+            m = re.search(r"^server\s*=\s*(\w+)\s*$", f.read(), re.M)
+    except OSError:
+        return "catseye"
+    return m.group(1) if m and m.group(1) in SERVERS else "catseye"
+
+
 class Commands:
+    server = "catseye"     # "other" turns the ! server commands off (list, labels and sending)
+
     def __init__(self, path):
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -274,7 +290,9 @@ class Commands:
                 self.modes[n] = keep
 
     def public(self):
-        return {"info": self.info, "action": self.action, "modes": self.modes, "modes_asof": self.modes_asof,
+        cats = self.server == "catseye"
+        return {"server": self.server, "info": self.info if cats else {}, "action": self.action if cats else {},
+                "modes": self.modes if cats else {}, "modes_asof": self.modes_asof if cats else "",
                 "emotes": sorted(self.emotes), "jobs": sorted(self.jobs)}
 
     def emote(self, text):
@@ -302,6 +320,8 @@ class Commands:
         m = re.match(r"^!([A-Za-z]+)(?:\s+(.*))?$", text)
         if not m:
             raise SendError("Blocked: not an allowed command.")
+        if self.server != "catseye":
+            raise SendError("Server commands are off: phonechatXI is set to Other server (/pchat server).")
         name, args = m.group(1).lower(), (m.group(2) or "").strip()
         if name not in self.info and name not in self.action:
             raise SendError("Blocked: not an allowed command.")
@@ -1053,7 +1073,7 @@ class Handler(BaseHTTPRequestHandler):
         elif u.path == "/api/status":
             self.send_json(200, {"version": VERSION, "build": build_id(), "url": self.url, "boot": store.boot,
                                  "char": self.sender.char, "save_tells": self.tells.enabled,
-                                 "scrollback": store.mult,
+                                 "scrollback": store.mult, "server": self.commands.server,
                                  "prev_settings": os.path.isfile(os.path.join(self.folder, PREFS_PREVIOUS))})
         elif u.path == "/api/prefs":
             self.send_json(200, {"prefs": load_prefs(self.folder)})
@@ -1271,6 +1291,7 @@ def main():
     Handler.sender = sender
     Handler.tells = tells
     Handler.commands = Commands(os.path.join(HERE, "commands.json"))
+    Handler.commands.server = read_server(folder)
 
     sender.start()
     Tailer(folder, sender, tells).start()
@@ -1304,6 +1325,10 @@ def main():
             if watch.step(time.time()) == "close":
                 close()
             if time.time() >= next_status:
+                server = read_server(folder)            # /pchat server takes effect within a few seconds
+                if server != Handler.commands.server:
+                    Handler.commands.server = server
+                    say("Server: %s." % ("CatsEyeXI" if server == "catseye" else "Other server (no ! commands)"))
                 write_status(folder, Handler.url, True)
                 next_status = time.time() + STATUS_SECONDS
             time.sleep(1)

@@ -89,6 +89,54 @@ with tempfile.TemporaryDirectory(prefix='phonechat-qc-') as tmp:
     g.EVENTS['text_in'](lua.table_from(dict(mode=14, message='[1]<Tester> injected test', injected=True, blocked=False)))
     assert (path/'feed-Tester.log').read_bytes() == before
     print('PASS: combat, unknown modes, unrelated system status and injected chat stay excluded')
+    # Server profiles: /pchat server other only takes CatsEye extras away. Chat, emotes and bazaar stay.
+    import time as _t
+    typed=[]
+    g.SAY=lambda s:typed.append(str(s))
+    out=path/'outbox-Tester.log'; out.write_text('')
+    def tick(n=1):
+        for _ in range(n):
+            lua.execute('FAKE_CLOCK = FAKE_CLOCK + 1.5'); g.EVENTS['d3d_present']()
+    def send(cmd):
+        tick()
+        with open(out,'a') as f: f.write('x%d\t%d\t%s\n'%(len(typed)+len(open(out).read()),int(_t.time()),cmd))
+        tick(3)
+    def pchat(sub): g.EVENTS['command'](lua.table_from(dict(command='/pchat '+sub,blocked=False)))
+    send('/say !points')
+    assert 'would type (not sent): /say !points' in typed, typed
+    line(212,'{Populox} Hmm... something is stirring.')
+    assert '\tventure\tin\tPopulox\t' in (path/'feed-Tester.log').read_text()
+    pchat('server other')
+    assert 'server=other' in (path/'addon-settings.txt').read_text()
+    typed.clear()
+    send('/say !points'); send('/wave'); send('/l hi all')
+    assert not any('!points' in t and 'would type' in t for t in typed), typed
+    assert 'would type (not sent): /wave' in typed and 'would type (not sent): /l hi all' in typed, typed
+    before=(path/'feed-Tester.log').read_text()
+    line(212,'{Populox} Hmm... something is stirring.')
+    line(121,'[PartyFinder] Tester is looking for members: test')
+    line(121,"Your 'Bird feather' has sold to Charta for 7000 gil!")
+    line(121,'A new Summit of the Stars perk is now active: Reraise')
+    line(121,'Marlow is browsing your bazaar.')
+    new=(path/'feed-Tester.log').read_text()[len(before):]
+    assert '\tunity\tin\tPopulox\t' in new and '\tventure\t' not in new, new
+    assert '\tfinder\t' not in new and '\tsale\t' not in new and 'Summit' not in new, new
+    assert '\tbazaar\tin\t\tMarlow is browsing your bazaar.' in new, new
+    assert bm.read_server(str(path))=='other'
+    cmds.server='other'
+    try: cmds.check('!points', True); raise AssertionError('! command allowed on other server')
+    except bm.SendError as e: assert 'Other server' in str(e), e
+    assert cmds.check('/wave', False)[0]=='/wave'
+    pub=cmds.public(); assert pub['server']=='other' and not pub['info'] and not pub['action'] and not pub['modes'] and pub['emotes']
+    pchat('server catseye')
+    assert bm.read_server(str(path))=='catseye'
+    cmds.server='catseye'; assert cmds.public()['info'] and cmds.check('!points', True)[0]=='/say !points'
+    typed.clear(); send('/say !points')
+    assert 'would type (not sent): /say !points' in typed, typed
+    (path/'addon-settings.txt').write_text('server=whatever\n'); assert bm.read_server(str(path))=='catseye'
+    assert bm.read_server(str(path/'nowhere'))=='catseye'
+    g.SAY=lambda s:None
+    print('PASS: /pchat server other: no ! commands (addon and bridge), no CatsEye alerts; chat, emotes, bazaar unchanged; default and bad values are CatsEyeXI')
 for file in ROOT.rglob('*.py'):ast.parse(file.read_text())
 print('PASS: Python syntax')
 spec=importlib.util.spec_from_file_location('bridge',ROOT/'bridge/bridge.py');bridge=importlib.util.module_from_spec(spec);spec.loader.exec_module(bridge)
