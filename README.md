@@ -88,6 +88,7 @@ What it can send is a fixed list: `/l`, `/l2`, `/p`, `/t`, `/s`, `/sh`, the stoc
 - Auction House sales show in Alerts. `!bond` is on the Server tab, and every `!` command asks before it sends.
 - Your settings are kept across updates, with a copy from before the last update you can restore.
 - The same addon folder also loads natively in VanaCore (see Install). It reads and sends the same things either way.
+- Playing somewhere other than CatsEyeXI? `/pchat server other` turns the CatsEye-only parts off (see Other servers).
 
 v1.1.1 was a GitHub-only release, and 1.1.2 replaces it. The full list, including what 1.1.1 and 1.1.0 added, is in the [changelog](CHANGELOG.md).
 
